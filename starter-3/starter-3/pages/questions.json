@@ -1,0 +1,142 @@
+[
+  {
+    "text": "What was the first product launched by Apple?",
+    "answers": ["iPhone", "iPad", "Apple I", "iPod"],
+    "correctAnswers": [false, false, true, false]
+  },
+  {
+    "text": "Who is the CEO of TeslaWho is the CEO of TeslaWho is the CEO of Tesla?",
+    "answers": ["Elon Musk", "Jeff Bezos", "Bill Gates", "Mark Zuckerberg"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the capital of France?",
+    "answers": ["Berlin", "London", "Paris", "Rome"],
+    "correctAnswers": [false, false, true, false]
+  },
+  {
+    "text": "Which planet is known as the Red Planet?",
+    "answers": ["Earth", "Mars", "Venus", "Mercury"],
+    "correctAnswers": [false, true, false, false]
+  },
+  {
+    "text": "Who wrote 'Romeo and Juliet'?",
+    "answers": ["William Shakespeare", "Charles Dickens", "Jane Austen", "Leo Tolstoy"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "Which animal is known as the 'King of the Jungle'?",
+    "answers": ["Tiger", "Lion", "Leopard", "Elephant"],
+    "correctAnswers": [false, true, false, false]
+  },
+  {
+    "text": "Who painted the Mona Lisa?",
+    "answers": ["Leonardo da Vinci", "Pablo Picasso", "Vincent van Gogh", "Michelangelo"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the largest organ in the human body?",
+    "answers": ["Brain", "Heart", "Liver", "Skin"],
+    "correctAnswers": [false, false, false, true]
+  },
+  {
+    "text": "What year did the Titanic sink?",
+    "answers": ["1912", "1914", "1907", "1921"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the tallest mountain in the world?",
+    "answers": ["Mount Everest", "K2", "Kangchenjunga", "Lhotse"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "Which country is known as the Land of the Rising Sun?",
+    "answers": ["China", "India", "Japan", "South Korea"],
+    "correctAnswers": [false, false, true, false]
+  },
+  {
+    "text": "Who discovered penicillin?",
+    "answers": ["Alexander Fleming", "Albert Einstein", "Marie Curie", "Isaac Newton"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the chemical symbol for water?",
+    "answers": ["H2O", "CO2", "NaCl", "O2"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "Who is known as the father of modern physics?",
+    "answers": ["Albert Einstein", "Isaac Newton", "Galileo Galilei", "Nikola Tesla"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "Which country is the largest by land area?",
+    "answers": ["Russia", "Canada", "China", "United States"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the largest ocean on Earth?",
+    "answers": ["Pacific Ocean", "Atlantic Ocean", "Indian Ocean", "Arctic Ocean"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "Who developed the theory of relativity?",
+    "answers": ["Albert Einstein", "Isaac Newton", "Stephen Hawking", "Galileo Galilei"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the chemical symbol for gold?",
+    "answers": ["Au", "Ag", "Fe", "Cu"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the largest desert in the world?",
+    "answers": ["Sahara Desert", "Arctic Desert", "Antarctic Desert", "Gobi Desert"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the currency of Japan?",
+    "answers": ["Dollar", "Pound", "Yen", "Euro"],
+    "correctAnswers": [false, false, true, false]
+  },
+  {
+    "text": "Who invented the telephone?",
+    "answers": ["Alexander Graham Bell", "Thomas Edison", "Nikola Tesla", "Galileo Galilei"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the smallest bone in the human body?",
+    "answers": ["Stapes", "Femur", "Tibia", "Radius"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the chemical symbol for sodium?",
+    "answers": ["Na", "K", "Ca", "Mg"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "Who wrote 'To Kill a Mockingbird'?",
+    "answers": ["Harper Lee", "Mark Twain", "J.K. Rowling", "Stephen King"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the largest type of big cat?",
+    "answers": ["Tiger", "Lion", "Leopard", "Jaguar"],
+    "correctAnswers": [false, true, false, false]
+  },
+  {
+    "text": "Who was the first man to walk on the moon?",
+    "answers": ["Neil Armstrong", "Buzz Aldrin", "Yuri Gagarin", "Alan Shepard"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "What is the chemical symbol for carbon?",
+    "answers": ["C", "Ca", "Co", "Cu"],
+    "correctAnswers": [true, false, false, false]
+  },
+  {
+    "text": "Which country is known as the Emerald Isle?",
+    "answers": ["Ireland", "Scotland", "Wales", "England"],
+    "correctAnswers": [true, false, false, false]
+  }
+]
