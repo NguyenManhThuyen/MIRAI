@@ -1,9 +1,10 @@
 <!-- components/question.vue -->
 <template>
   <div class="question-component">
-    <nuxt-link :to="{ name: 'AddQuestion', params: { id: id } }" class="question-id">
-      <span>{{ id }}</span>
-    </nuxt-link>
+    <router-link :to="{ path: '/Admin/AddQuestion', props: { id: id } }" class="question-id">
+  <span>{{ id }}</span>
+</router-link>
+
     <div class="question-text">
       <p>{{ questionText }}</p>
     </div>

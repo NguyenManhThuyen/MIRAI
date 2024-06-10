@@ -2,45 +2,49 @@
   <div class="container">
     <div class="add-question">
       <div class="add-image">
-        <img class="add-image-background" :src="addImageBackground" alt="Add Image Background">
-        <div class="image-icons-container">
-          <img class="add-image-icon" :src="addImageIcon" alt="Add Image Icon">
-          <div class="upload-text-container">
-            <img class="plus-icon" src="@/assets/images/icon_plus.svg" alt="Plus Icon">
+        <div class="upload-container">
+          <button class="upload-button">
+            <img class="plus-icon" :src="iconPlus" alt="Plus Icon">
             <span class="upload-text">写真をアップロードする</span>
-          </div>
+          </button>
+          <div v-if="showErrors && !bannerImageUploaded" class="error-message">まだバナー画像を追加していません</div>
         </div>
       </div>
-      
-      <!-- New class to display floor number -->
+
       <div class="floor-display">
-        <h2>{{ floor }}階</h2>
+        <span>階</span>
+        <input type="number" v-model.number="localFloor" class="floor-input" @input="updateFloor" />
+        <div v-if="showErrors && !localFloor" class="error-message">階数が入力されていません</div>
       </div>
 
-      <!-- Button for adding an image -->
-      <button class="add-image-button">写真をアップロードする</button>
+      <div class="question-section">
+        <div class="question-header">
+          <span class="question-label">質問1</span>
+          <button class="add-question-button">質問を追加してください</button>
+        </div>
+        <div v-if="showErrors && !questionAdded" class="error-message">まだ質問を入力していません</div>
 
-      <!-- Numeric input for Answer 1 -->
-      <input v-model="answer1" placeholder="回答1" />
-
-      <!-- Text input fields for options -->
-      <div v-for="(option, index) in options" :key="index" class="option-row">
-        <input v-model="option.text" :placeholder="'オプション' + (index + 1)" />
-        <button @click="removeOption(index)">×</button>
+        <div class="options">
+          <div v-for="(option, index) in options" :key="index" class="option-row">
+            <input v-model="option.text" :placeholder="'オプション' + (index + 1)" />
+            <button @click="removeOption(index)" class="remove-button">×</button>
+            <div v-if="showErrors && !option.text" class="error-message">まだ答えの入力が終わっていません</div>
+          </div>
+          <button @click="addOption" class="add-option-button">+ さらに多くの回答</button>
+        </div>
       </div>
 
-      <!-- Button to add more answers -->
-      <button @click="addOption">+ さらにくの回答</button>
+      <div class="footer-image-upload">
+        <button class="footer-upload-button">+ フッター画像をダウンロード</button>
+        <div v-if="showErrors && !footerImageUploaded" class="error-message">フッター画像をまだ追加していません</div>
+      </div>
 
-      <!-- Next button -->
-      <button class="next-button">次へ</button>
+      <button class="next-button" @click="validateForm">次に</button>
     </div>
   </div>
 </template>
 
 <script>
-import addImageIcon from "@/assets/images/add_image_icon.svg";
-import addImageBackground from "@/assets/images/add_image_background2.svg";
 import iconPlus from "@/assets/images/icon_plus.svg";
 
 export default {
@@ -56,16 +60,14 @@ export default {
   },
   data() {
     return {
-      answer1: '',
-      options: [{ text: '' }],
-      addImageIcon: addImageIcon,
-      addImageBackground: addImageBackground,
+      localFloor: this.floor,
+      options: [{ text: '' }, { text: '' }, { text: '' }],
       iconPlus: iconPlus,
+      bannerImageUploaded: false,
+      footerImageUploaded: false,
+      questionAdded: false,
+      showErrors: false, // Flag to control error message display
     };
-  },
-  mounted() {
-    console.log('ID received:', this.id);
-    console.log('Floor received:', this.floor);
   },
   methods: {
     addOption() {
@@ -73,6 +75,30 @@ export default {
     },
     removeOption(index) {
       this.options.splice(index, 1);
+    },
+    updateFloor(event) {
+      const value = event.target.value;
+      this.localFloor = value;
+      this.$emit('update:floor', value);
+    },
+    validateForm() {
+      // Set the showErrors flag to true to display the error messages
+      this.showErrors = true;
+
+      // Validate the form inputs
+      const isBannerImageValid = this.bannerImageUploaded;
+      const isFloorValid = this.localFloor;
+      const isQuestionValid = this.questionAdded;
+      const areOptionsValid = this.options.every(option => option.text);
+      const isFooterImageValid = this.footerImageUploaded;
+
+      if (isBannerImageValid && isFloorValid && isQuestionValid && areOptionsValid && isFooterImageValid) {
+        // Form is valid, perform the next steps
+        alert('Form submitted successfully!');
+      } else {
+        // Handle validation failure
+        console.log('Form validation failed.');
+      }
     },
   },
 };
@@ -83,81 +109,152 @@ export default {
   width: 819px;
   height: 901px;
   margin: 0 auto;
-  box-sizing: border-box;
   background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  box-sizing: border-box;
 }
 
 .add-image {
   position: relative;
   height: 184px;
   background: #BDBDBD;
-  border-radius: 12px 12px 0 0;
+  border-radius: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 24px;
 }
 
-.add-image-background {
-  position: absolute;
-  width: calc(100% - 48px);
-  height: calc(100% - 48px);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.image-icons-container {
-  position: absolute;
-  top: 24px;
+.upload-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  width: 100%;
+  justify-content: center;
 }
 
-.add-image-icon {
-  margin-top: 24px;
-}
-
-.upload-text-container {
-  margin-top: 8px;
-  padding: 10px 10px 10px 16px;
+.upload-button {
+  background: none;
+  border: none;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  border: 1px solid white;
-  border-radius: 12px;
-  gap: 8px;
+  cursor: pointer;
 }
 
 .plus-icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 8px; /* Optional: Adjust space between icon and text */
+  width: 24px;
+  height: 24px;
 }
 
 .upload-text {
   font-size: 14px;
   color: white;
+  margin-top: 8px;
 }
 
-/* New class for displaying floor number */
 .floor-display {
-  width: 181px;
-  height: 52px;
-  margin: 16px auto;
   display: flex;
   align-items: center;
-  padding-left: 12px;
-  border: 1px solid black;
-  border-radius: 12px;
+  justify-content: center;
+  margin-bottom: 24px;
 }
 
-.floor-display h2 {
-  font-family: Noto Sans JP;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 22.4px;
-  color: #1A1A1A;
+.floor-display span {
+  margin-right: 8px;
+  border: 1px solid #1A1A1A;
+  padding: 4px 8px;
+}
+
+.question-section {
+  margin-bottom: 24px;
+}
+
+.question-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  background-color: #1A1A1A;
+  padding: 8px 16px;
+  border: 1px solid #1A1A1A;
+  border-radius: 4px;
+}
+
+.question-label {
+  color: white;
+}
+
+.add-question-button {
+  background: none;
+  border: none;
+  color: #FF4081;
+  cursor: pointer;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-direction: column;
+}
+
+.option-row input {
+  flex-grow: 1;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+}
+
+.remove-button {
+  background: none;
+  border: none;
+  color: #FF4081;
+  cursor: pointer;
+}
+
+.add-option-button {
+  background: none;
+  border: none;
+  color: #FF4081;
+  cursor: pointer;
+}
+
+.footer-image-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.footer-upload-button {
+  background: none;
+  border: none;
+  color: #FF4081;
+  cursor: pointer;
+}
+
+.next-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #FF4081;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
 }
 </style>
+

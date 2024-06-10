@@ -12,10 +12,12 @@
       <div class="forgot-password">
         <a href="#">パスワードを忘れましたか?</a>
       </div>
+      <p v-if="loginError" class="error-message">{{ loginError }}</p>
       <button type="submit">ログイン</button>
     </form>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -24,22 +26,30 @@ export default {
       username: '',
       password: '',
       showPassword: false,
+      loginError: '',  // Thêm thuộc tính loginError để lưu trữ thông báo lỗi
     };
   },
   methods: {
     handleSubmit() {
-      // Giả sử đăng nhập thành công
-      console.log('Tên người dùng:', this.username);
-      console.log('Mật khẩu:', this.password);
-      
-      // Phát sự kiện đăng nhập thành công
-      this.$emit('login-success');
+      // Giả sử đăng nhập không thành công
+      const isSuccess = false;  // Dùng biến này để kiểm tra đăng nhập thành công hay không
+
+      if (isSuccess) {
+        console.log('Tên người dùng:', this.username);
+        console.log('Mật khẩu:', this.password);
+        this.loginError = '';  // Xóa thông báo lỗi nếu đăng nhập thành công
+        // Phát sự kiện đăng nhập thành công
+        this.$emit('login-success');
+      } else {
+        this.loginError = 'パスワードが間違っているか、このアカウントは存在しません。パスワードをリセットするか、この記事を確認してください。';
+      }
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },
   },
 };
+
 </script>
 
 <style scoped>
@@ -131,6 +141,25 @@ button {
 
 button:hover {
   transform: scale(1.05);
+}
+
+.error-message {
+  width: 100%;
+  height: auto; /* Adjust height dynamically */
+  background: #E13A4B33;
+  color: #E13A4B;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 112px;
+  gap: 10px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 19.6px;
+  text-align: center;
+  word-wrap: break-word; /* Allow wrapping */
+  white-space: normal; /* Enable wrapping */
+  margin-bottom: 8px;
 }
 
 @media screen and (max-width: 480px) {

@@ -120,15 +120,19 @@ export default {
 
   /* CSS cho phần body */
   .body {
-    width: 819px;
-    height: 481px;
-    padding: 24px;
-    gap: 10px;
-    border-radius: 16px;
-    opacity: 0px;
-    background: #FFFFFF;
-    margin: 0 auto; /* Canh ra giữa theo chiều ngang */
-  }
+  width: 819px;
+  height: auto; /* Sử dụng chiều cao tự động để nội dung có thể mở rộng */
+  padding: 24px;
+  gap: 10px;
+  border-radius: 16px;
+  opacity: 0px;
+  background: #FFFFFF;
+  margin: 0 auto; /* Canh ra giữa theo chiều ngang */
+  display: flex; /* Sử dụng flexbox để căn giữa button */
+  flex-direction: column; /* Sắp xếp theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều dọc */
+  align-items: center; /* Căn giữa theo chiều ngang */
+}
 
   /* Hiển thị "質問" với ID câu hỏi */
   .question-label {

@@ -1,9 +1,9 @@
 <template>
   <div class="view-container">
     <AnswerNotification
-      :questionId="1"
-      :correctAnswer="'Thuyen'"
-      :isCorrect="isCorrect"
+      :questionId="Number($route.params.questionId)"
+      :correctAnswer="$route.query.correctAnswer"
+      :isCorrect="$route.query.isCorrect === 'true'"
     />
     <div class="footer-wrapper">
       <FooterQuestion :footerImage="footerImage" class="footer-question" />
@@ -40,6 +40,12 @@ export default {
       footerImage,
     };
   },
+  mounted() {
+    // Log the received props to the console
+    console.log('questionId:', this.questionId);
+    console.log('correctAnswer:', this.correctAnswer);
+    console.log('isCorrect:', this.isCorrect);
+  }
 };
 </script>
 

@@ -2,7 +2,9 @@
   <div class="icon-container" :style="{ width: containerWidth, height: containerHeight }">
     <div class="icon-row">
       <div v-for="(icon, id) in iconImages" :key="id" class="icon-wrapper">
-        <img :src="icon" @click="selectIcon(id)" :class="{ 'line-icon': id === 1 || id === 3 || id === 5 }" class="icon" />
+        <nuxt-link :to="getLink(id)" class="icon-link">
+          <img :src="icon" :class="{ 'line-icon': id === 1 || id === 3 || id === 5, 'icon': id !== 1 && id !== 3 && id !== 5 }" />
+        </nuxt-link>
         <div class="icon-text" :class="{ 'red-text': icon.includes('red') && id <= selectedIndex }">{{ iconTexts[id] }}</div>
       </div>
     </div>
@@ -61,6 +63,13 @@ export default {
         this.iconTexts.splice(i, 1, this.iconTexts[i] || '');
       }
     },
+    getLink(id) {
+      if (id === 6) {
+        return '/Admin/QRcode'; // Đặt đường dẫn của component khác ở đây
+      } else if (id === 0){
+        return '/Admin/AddQuestion'; // Nếu không phải icon điều hướng, đặt đường dẫn là #
+      }
+    }
   }
 };
 
@@ -79,7 +88,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 12px;
+  margin-top: 16px;
   margin-bottom: auto;
 }
 
@@ -105,12 +114,8 @@ export default {
 .icon-container img.line-icon {
   width: 92.66px;
   height: 2px;
-  top: 32px;
-  left: 363.66px;
-  gap: 0px;
-  border: 2px 0px 0px 0px;
-  opacity: 0px;
-  rotate: -0 deg;
+  margin-top: 4px; /* Dịch chuyển lên trên để căn giữa */
+  margin-bottom: 4px; /* Dịch chuyển xuống dưới để căn giữa */
 }
 
 .icon-text {

@@ -63,39 +63,29 @@ export default {
     };
   },
   methods: {
-  handleAnswer(index) {
-    if (!this.isAnswered) {
-      this.selectedAnswerIndex = index;
-      this.isAnswered = true;
-      console.log(`Đã chọn câu trả lời ${index + 1}`);
-      setTimeout(() => {
+    handleAnswer(index) {
+      if (!this.isAnswered) {
+        this.selectedAnswerIndex = index;
+        this.isAnswered = true;
+        const isCorrect = this.correctAnswers[index];
+        const correctAnswerText = this.answers[this.correctAnswers.indexOf(true)];
+
+        setTimeout(() => {
           this.$router.push({
-            name: 'AnswerNotificationView',
-            props: { 
-              id: this.id, // Pass the question ID
-              status: 'correct' // Pass the answer status
+            path: `/AnswerNotificationView`,
+            query: {
+              isCorrect: isCorrect.toString(), // Convert boolean to string
+              correctAnswer: correctAnswerText,
+              questionId: this.id
             }
           });
         }, 5000);
-    } else {
-      this.selectedAnswerIndex = index;
-      this.isAnswered = false;
-      console.log(`Đã chọn câu trả lời ${index + 1}`);
-      setTimeout(() => {
-          this.$router.push({
-            name: 'AnswerNotificationView',
-            props: { 
-              id: this.id, // Pass the question ID
-              status: 'false' // Pass the answer status
-            }
-          });
-        }, 5000);
+      }
     }
   }
-}
-
 };
 </script>
+
 
 <style scoped>
 .quiz-container {
@@ -161,6 +151,7 @@ export default {
 .answers {
   display: flex;
   flex-direction: column;
+  margin-bottom: 15px;
 }
 
 .answer-button {
