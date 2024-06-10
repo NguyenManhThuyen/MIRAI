@@ -20,12 +20,13 @@ props: {
 .site-footer {
 background-color: #f8f9fa;
 text-align: center;
+width: 100%;
+height: auto;
+max-height: 90px;
 }
 
 .footer-image {
-  width: auto;
+  width: 100%;
 height: auto;
-margin-left: auto; /* Căn lề phải */
-margin-right: auto; /* Căn lề trái */
 }
 </style>

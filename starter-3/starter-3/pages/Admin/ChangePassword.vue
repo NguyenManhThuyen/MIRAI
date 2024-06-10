@@ -2,22 +2,22 @@
     <div>
       <div class="login-banner"></div>
       <div class="login-page">
-        <ForgotPasswordCodeForm @success="handleLoginSuccess" />
+        <ChangePasswordForm @success="handleLoginSuccess" />
       </div>
     </div>
   </template>
   
   <script>
-  import ForgotPasswordCodeForm from '@/components/ForgotPasswordCodeForm.vue';
+  import ChangePasswordForm from '@/components/ForgotPasswordForm.vue';
   
   export default {
     name: "LoginPage",
     components: {
-      ForgotPasswordCodeForm,
+        ChangePasswordForm,
     },
     methods: {
       handleLoginSuccess() {
-        this.$router.push({ name: 'Login' });
+        this.$router.push('/Admin/ForgotPasswordCode');
       }
     }
   };

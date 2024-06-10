@@ -17,7 +17,7 @@ export default {
   },
   methods: {
     handleLoginSuccess() {
-      this.$router.push({ name: 'AnswerNotificationView' });
+      this.$router.push({ name: '/Admin/MainPage' });
     }
   }
 };

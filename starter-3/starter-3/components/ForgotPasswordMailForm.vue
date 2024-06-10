@@ -5,11 +5,15 @@
     <form @submit.prevent="handleSubmit">
       <div class="input-group">
         <input type="text" v-model="username" placeholder="メールアドレスを入力して" />
-        <div v-if="showErrors && (!username || username === 'thuyen')" class="error-message">{{ errorMessage }}</div>
+        <div v-if="showErrors && !username" class="error-message">{{ errorMessage }}</div>
       </div>
-      <button type="submit">確認する</button>
+      <nuxt-link v-if="username" to="/Admin/ForgotPasswordCode">
+        <button type="submit">確認する</button>
+      </nuxt-link>
+      <div v-else>
+        <button type="submit" disabled>確認する</button>
+      </div>
     </form>
-    <nuxt-link v-if="success" :to="{ path: '/Admin/ForgotPasswordCode' }"></nuxt-link>
   </div>
 </template>
 
@@ -19,29 +23,24 @@ export default {
     return {
       username: '',
       showErrors: false,
-      success: false,
       errorMessage: 'あなたのメールアドレスが間違っています', // Error message
     };
   },
   methods: {
     handleSubmit() {
-      this.showErrors = true; // Hiển thị thông báo lỗi
+      this.showErrors = true; // Set showErrors to true to display error messages
       if (!this.username) {
-        // Hiển thị thông báo lỗi nếu username trống
-        this.errorMessage = 'メールアドレスを入力してください';
-      } else if (this.username === 'thuyen') {
-        // Hiển thị thông báo lỗi nếu username là "thuyen"
-        this.errorMessage = 'メールアドレスが正しくありません';
+        // Username is empty, error message will be displayed
       } else {
-        // Nếu không có lỗi, tiếp tục xử lý
+        // Username is valid, proceed with submission
         console.log('Username:', this.username);
-        this.success = true;
         this.$emit('success');
       }
     },
   },
 };
 </script>
+
 <style scoped>
 .login-container {
   background-color: #ffffff;

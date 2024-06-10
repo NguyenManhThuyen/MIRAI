@@ -84,18 +84,4 @@ export default {
     padding-top: 24px;
     padding-bottom: 24px;
   }
-  
-  
-  /* Responsive CSS */
-  @media screen and (max-width: 768px) {
-    .parent-component {
-      padding: 0 20px; /* Thêm padding để trang đăng nhập không bị dính vào mép */
-    }
-  }
-  
-  @media screen and (max-width: 480px) {
-    .login-banner {
-      height: 40px; /* Giảm chiều cao của banner cho các thiết bị nhỏ hơn */
-    }
-  }
 </style>

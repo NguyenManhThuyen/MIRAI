@@ -27,6 +27,6 @@ export default {
   align-items: flex-start; /* Đẩy nội dung lên trên cùng */
   height: 100dvh; /* Chiều cao của phần còn lại của trang */
   margin: 0;
-  padding-top: 24px; /* Khoảng cách từ trên cùng */
+  padding-top: 60px; /* Khoảng cách từ trên cùng */
 }
 </style>

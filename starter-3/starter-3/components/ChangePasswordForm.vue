@@ -1,15 +1,16 @@
 <template>
   <div class="login-container">
-    <h2>ログイン</h2>
-    <h3>アカウントの電子メールを入力してください。パスワードをリセットするための電子メールが送信されます。</h3>
+    <h2>パスワードを変更する</h2>
     <form @submit.prevent="handleSubmit">
       <div class="input-group">
-        <input type="text" v-model="username" placeholder="メールアドレスを入力して" />
-        <div v-if="showErrors && (!username || username === 'thuyen')" class="error-message">{{ errorMessage }}</div>
+        <input type="password" v-model="password" placeholder="新しいパスワード" required />
       </div>
-      <button type="submit">確認する</button>
+      <div class="input-group">
+        <input type="password" v-model="confirmPassword" placeholder="新しいパスワードを確認" required />
+        <div v-if="showErrors && passwordMismatch" class="error-message">{{ errorMessage }}</div>
+      </div>
+      <button type="submit">パスワードを変更する</button>
     </form>
-    <nuxt-link v-if="success" :to="{ path: '/Admin/ForgotPasswordCode' }"></nuxt-link>
   </div>
 </template>
 
@@ -17,31 +18,30 @@
 export default {
   data() {
     return {
-      username: '',
+      password: '',
+      confirmPassword: '',
       showErrors: false,
-      success: false,
-      errorMessage: 'あなたのメールアドレスが間違っています', // Error message
+      passwordMismatch: false,
+      errorMessage: 'パスワードが一致しません', // Thông báo lỗi bằng tiếng Nhật
     };
   },
   methods: {
     handleSubmit() {
       this.showErrors = true; // Hiển thị thông báo lỗi
-      if (!this.username) {
-        // Hiển thị thông báo lỗi nếu username trống
-        this.errorMessage = 'メールアドレスを入力してください';
-      } else if (this.username === 'thuyen') {
-        // Hiển thị thông báo lỗi nếu username là "thuyen"
-        this.errorMessage = 'メールアドレスが正しくありません';
-      } else {
-        // Nếu không có lỗi, tiếp tục xử lý
-        console.log('Username:', this.username);
-        this.success = true;
+      this.passwordMismatch = this.password !== this.confirmPassword;
+
+      if (!this.passwordMismatch) {
+        console.log('新しいパスワード:', this.password);
+        console.log('新しいパスワードを確認:', this.confirmPassword);
         this.$emit('success');
+        this.showErrors = false;
+        this.$router.push('/Admin/Login'); // Chuyển hướng tới trang login
       }
     },
   },
 };
 </script>
+
 <style scoped>
 .login-container {
   background-color: #ffffff;
@@ -55,22 +55,19 @@ export default {
 
 h2 {
   color: #E13A4B;
-  margin-top: 0px;
+  margin-top: 24px;
   margin-bottom: 24px;
   font-size: 40px;
-  font-weight: bold;
-}
-
-h3 {
-  margin-bottom: 24px;
+  font-family: Verdana;
+  font-weight: 700;
+  line-height: 56px;
+  text-align: center;
 }
 
 .input-group {
-  box-sizing: border-box;
+  box-sizing: border-box; /* Tính cả padding và border vào kích thước */
   width: 100%;
-  height: auto;
-  margin-bottom: 24px;
-  position: relative;
+  margin-bottom: 24px; /* Thêm khoảng cách dưới */
 }
 
 .input-group input {
@@ -78,21 +75,13 @@ h3 {
   border-radius: 25px;
   font-size: 16px;
   width: 100%;
-  max-width: 437px;
   height: 52px;
   padding-left: 17px;
   font-family: 'Noto Sans JP', sans-serif;
   font-weight: 500;
   line-height: 22.4px;
   text-align: left;
-  color: #333;
-}
-
-.error-message {
-  color: red;
-  font-size: 14px;
-  margin-top: 8px;
-  display: flex;
+  color: #333; /* Thay đổi màu chữ để dễ đọc hơn */
 }
 
 button {
@@ -103,7 +92,6 @@ button {
   border: none;
   padding: 14px;
   border-radius: 112px;
-  gap: 10px;
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 16px;
   font-weight: 500;
@@ -111,6 +99,14 @@ button {
   text-align: center;
   cursor: pointer;
   transition: transform 0.3s;
+  margin-bottom: 26px;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 8px;
+  display: flex;
 }
 
 button:hover {

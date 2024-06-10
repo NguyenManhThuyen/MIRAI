@@ -68,6 +68,10 @@ export default {
         return '/Admin/QRcode'; // Đặt đường dẫn của component khác ở đây
       } else if (id === 0){
         return '/Admin/AddQuestion'; // Nếu không phải icon điều hướng, đặt đường dẫn là #
+      } else if (id === 4) {
+        return '/Admin/DescriptionAnswer'; // Nếu không phải icon điều hướng, đặt đư��ng dẫn là #
+      } else if (id === 2) {
+        return '/Admin/RightAnswer'; // Nếu không phải icon điều hướng, đặt đư��ng dẫn là #
       }
     }
   }

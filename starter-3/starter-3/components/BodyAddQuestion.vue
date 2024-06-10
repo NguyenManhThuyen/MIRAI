@@ -3,49 +3,100 @@
     <div class="add-question">
       <div class="add-image">
         <div class="upload-container">
-          <button class="upload-button">
-            <img class="plus-icon" :src="iconPlus" alt="Plus Icon">
-            <span class="upload-text">写真をアップロードする</span>
+          <button class="upload-button" @click="uploadImage">
+            <img class="plus-icon" :src="iconPlus" alt="Plus Icon" />
+            <img src="@/assets/images/backgroundd.svg" alt="body" class="body_inner" />
           </button>
-          <div v-if="showErrors && !bannerImageUploaded" class="error-message">まだバナー画像を追加していません</div>
+          <div v-if="showErrors && !bannerImageUploaded" class="error-message">
+            まだバナー画像を追加していません
+          </div>
         </div>
+        <!-- Hiển thị hình ảnh đã tải lên -->
+        <img
+          v-if="bannerImageUploaded"
+          :src="bannerImage"
+          alt="Uploaded Banner Image"
+          class="uploaded-image"
+        />
       </div>
 
       <div class="floor-display">
         <span>階</span>
-        <input type="number" v-model.number="localFloor" class="floor-input" @input="updateFloor" />
-        <div v-if="showErrors && !localFloor" class="error-message">階数が入力されていません</div>
+        <input
+          type="number"
+          v-model.number="localFloor"
+          class="floor-input"
+          @input="updateFloor"
+        />
+      </div>
+      <div v-if="showErrors && !localFloor" class="error-message">
+        階数が入力されていません
+      </div>
+
+      <div class="question-header">
+        <span class="question-label">質問 {{ questionId }}</span>
+      </div>
+
+      <div class="question-heading">
+        <div class="image-container">
+          <img src="@/assets/images/line_help.svg" alt="Image" />
+        </div>
+        <!-- Thay thế h2 bằng một trường nhập dữ liệu textarea -->
+        <textarea
+          v-model="questionText"
+          class="question-textarea"
+          placeholder="質問を追加してください"
+        ></textarea>
+      </div>
+      <div v-if="showErrors && !questionAdded" class="error-message">
+        まだ質問を入力していません
       </div>
 
       <div class="question-section">
-        <div class="question-header">
-          <span class="question-label">質問1</span>
-          <button class="add-question-button">質問を追加してください</button>
-        </div>
-        <div v-if="showErrors && !questionAdded" class="error-message">まだ質問を入力していません</div>
-
-        <div class="options">
-          <div v-for="(option, index) in options" :key="index" class="option-row">
+        <div v-for="(option, index) in options" :key="index" class="option-row">
+          <div class="input-container">
             <input v-model="option.text" :placeholder="'オプション' + (index + 1)" />
-            <button @click="removeOption(index)" class="remove-button">×</button>
-            <div v-if="showErrors && !option.text" class="error-message">まだ答えの入力が終わっていません</div>
           </div>
-          <button @click="addOption" class="add-option-button">+ さらに多くの回答</button>
+          <button @click="removeOption(index)" class="remove-button">×</button>
+        </div>
+        <!-- Hiển thị thông báo lỗi cho tùy chọn -->
+        <div v-if="showErrors && !areOptionsValid" class="error-message">
+          オプションを入力してください
+        </div>
+
+        <!-- "さらに多くの回答" được hiển thị khi số lượng options không đạt 4 -->
+        <div v-if="options.length < 4" class="option-row">
+          <div class="input-container">
+            <span class="add-option-button" @click="addOption">+ さらに多くの回答</span>
+          </div>
         </div>
       </div>
 
-      <div class="footer-image-upload">
-        <button class="footer-upload-button">+ フッター画像をダウンロード</button>
-        <div v-if="showErrors && !footerImageUploaded" class="error-message">フッター画像をまだ追加していません</div>
+      <div class="footer-image-upload" :style="footerImageStyle">
+        <button class="footer-upload-button" @click="uploadFooterImage">
+          + フッター画像をダウンロード
+        </button>
+        <!-- Hiển thị ảnh đã tải lên -->
+        <img
+          v-if="footerImageUploaded"
+          :src="footerImage"
+          alt="Uploaded Footer Image"
+          class="uploaded-footer-image"
+        />
+        <!-- Hiển thị thông báo lỗi nếu cần -->
+        <div v-if="showErrors && !footerImageUploaded" class="error-message">
+          フッター画像をまだ追加していません
+        </div>
       </div>
-
+    </div>
+    <div class="next-button-container">
       <button class="next-button" @click="validateForm">次に</button>
     </div>
   </div>
 </template>
 
 <script>
-import iconPlus from "@/assets/images/icon_plus.svg";
+import iconPlus from "@/assets/images/addquesttion.svg";
 
 export default {
   props: {
@@ -61,25 +112,42 @@ export default {
   data() {
     return {
       localFloor: this.floor,
-      options: [{ text: '' }, { text: '' }, { text: '' }],
+      options: [{ text: "" }, { text: "" }, { text: "" }],
+      optionErrors: [false, false, false],
+      // Thêm biến để kiểm tra số lượng tùy chọn
+      remainingOptions: 4,
       iconPlus: iconPlus,
+      bannerImage: "", // Thêm biến để lưu trữ ảnh đã chọn
       bannerImageUploaded: false,
       footerImageUploaded: false,
       questionAdded: false,
       showErrors: false, // Flag to control error message display
+      footerImage: "",
     };
   },
+
   methods: {
     addOption() {
-      this.options.push({ text: '' });
+      if (this.options.length >= 0) {
+        this.options.push({ text: "" });
+        this.remainingOptions -= 1;
+        this.optionErrors.push(false); // Thêm một flag mới cho tùy chọn mới
+      } else {
+        // Hiển thị thông báo khi đã đạt đến số lượng tùy chọn tối đa
+        this.options.pop();
+        alert("追加できる質問は最大 4 つまでです。");
+      }
     },
     removeOption(index) {
       this.options.splice(index, 1);
+      this.remainingOptions += 1;
+      this.optionErrors.splice(index, 1); // Xóa flag của tùy chọn bị xóa
     },
+
     updateFloor(event) {
       const value = event.target.value;
       this.localFloor = value;
-      this.$emit('update:floor', value);
+      this.$emit("update:floor", value);
     },
     validateForm() {
       // Set the showErrors flag to true to display the error messages
@@ -89,16 +157,71 @@ export default {
       const isBannerImageValid = this.bannerImageUploaded;
       const isFloorValid = this.localFloor;
       const isQuestionValid = this.questionAdded;
-      const areOptionsValid = this.options.every(option => option.text);
+      // const areOptionsValid = this.options.every((option) => option.text);
       const isFooterImageValid = this.footerImageUploaded;
+      // Validate the form inputs
+      const areOptionsValid = this.options.every((option, index) => {
+        if (!option.text) {
+          this.optionErrors[index] = true; // Đặt flag lỗi cho tùy chọn không hợp lệ
+          return false;
+        }
+        return true;
+      });
 
-      if (isBannerImageValid && isFloorValid && isQuestionValid && areOptionsValid && isFooterImageValid) {
+      if (
+        isBannerImageValid &&
+        isFloorValid &&
+        isQuestionValid &&
+        areOptionsValid &&
+        isFooterImageValid
+      ) {
         // Form is valid, perform the next steps
-        alert('Form submitted successfully!');
+        alert("Form submitted successfully!");
       } else {
         // Handle validation failure
-        console.log('Form validation failed.');
+        console.log("Form validation failed.");
       }
+    },
+    uploadImage() {
+      // Tạo một input element dạng file
+      const input = document.createElement("input");
+      input.type = "file";
+      // Sét thuộc tính 'onchange' để xử lý việc chọn file
+      input.onchange = (e) => {
+        const file = e.target.files[0]; // Lấy file đã chọn
+        if (file) {
+          // Tạo một đối tượng FileReader để đọc file
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            // Khi file được đọc thành công, gán nội dung vào biến bannerImageUploaded và hiển thị ảnh
+            this.bannerImageUploaded = true;
+            const image = e.target.result;
+            this.bannerImage = image; // Gán ảnh đã chọn vào biến bannerImage để hiển thị
+          };
+          // Đọc file ảnh dưới dạng URL
+          reader.readAsDataURL(file);
+        }
+      };
+      // Bắt đầu chọn file khi button được nhấp
+      input.click();
+    },
+    uploadFooterImage() {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            // Gán ảnh đã chọn vào biến footerImage để hiển thị
+            this.footerImage = e.target.result;
+            // Đặt flag footerImageUploaded thành true để chỉ ra rằng ảnh đã được tải lên
+            this.footerImageUploaded = true;
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
     },
   },
 };
@@ -107,23 +230,32 @@ export default {
 <style scoped>
 .container {
   width: 819px;
-  height: 901px;
+  height: auto;
   margin: 0 auto;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  padding: 24px;
-  box-sizing: border-box;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.add-question {
+  width: 100%;
 }
 
 .add-image {
   position: relative;
   height: 184px;
-  background: #BDBDBD;
+  background: #bdbdbd;
   border-radius: 12px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; /* Căn giữa các phần tử theo chiều ngang */
   margin-bottom: 24px;
 }
 
@@ -132,20 +264,33 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
-
 .upload-button {
-  background: none;
-  border: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
+  position: relative; /* Đặt vị trí của button là relative */
 }
 
 .plus-icon {
-  width: 24px;
-  height: 24px;
+  position: absolute; /* Đặt vị trí của plus icon là absolute */
+  top: 50%; /* Đặt vị trí top là 50% so với button */
+  left: 50%; /* Đặt vị trí left là 50% so với button */
+  transform: translate(
+    -50%,
+    -50%
+  ); /* Dịch chuyển plus icon điều chỉnh để nằm chính giữa button */
+  z-index: 0; /* Đặt z-index cao hơn để plus icon hiển thị phía trên body inner */
+}
+
+.inner-icon {
+  width: 100%; /* Đảm bảo inner icon lấp đầy toàn bộ button */
+  height: 100%;
+}
+
+.uploaded-image {
+  max-width: 100%; /* Giới hạn chiều rộng tối đa của ảnh */
+  max-height: 300px; /* Giới hạn chiều cao tối đa của ảnh */
+  object-fit: contain; /* Scale the image up or down to fit both its width and height within the container */
 }
 
 .upload-text {
@@ -154,43 +299,106 @@ export default {
   margin-top: 8px;
 }
 
+.uploaded-footer-image {
+  max-width: 100%;
+  max-height: 100%; /* Optional: adjust this if you want to limit the height as well */
+  object-fit: contain; /* Scale the image up or down to fit both its width and height within the container */
+}
+
 .floor-display {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
+  border: 1px solid #1a1a1a;
+  padding: 4px 8px;
+  border-radius: 4px;
+  justify-content: space-between; /* Thêm thuộc tính này */
+  /* Thêm margin để căn giữa */
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 181px;
+  height: 52px;
+  left: 319px;
+  gap: 0px;
+  border-radius: 12px;
+  background-color: transparent;
 }
 
 .floor-display span {
-  margin-right: 8px;
-  border: 1px solid #1A1A1A;
-  padding: 4px 8px;
+  margin-left: 8px;
+  /* Không cần thiết nếu sử dụng padding trong .floor-display */
+  /* padding: 4px 8px; */
+}
+
+.floor-display input {
+  max-width: 50px;
+  /* Hoặc thêm giá trị margin-left */
+  /* margin-left: 16px; */
+  border: 10px solid #8f8989;
+  width: 51.88px;
+  height: 34px;
+  top: 9px;
+  left: 439.31px;
+  padding: 6px 8px 6px 8px;
+  gap: 10px;
+  border-radius: 8px;
+  border: 1px;
+}
+
+.question-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px dashed #ff0000; /* Dashed red border */
+  margin-bottom: 16px;
+  margin-left: 24px;
+  margin-right: 24px;
+  border-radius: 12px;
+  padding: 4px; /* Thêm padding để tạo khoảng cách xung quanh nội dung */
+}
+
+.image-container {
+  margin-right: 16px; /* Adjust as needed */
+  padding: 8px; /* Optional padding */
+}
+
+.image-container img {
+  max-width: 100px; /* Adjust image size as needed */
+  max-height: 100px; /* Adjust image size as needed */
 }
 
 .question-section {
   margin-bottom: 24px;
+  margin-left: 24px;
+  margin-right: 24px;
 }
 
 .question-header {
-  display: flex;
-  align-items: center;
+  align-items: center; /* Căn giữa theo chiều dọc */
   justify-content: center;
-  margin-bottom: 16px;
-  background-color: #1A1A1A;
-  padding: 8px 16px;
-  border: 1px solid #1A1A1A;
+  padding: 8px 8px;
   border-radius: 4px;
 }
 
+/* Hiển thị "質問" với ID câu hỏi */
 .question-label {
+  max-width: 60px;
+  max-height: 36px;
+  padding: 8px 12px;
+  gap: 10px;
+  border-radius: 44px;
+  opacity: 1;
+  background: #000000;
   color: white;
-}
-
-.add-question-button {
-  background: none;
-  border: none;
-  color: #FF4081;
-  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .options {
@@ -202,59 +410,97 @@ export default {
   display: flex;
   align-items: center;
   margin-bottom: 16px;
-  flex-direction: column;
+  padding: 16px 24px;
+  gap: 0px;
+  border-radius: 112px;
+  border: 1px solid #d9d9d9;
 }
 
 .option-row input {
   flex-grow: 1;
-  margin-bottom: 8px;
-  padding: 8px;
-  border: 1px solid #E0E0E0;
-  border-radius: 4px;
+  margin-right: 8px; /* Thêm margin để tạo khoảng cách giữa input và nút x */
 }
 
 .remove-button {
   background: none;
   border: none;
-  color: #FF4081;
+  color: #ff4081;
   cursor: pointer;
+  margin-left: auto; /* Đưa nút x về phía lề phải */
 }
 
 .add-option-button {
   background: none;
   border: none;
-  color: #FF4081;
+  color: #bdbdbd;
   cursor: pointer;
+  text-align: center;
 }
 
 .footer-image-upload {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   margin-bottom: 24px;
+  background-color: #bdbdbd;
+  position: relative; /* Đặt vị trí là relative */
+  width: 100%; /* Đảm bảo chiều rộng là 100% */
+  height: 64px; /* Thiết lập chiều cao mặc định */
 }
 
 .footer-upload-button {
   background: none;
   border: none;
-  color: #FF4081;
+  color: #ffffff;
   cursor: pointer;
+  border: 1px solid #ecf1f4;
+
+  padding: 10px 24px 10px 16px;
+  gap: 8px;
+  border-radius: 12px;
+  border: 1px 0px 0px 0px;
+  opacity: 0px;
+  position: absolute; /* Đặt vị trí là absolute */
+}
+
+.uploaded-image {
+  position: absolute;
 }
 
 .next-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #FF4081;
-  color: white;
+  width: 196px;
+  height: 56px;
+  background-color: #e13a4b;
+  color: #fff;
   border: none;
-  border-radius: 4px;
+  padding: 14px;
+  border-radius: 112px;
+  gap: 10px;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22.4px;
+  align-items: center;
+  text-align: center;
   cursor: pointer;
+  transition: transform 0.3s;
 }
 
 .error-message {
+  text-align: center;
+  align-items: center;
   color: red;
   font-size: 12px;
   margin-top: 4px;
 }
-</style>
 
+.question-textarea {
+  font-family: "Noto Sans JP";
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 16px;
+  text-align: center;
+  color: #e13a4b80;
+}
+</style>

@@ -5,9 +5,9 @@
   <span>{{ id }}</span>
 </router-link>
 
-    <div class="question-text">
-      <p>{{ questionText }}</p>
-    </div>
+<div class="question-text" :style="{ color: questionTextColor }">
+  <p>{{ questionText }}</p>
+</div>
     <div class="floor-number">
       <button class="floor-button">{{ floor }}階</button>
       <button @click="deleteQuestion" class="delete-icon"></button>
@@ -43,6 +43,10 @@ const props = defineProps({
     type: Number,
     required: true
   }
+});
+
+const questionTextColor = computed(() => {
+  return props.floor === null ? '#BDBDBD' : '#1A1A1A';
 });
 
 const emit = defineEmits(['delete']);

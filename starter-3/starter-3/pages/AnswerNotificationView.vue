@@ -57,10 +57,11 @@ export default {
   padding-top: 62px;
   background-color: #F9EFE3; /* Màu nền */
   background-image: url('@/assets/images/background.svg'); /* Hình nền */
-  height: 100vh; /* Chiều cao của phần còn lại của trang */
+  height: 100dvh; /* Chiều cao của phần còn lại của trang */
 }
 
 .footer-wrapper {
   margin-top: auto; /* Footer sẽ luôn nằm ở dưới cùng */
+  width: 100%;
 }
 </style>

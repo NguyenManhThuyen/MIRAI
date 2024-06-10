@@ -10,14 +10,14 @@
         <img @click="togglePasswordVisibility" src="@/assets/images/remove-red-eye.svg" alt="Toggle Password Visibility" class="eye-icon"/>
       </div>
       <div class="forgot-password">
-        <a href="#">パスワードを忘れましたか?</a>
+        <nuxt-link v-if="username && password" to="/Admin/MainPage">パスワードを忘れましたか?</nuxt-link>
+        <nuxt-link v-else to="/Admin/ForgotPassword">パスワードを忘れましたか?</nuxt-link>
       </div>
       <p v-if="loginError" class="error-message">{{ loginError }}</p>
       <button type="submit">ログイン</button>
     </form>
   </div>
 </template>
-
 
 <script>
 export default {
@@ -31,17 +31,13 @@ export default {
   },
   methods: {
     handleSubmit() {
-      // Giả sử đăng nhập không thành công
-      const isSuccess = false;  // Dùng biến này để kiểm tra đăng nhập thành công hay không
-
-      if (isSuccess) {
-        console.log('Tên người dùng:', this.username);
-        console.log('Mật khẩu:', this.password);
-        this.loginError = '';  // Xóa thông báo lỗi nếu đăng nhập thành công
-        // Phát sự kiện đăng nhập thành công
-        this.$emit('login-success');
+      // Kiểm tra xem cả hai trường đều không được trống
+      if (!this.username || !this.password) {
+        // Nếu một trong hai trường trống, hiển thị thông báo lỗi
+        this.loginError = 'ユーザー名またはパスワードが未入力です。';
       } else {
-        this.loginError = 'パスワードが間違っているか、このアカウントは存在しません。パスワードをリセットするか、この記事を確認してください。';
+        // Nếu cả hai trường không trống, chuyển hướng đến /Admin/MainPage
+        this.$router.push('/Admin/MainPage');
       }
     },
     togglePasswordVisibility() {
@@ -49,8 +45,9 @@ export default {
     },
   },
 };
-
 </script>
+
+
 
 <style scoped>
 .login-container {
@@ -58,7 +55,7 @@ export default {
   padding: 40px 24px 40px 24px;
   border-radius: 10px;
   width: 100%;
-  max-width: 437px;
+  max-width: 487px;
   margin: 0 auto;
   text-align: center;
 }
@@ -69,7 +66,10 @@ h2 {
   margin-bottom: 24px;
   max-height: 56px;
   font-size: 40px;
+  font-weight: bold;
 }
+
+
 
 .input-group {
   box-sizing: border-box; /* Tính cả padding và border vào kích thước */

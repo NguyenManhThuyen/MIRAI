@@ -3,7 +3,7 @@
     <img src="@/assets/images/mirai-tower.svg" alt="Mirai Tower" class="quiz-image" />
     <div class="content">
       <div class="question-counter">
-        <span class="counter-text">{{ `Câu hỏi ${id + 1}` }}</span>
+        <span class="counter-text">{{ `質問 ${id + 1}` }}</span>
       </div>
       <div class="question">
         <h2>{{ question }}</h2>
@@ -86,7 +86,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .quiz-container {
   background-color: #ffffff;
@@ -96,6 +95,7 @@ export default {
   text-align: center;
   box-shadow: 0px 6px 18px 0px rgba(0, 0, 0, 0.1);
   font-family: Arial, sans-serif;
+  margin-top: 16px;
 }
 
 .quiz-image {
@@ -115,9 +115,9 @@ export default {
 
 .question-counter {
   margin: 16px 0 0 0;
-  font-size: 14px;
+  font-size: 16px; /* Tăng kích thước chữ */
   color: #333;
-  margin-bottom: 8px;
+  margin-bottom: 12px; /* Tăng khoảng cách dưới */
 }
 
 .counter-text {
@@ -125,23 +125,23 @@ export default {
   width: auto;
   height: auto;
   border-radius: 61px;
-  padding: 8px 12px 8px 12px;
+  padding: 10px 14px; /* Tăng padding */
   background-color: #0e0e2c;
   color: #fff;
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 12px;
+  font-size: 14px; /* Tăng kích thước chữ */
   font-weight: 400;
   line-height: 17.38px;
   text-align: center;
 }
 
 .question {
-  margin-bottom: 16px;
+  margin-bottom: 20px; /* Tăng khoảng cách dưới */
 }
 
 .question h2 {
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 20px;
+  font-size: 24px; /* Tăng kích thước chữ */
   font-weight: 700;
   line-height: 28.96px;
   letter-spacing: 0.02em;
@@ -151,17 +151,17 @@ export default {
 .answers {
   display: flex;
   flex-direction: column;
-  margin-bottom: 15px;
+  margin-bottom: 20px; /* Tăng khoảng cách dưới */
 }
 
 .answer-button {
   background-color: #fff;
   color: #333;
   border: 1px solid #ccc;
-  padding: 8px;
+  padding: 12px; /* Tăng padding */
   border-radius: 12px;
-  font-size: 14px;
-  margin: 5px 0;
+  font-size: 16px; /* Tăng kích thước chữ */
+  margin: 8px 0; /* Tăng khoảng cách giữa các nút */
   cursor: pointer;
   transition: transform 0.3s, border-color 0.3s;
 }
