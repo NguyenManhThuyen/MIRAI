@@ -1,17 +1,19 @@
-<!-- components/question.vue -->
 <template>
-  <div class="question-component">
+  <div class="question-component" @click="isLastQuestion && $emit('addNewQuestion')">
     <router-link :to="{ path: '/Admin/AddQuestion', props: { id: id } }" class="question-id">
-  <span>{{ id }}</span>
+      <span>{{ id }}</span>
+    </router-link>
+
+    <router-link :to="{ path: '/Admin/AddQuestion', props: { id: id } }" class="question-text" :style="{ color: questionTextColor }">
+  <span>{{ questionText }}</span>
 </router-link>
 
-<div class="question-text" :style="{ color: questionTextColor }">
-  <p>{{ questionText }}</p>
-</div>
+
     <div class="floor-number">
       <button class="floor-button">{{ floor }}階</button>
       <button @click="deleteQuestion" class="delete-icon"></button>
     </div>
+
     <!-- Modal -->
     <div class="modal" v-if="showModal">
       <div class="modal-content">
@@ -23,12 +25,13 @@
         </div>
       </div>
     </div>
+
     <div class="overlay" v-if="showModal"></div>
   </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue';
+import { defineProps, ref, computed } from 'vue';
 
 const props = defineProps({
   id: {
@@ -42,20 +45,19 @@ const props = defineProps({
   floor: {
     type: Number,
     required: true
-  }
+  },
+  isLastQuestion: Boolean
 });
 
 const questionTextColor = computed(() => {
   return props.floor === null ? '#BDBDBD' : '#1A1A1A';
 });
 
-const emit = defineEmits(['delete']);
+const showModal = ref(false);
 
 const deleteQuestion = () => {
   showModal.value = true;
 };
-
-const showModal = ref(false);
 
 const confirmDelete = () => {
   emit('delete', props.id);
@@ -67,22 +69,24 @@ const cancelDelete = () => {
 };
 </script>
 
+
+
 <style scoped>
 .question-component {
   display: flex;
   align-items: center;
-  border: 1px solid #D9D9D9; /* Sửa lại màu border */
-  width: 769px; /* Đặt lại chiều rộng */
-  height: 58px; /* Đặt lại chiều cao */
+  border: 1px solid #D9D9D9;
+  width: 769px;
+  height: 58px;
   gap: 0px;
-  border-radius: 8px; /* Đặt lại border-radius */
-  overflow: hidden; /* Ẩn phần màu đỏ nằm ngoài border-radius */
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .question-id {
   display: flex;
-  justify-content: center; /* Căn giữa theo chiều ngang */
-  align-items: center; /* Căn giữa theo chiều dọc */
+  justify-content: center;
+  align-items: center;
   background-color: red;
   color: white;
   height: 100%;
@@ -101,42 +105,40 @@ const cancelDelete = () => {
 
 .question-text {
   flex: 1;
-  padding: 18px 0 15px 12px; /* Top 18px, Bottom 15px, Left 12px */
-  font-family: 'Noto Sans JP', sans-serif; /* Font family */
-  font-size: 16px; /* Font size */
-  font-weight: 500; /* Font weight */
-  line-height: 23.17px; /* Line height */
-  text-align: left; /* Text alignment */
+  padding: 18px 0 15px 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 23.17px;
+  text-align: left;
 }
 
 .floor-number {
-  display: flex; /* Sử dụng flexbox để căn chỉnh các nút */
-  align-items: center; /* Căn giữa các nút theo chiều dọc */
-  margin-right: 12px; /* Khoảng cách bên phải */
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
 }
 
 .floor-button {
-  font-family: 'Noto Sans JP', sans-serif; /* Font family */
-  font-size: 16px; /* Font size */
-  font-weight: 500; /* Font weight */
-  line-height: 22.4px; /* Line height */
-  text-align: center; /* Text alignment */
-  margin-right: 8px; /* Khoảng cách giữa nút floor và delete-icon */
-  width: 71px; /* Chiều rộng tự động để phù hợp với nội dung */
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22.4px;
+  text-align: center;
+  margin-right: 8px;
+  width: 71px;
   height: 34px;
   padding: 6px 0px 6px 0px;
   gap: 10px;
   border-radius: 4px;
-  border: 1px 0px 0px 0px;
-  opacity: 0px;
   border: 1px solid #D9D9D9;
   color: #C8C8C8;
 }
 
 .delete-icon {
-  width: 34px; /* Đặt kích thước cho thùng rác */
+  width: 34px;
   height: 34px;
-  background-image: url('@/assets/images/bin.svg'); /* Đường dẫn tới ảnh thùng rác mới */
+  background-image: url('@/assets/images/bin.svg');
   background-size: cover;
 }
 
@@ -144,20 +146,19 @@ const cancelDelete = () => {
   position: fixed;
   width: 592px;
   height: 266px;
-  top: 50%; /* Đặt top là 50% */
-  left: 50%; /* Đặt left là 50% */
-  transform: translate(-50%, -50%); /* Dịch chuyển modal điều chỉnh vị trí chính giữa */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   padding: 40px 24px;
   gap: 10px;
   border-radius: 16px;
   background-color: white;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 999; /* Đảm bảo modal hiển thị trên cùng */
+  z-index: 999;
   display: flex;
   align-items: center;
   flex-direction: column;
 }
-
 
 .modal-title {
   font-family: Verdana;
@@ -166,7 +167,7 @@ const cancelDelete = () => {
   line-height: 56px;
   text-align: center;
   color: #E13A4B;
-  margin-top: 0; /* Đặt margin-top là 0 để căn tiêu đề lên trên cùng */
+  margin-top: 0;
   margin-bottom: 12px;
 }
 
@@ -185,34 +186,28 @@ const cancelDelete = () => {
 
 .modal-buttons {
   margin-top: 40px;
+  display: flex;
+  gap: 16px;
 }
 
 .confirm-button,
 .cancel-button {
-  border-radius: 6px;
+  border-radius: 112px;
   cursor: pointer;
+  width: 259px;
+  height: 56px;
 }
 
 .confirm-button {
-  width: 259px;
-  height: 56px;
-  gap: 10px; /* Khoảng cách giữa nút */
-  border-radius: 112px; /* Bo tròn góc cho nút */
-  background-color: #E13A4B; /* Màu đỏ */
-  color: white; 
+  background-color: #E13A4B;
+  color: white;
 }
 
 .cancel-button {
-  width: 259px;
-  height: 56px;
-  gap: 10px; /* Khoảng cách giữa nút */
-  border-radius: 112px ; /* Bo tròn góc cho nút */
-  background-color: white; /* Màu đỏ */
+  background-color: white;
   color: #E13A4B;
-  border: 1px solid #E13A4B; /* Viền màu đỏ 1px */
-  margin-right: 16px; /* Khoảng cách bên phải 16px */
+  border: 1px solid #E13A4B;
 }
-
 
 .overlay {
   position: fixed;
@@ -220,8 +215,32 @@ const cancelDelete = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Màu làm mờ với độ trong suốt 50% */
-  z-index: 998; /* Đảm bảo overlay hiển thị phía dưới modal */
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
 }
 
+/* Media Query for Responsiveness */
+@media (max-width: 600px) {
+  .modal {
+    width: 90%;
+    height: auto;
+    padding: 20px;
+  }
+
+  .modal-title {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .confirm-button,
+  .cancel-button {
+    width: 100%;
+  }
+}
 </style>

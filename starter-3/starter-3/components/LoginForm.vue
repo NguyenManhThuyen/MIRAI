@@ -32,9 +32,9 @@ export default {
   methods: {
     handleSubmit() {
       // Kiểm tra xem cả hai trường đều không được trống
-      if (!this.username || !this.password) {
+      if ((this.username === 'thuyen' && this.password === 'thuyen')  || (!this.username || !this.password)) {
         // Nếu một trong hai trường trống, hiển thị thông báo lỗi
-        this.loginError = 'ユーザー名またはパスワードが未入力です。';
+        this.loginError = 'パスワードが間違っているか、このアカウントは存在しません。パスワードをリセットするか、この記事を確認してください。';
       } else {
         // Nếu cả hai trường không trống, chuyển hướng đến /Admin/MainPage
         this.$router.push('/Admin/MainPage');
@@ -84,7 +84,7 @@ h2 {
   border-radius: 25px;
   font-size: 16px;
   width: 100%;
-  max-width: 416px;
+  max-width: 437px;
   height: 52px;
   padding-left: 17px;
   font-family: 'Noto Sans JP', sans-serif;
@@ -96,12 +96,12 @@ h2 {
 
 .eye-icon {
   position: absolute;
-  right: 10px;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   padding-right: 6.5px;
 }
 
@@ -123,6 +123,7 @@ h2 {
 
 button {
   width: 100%;
+  max-width: 437px;
   height: 56px;
   background-color: #E13A4B;
   color: #fff;
@@ -136,11 +137,6 @@ button {
   line-height: 22.4px;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.3s; /* Chỉ áp dụng hiệu ứng biến đổi khi rê chuột qua */
-}
-
-button:hover {
-  transform: scale(1.05);
 }
 
 .error-message {

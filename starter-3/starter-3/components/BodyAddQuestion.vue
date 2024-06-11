@@ -3,15 +3,18 @@
     <div class="add-question">
       <div class="add-image">
         <div class="upload-container">
+          <!-- Button upload -->
           <button class="upload-button" @click="uploadImage">
             <img class="plus-icon" :src="iconPlus" alt="Plus Icon" />
             <img src="@/assets/images/backgroundd.svg" alt="body" class="body_inner" />
           </button>
-          <div v-if="showErrors && !bannerImageUploaded" class="error-message">
+          <!-- Error message -->
+          <div v-if="showErrors && !bannerImageUploaded" class="error-message below-upload-button">
             まだバナー画像を追加していません
           </div>
         </div>
-        <!-- Hiển thị hình ảnh đã tải lên -->
+
+        <!-- Uploaded image -->
         <img
           v-if="bannerImageUploaded"
           :src="bannerImage"
@@ -34,7 +37,7 @@
       </div>
 
       <div class="question-header">
-        <span class="question-label">質問 {{ questionId }}</span>
+        <span class="question-label">質問 {{ id }}</span>
       </div>
 
       <div class="question-heading">
@@ -53,15 +56,16 @@
       </div>
 
       <div class="question-section">
-        <div v-for="(option, index) in options" :key="index" class="option-row">
-          <div class="input-container">
-            <input v-model="option.text" :placeholder="'オプション' + (index + 1)" />
+        <div v-for="(option, index) in options" :key="index" class="option-row-container">
+          <div class="option-row">
+            <div class="input-container">
+              <input v-model="option.text" :placeholder="'オプション' + (index + 1)" />
+            </div>
+            <button @click="removeOption(index)" class="remove-button">×</button>
           </div>
-          <button @click="removeOption(index)" class="remove-button">×</button>
-        </div>
-        <!-- Hiển thị thông báo lỗi cho tùy chọn -->
-        <div v-if="showErrors && !areOptionsValid" class="error-message">
-          オプションを入力してください
+          <div v-if="showErrors && optionErrors[index]" class="option-error-message">
+            オプションを入力してください
+          </div>
         </div>
 
         <!-- "さらに多くの回答" được hiển thị khi số lượng options không đạt 4 -->
@@ -94,6 +98,8 @@
     </div>
   </div>
 </template>
+
+
 
 <script>
 import iconPlus from "@/assets/images/addquesttion.svg";
@@ -227,6 +233,7 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .container {
   width: 819px;
@@ -260,6 +267,7 @@ export default {
 }
 
 .upload-container {
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -288,9 +296,9 @@ export default {
 }
 
 .uploaded-image {
-  max-width: 100%; /* Giới hạn chiều rộng tối đa của ảnh */
-  max-height: 300px; /* Giới hạn chiều cao tối đa của ảnh */
-  object-fit: contain; /* Scale the image up or down to fit both its width and height within the container */
+  max-width: 819px; /* Giới hạn chiều rộng tối đa của ảnh */
+  max-height: 184px; /* Giới hạn chiều cao tối đa của ảnh */
+  z-index: 0;
 }
 
 .upload-text {
@@ -409,7 +417,8 @@ export default {
 .option-row {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+  margin-top: 8px;
   padding: 16px 24px;
   gap: 0px;
   border-radius: 112px;
@@ -495,6 +504,12 @@ export default {
   margin-top: 4px;
 }
 
+.input-container .error-message {
+  text-align: left; /* Để căn trái nếu bạn muốn */
+  margin-top: 4px;
+}
+
+
 .question-textarea {
   font-family: "Noto Sans JP";
   font-size: 24px;
@@ -502,5 +517,22 @@ export default {
   line-height: 16px;
   text-align: center;
   color: #e13a4b80;
+}
+
+.option-error-message {
+  color: red;
+  font-size: 14px;
+  margin-left: 16px;
+  margin-bottom: 8px;
+  text-align: center;
+
+  /* Định dạng vị trí của thông báo lỗi */
+.below-upload-button {
+  position: absolute;
+  top: 100%; /* Đặt top là 100% so với phần tử cha */
+  left: 50%; /* Đặt left là 50% so với phần tử cha */
+  transform: translateX(-50%); /* Dịch chuyển vị trí sang trái 50% để căn giữa */
+}
+
 }
 </style>

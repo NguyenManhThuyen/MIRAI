@@ -1,13 +1,15 @@
 <template>
   <div>
     <Question
-      v-for="question in questions"
+      v-for="(question, index) in questions"
       :key="question.id"
       :id="question.id"
       :questionText="question.text"
       :floor="question.floor"
       @delete="handleDelete"
-      :style="{ marginBottom: '12px' }" 
+      :isLastQuestion="index === questions.length - 1"
+      @addNewQuestion="addNewQuestion"
+      :style="{ marginBottom: '12px' }"
     />
   </div>
 </template>
@@ -32,7 +34,21 @@ const questions = ref([
 const handleDelete = (id) => {
   questions.value = questions.value.filter(question => question.id !== id);
 };
+
+const addNewQuestion = () => {
+  const lastQuestion = questions.value[questions.value.length - 1];
+  const newId = lastQuestion.id + 1;
+  const newQuestionText = `質問番号 ${newId}`;
+  
+  // Cập nhật nội dung của câu hỏi thứ 10 thành "質問番号 10"
+  questions.value[questions.value.length - 1].text = `質問番号 ${lastQuestion.id}`;
+
+  // Thêm câu hỏi mới với nội dung "+ さらに質問を"
+  questions.value.push({ id: newId, text: '+ さらに質問を', floor: null });
+};
+
 </script>
+
 
 <style scoped>
 /* Add any required styles here */
