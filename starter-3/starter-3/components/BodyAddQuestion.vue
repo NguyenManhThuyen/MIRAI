@@ -9,7 +9,10 @@
             <img src="@/assets/images/backgroundd.svg" alt="body" class="body_inner" />
           </button>
           <!-- Error message -->
-          <div v-if="showErrors && !bannerImageUploaded" class="error-message below-upload-button">
+          <div
+            v-if="showErrors && !bannerImageUploaded"
+            class="error-message below-upload-button"
+          >
             まだバナー画像を追加していません
           </div>
         </div>
@@ -23,7 +26,7 @@
         />
       </div>
 
-      <div class="floor-display">
+      <div :class="['floor-display', { 'error-border': showErrors && !localFloor }]">
         <span>階</span>
         <input
           type="number"
@@ -87,10 +90,10 @@
           alt="Uploaded Footer Image"
           class="uploaded-footer-image"
         />
-        <!-- Hiển thị thông báo lỗi nếu cần -->
-        <div v-if="showErrors && !footerImageUploaded" class="error-message">
-          フッター画像をまだ追加していません
-        </div>
+      </div>
+      <!-- Hiển thị thông báo lỗi nếu cần -->
+      <div v-if="showErrors && !footerImageUploaded" class="error-message">
+        フッター画像をまだ追加していません
       </div>
     </div>
     <div class="next-button-container">
@@ -98,8 +101,6 @@
     </div>
   </div>
 </template>
-
-
 
 <script>
 import iconPlus from "@/assets/images/addquesttion.svg";
@@ -156,38 +157,38 @@ export default {
       this.$emit("update:floor", value);
     },
     validateForm() {
-      // Set the showErrors flag to true to display the error messages
       this.showErrors = true;
 
       // Validate the form inputs
       const isBannerImageValid = this.bannerImageUploaded;
       const isFloorValid = this.localFloor;
-      const isQuestionValid = this.questionAdded;
-      // const areOptionsValid = this.options.every((option) => option.text);
-      const isFooterImageValid = this.footerImageUploaded;
-      // Validate the form inputs
+      const isQuestionValid = this.questionText.trim().length > 0;
       const areOptionsValid = this.options.every((option, index) => {
         if (!option.text) {
-          this.optionErrors[index] = true; // Đặt flag lỗi cho tùy chọn không hợp lệ
+          this.optionErrors[index] = true;
           return false;
         }
+        this.optionErrors[index] = false;
         return true;
       });
+      const isFooterImageValid = this.footerImageUploaded;
+
+      // Set the questionAdded flag based on the validation
+      this.questionAdded = isQuestionValid;
 
       if (
         isBannerImageValid &&
         isFloorValid &&
         isQuestionValid &&
         areOptionsValid &&
-        isFooterImageValid
+        isFooterImageValiggd
       ) {
-        // Form is valid, perform the next steps
         alert("Form submitted successfully!");
       } else {
-        // Handle validation failure
         console.log("Form validation failed.");
       }
     },
+
     uploadImage() {
       // Tạo một input element dạng file
       const input = document.createElement("input");
@@ -232,7 +233,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .container {
@@ -318,38 +318,29 @@ export default {
   align-items: center;
   border: 1px solid #1a1a1a;
   padding: 4px 8px;
-  border-radius: 4px;
-  justify-content: space-between; /* Thêm thuộc tính này */
-  /* Thêm margin để căn giữa */
+  border-radius: 12px;
+  justify-content: space-between;
   margin-left: auto;
   margin-right: auto;
   max-width: 181px;
   height: 52px;
-  left: 319px;
-  gap: 0px;
-  border-radius: 12px;
   background-color: transparent;
 }
 
 .floor-display span {
   margin-left: 8px;
-  /* Không cần thiết nếu sử dụng padding trong .floor-display */
-  /* padding: 4px 8px; */
 }
 
 .floor-display input {
-  max-width: 50px;
-  /* Hoặc thêm giá trị margin-left */
-  /* margin-left: 16px; */
-  border: 10px solid #8f8989;
+  border: 1px solid #8f8989;
+  border-radius: 8px;
+  padding: 6px 8px;
   width: 51.88px;
   height: 34px;
-  top: 9px;
-  left: 439.31px;
-  padding: 6px 8px 6px 8px;
-  gap: 10px;
-  border-radius: 8px;
-  border: 1px;
+}
+
+.floor-display.error-border {
+  border-color: #e13a4b; /* Thay đổi màu viền khi có lỗi */
 }
 
 .question-heading {
@@ -451,7 +442,6 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
   background-color: #bdbdbd;
   position: relative; /* Đặt vị trí là relative */
   width: 100%; /* Đảm bảo chiều rộng là 100% */
@@ -494,6 +484,7 @@ export default {
   text-align: center;
   cursor: pointer;
   transition: transform 0.3s;
+  margin-top: 24px;
 }
 
 .error-message {
@@ -509,14 +500,16 @@ export default {
   margin-top: 4px;
 }
 
-
 .question-textarea {
+  margin-top: 12px;
   font-family: "Noto Sans JP";
   font-size: 24px;
   font-weight: 500;
   line-height: 16px;
   text-align: center;
   color: #e13a4b80;
+  justify-content: center;
+  width: fit-content;
 }
 
 .option-error-message {
@@ -527,12 +520,89 @@ export default {
   text-align: center;
 
   /* Định dạng vị trí của thông báo lỗi */
-.below-upload-button {
-  position: absolute;
-  top: 100%; /* Đặt top là 100% so với phần tử cha */
-  left: 50%; /* Đặt left là 50% so với phần tử cha */
-  transform: translateX(-50%); /* Dịch chuyển vị trí sang trái 50% để căn giữa */
+  .below-upload-button {
+    position: absolute;
+    top: 100%; /* Đặt top là 100% so với phần tử cha */
+    left: 50%; /* Đặt left là 50% so với phần tử cha */
+    transform: translateX(-50%); /* Dịch chuyển vị trí sang trái 50% để căn giữa */
+  }
 }
 
+/* Tối ưu hóa layout cho màn hình có độ rộng nhỏ hơn */
+@media screen and (max-width: 768px) {
+  .container {
+    width: 100%; /* Chiều rộng tối đa cho container là 100% */
+  }
+
+  .add-image {
+    height: 120px; /* Giảm chiều cao của phần add image */
+  }
+
+  .floor-display input {
+    width: 70px; /* Giảm độ rộng của input cho số tầng */
+  }
+
+  .question-heading {
+    margin-left: 8px;
+    margin-right: 8px; /* Giảm khoảng cách giữa lề trái và lề phải của phần question heading */
+  }
+
+  .question-label {
+    max-width: 50px; /* Giảm kích thước của question label */
+    font-size: 12px; /* Giảm kích thước font cho question label */
+    padding: 6px 8px; /* Giảm khoảng cách giữa text và viền */
+  }
+
+  .option-row {
+    padding: 8px; /* Giảm khoảng cách giữa các option row */
+  }
+
+  .next-button {
+    width: 150px; /* Giảm kích thước của nút next */
+    height: 40px; /* Giảm kích thước của nút next */
+    font-size: 14px; /* Giảm kích thước font cho nút next */
+  }
+
+  .footer-upload-button {
+    padding: 8px 16px; /* Giảm khoảng cách giữa nút upload footer */
+    font-size: 12px; /* Giảm kích thước font cho nút upload footer */
+  }
+}
+
+/* Tối ưu hóa layout cho màn hình có độ rộng nhỏ hơn */
+@media screen and (max-width: 480px) {
+  .add-image {
+    height: 100px; /* Giảm chiều cao của phần add image */
+  }
+
+  .floor-display input {
+    width: 50px; /* Giảm độ rộng của input cho số tầng */
+  }
+
+  .question-heading {
+    margin-left: 4px;
+    margin-right: 4px; /* Giảm khoảng cách giữa lề trái và lề phải của phần question heading */
+  }
+
+  .question-label {
+    max-width: 40px; /* Giảm kích thước của question label */
+    font-size: 10px; /* Giảm kích thước font cho question label */
+    padding: 4px 6px; /* Giảm khoảng cách giữa text và viền */
+  }
+
+  .option-row {
+    padding: 4px; /* Giảm khoảng cách giữa các option row */
+  }
+
+  .next-button {
+    width: 120px; /* Giảm kích thước của nút next */
+    height: 36px; /* Giảm kích thước của nút next */
+    font-size: 12px; /* Giảm kích thước font cho nút next */
+  }
+
+  .footer-upload-button {
+    padding: 6px 12px; /* Giảm khoảng cách giữa nút upload footer */
+    font-size: 10px; /* Giảm kích thước font cho nút upload footer */
+  }
 }
 </style>
