@@ -1,0 +1,92 @@
+[
+    {
+      "Id": "1",
+      "question_name": "着物を着る文化的伝統がある国はどこですか?",
+      "correct_answer_explain": "東京は、本州の南東部にある関東地方の一部であり、伊豆諸島と小笠原諸島が含まれています。東京が江戸と名付けられたのは、徳川家康の時代でした。",
+      "correct_answer_name": "option_3",
+      "options": {
+        "option_1": "スペインの国",
+        "option_2": "ソビエトの国",
+        "option_3": "日本の国",
+        "option_4": "ブラジルという国"
+      },
+      "floor": "1",
+      "banner_url": "https://example.com/banner.jpg",
+      "footer_url": "https://example.com/footer.jpg",
+      "qrcode_url": "https://example.com/qrcode.jpg",
+      "created_at": "2024-06-10T12:34:56Z",
+      "updated_at": "2024-06-10T12:34:56Z"
+    },
+    {
+      "Id": "2",
+      "question_name": "世界で最も人口の多い国はどれですか?",
+      "correct_answer_explain": "中国は、東アジアに位置し、17の地域と46の州に分かれています。",
+      "correct_answer_name": "option_1",
+      "options": {
+        "option_1": "中国",
+        "option_2": "インド",
+        "option_3": "アメリカ",
+        "option_4": "インドネシア"
+      },
+      "floor": "1",
+      "banner_url": "https://example.com/banner.jpg",
+      "footer_url": "https://example.com/footer.jpg",
+      "qrcode_url": "https://example.com/qrcode.jpg",
+      "created_at": "2024-06-10T12:34:56Z",
+      "updated_at": "2024-06-10T12:34:56Z"
+    },
+    {
+      "Id": "3",
+      "question_name": "アフリカ大陸で最も広い国はどれですか?",
+      "correct_answer_explain": "アルジェリアは、アフリカ大陸の北側に位置し、地中海に面しています。",
+      "correct_answer_name": "option_1",
+      "options": {
+        "option_1": "アルジェリア",
+        "option_2": "コンゴ",
+        "option_3": "ナイジェリア",
+        "option_4": "エジプト"
+      },
+      "floor": "1",
+      "banner_url": "https://example.com/banner.jpg",
+      "footer_url": "https://example.com/footer.jpg",
+      "qrcode_url": "https://example.com/qrcode.jpg",
+      "created_at": "2024-06-10T12:34:56Z",
+      "updated_at": "2024-06-10T12:34:56Z"
+    },
+    {
+      "Id": "4",
+      "question_name": "最初の人類が誕生した大陸はどれですか?",
+      "correct_answer_explain": "アフリカ大陸は、現在の人類の祖先であるホモ・サピエンスの誕生地として広く受け入れられています。",
+      "correct_answer_name": "option_3",
+      "options": {
+        "option_1": "ヨーロッパ",
+        "option_2": "アジア",
+        "option_3": "アフリカ",
+        "option_4": "オーストラリア"
+      },
+      "floor": "1",
+      "banner_url": "https://example.com/banner.jpg",
+      "footer_url": "https://example.com/footer.jpg",
+      "qrcode_url": "https://example.com/qrcode.jpg",
+      "created_at": "2024-06-10T12:34:56Z",
+      "updated_at": "2024-06-10T12:34:56Z"
+    },
+    {
+      "Id": "5",
+      "question_name": "バッファローのニックネームを持つアメリカの都市はどこですか?",
+      "correct_answer_explain": "バッファローのニックネームを持つ都市は、ニューヨーク州のバッファローです。",
+      "correct_answer_name": "option_2",
+      "options": {
+        "option_1": "シカゴ",
+        "option_2": "バッファロー",
+        "option_3": "ロサンゼルス",
+        "option_4": "ニューオーリンズ"
+      },
+      "floor": "1",
+      "banner_url": "https://example.com/banner.jpg",
+      "footer_url": "https://example.com/footer.jpg",
+      "qrcode_url": "https://example.com/qrcode.jpg",
+      "created_at": "2024-06-10T12:34:56Z",
+      "updated_at": "2024-06-10T12:34:56Z"
+    }
+]
