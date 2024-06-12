@@ -37,7 +37,7 @@ export default {
   props: {
     id: {
       type: Number,
-      required: true,
+      //required: true,
     },
   },
   data() {
@@ -102,7 +102,7 @@ export default {
       if (id === 6) {
         return "/Admin/QRcode"; // Đặt đường dẫn của component khác ở đây
       } else if (id === 0) {
-        return "/Admin/AddQuestion"; // Nếu không phải icon điều hướng, đặt đường dẫn là #
+        return "/Admin/AddQuestion/0"; // Nếu không phải icon điều hướng, đặt đường dẫn là #
       } else if (id === 4) {
         return "/Admin/DescriptionAnswer"; // Nếu không phải icon điều hướng, đặt đư��ng dẫn là #
       } else if (id === 2) {

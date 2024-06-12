@@ -20,6 +20,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -30,14 +32,28 @@ export default {
     };
   },
   methods: {
-    handleSubmit() {
-      // Kiểm tra xem cả hai trường đều không được trống
-      if ((this.username === 'thuyen' && this.password === 'thuyen')  || (!this.username || !this.password)) {
-        // Nếu một trong hai trường trống, hiển thị thông báo lỗi
-        this.loginError = 'パスワードが間違っているか、このアカウントは存在しません。パスワードをリセットするか、この記事を確認してください。';
-      } else {
-        // Nếu cả hai trường không trống, chuyển hướng đến /Admin/MainPage
-        this.$router.push('/Admin/MainPage');
+    async handleSubmit() {
+      if (!this.username || !this.password) {
+        this.loginError = 'ユーザー名とパスワードを入力してください。';
+        return;
+      }
+
+      try {
+        const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users', {
+          email: this.username,
+          password: this.password,
+        }, {
+          headers: { "Access-Control-Allow-Origin": "*", 'Access-Control-Allow-Headers': '*', }
+        });
+
+        if (response.status === 200) {
+          this.$router.push('/Admin/MainPage');
+        } else {
+          this.loginError = 'パスワードが間違っているか、このアカウントは存在しません。パスワードをリセットするか、この記事を確認してください。';
+        }
+      } catch (error) {
+        this.loginError = 'サーバーに接続できません。後でもう一度やり直してください。';
+        console.error('Login error:', error);
       }
     },
     togglePasswordVisibility() {
@@ -46,7 +62,6 @@ export default {
   },
 };
 </script>
-
 
 
 <style scoped>
@@ -92,6 +107,7 @@ h2 {
   line-height: 22.4px;
   text-align: left;
   color: #BBBBBB;
+  outline: none; /* Thêm dòng này để loại bỏ đường viền khi focus */
 }
 
 .eye-icon {
@@ -131,13 +147,19 @@ button {
   padding: 14px;
   border-radius: 112px;
   gap: 10px;
-  font-family: 'Noto Sans JP', sans-serif; /* Thêm font-family */
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 16px;
   font-weight: 500;
   line-height: 22.4px;
   text-align: center;
   cursor: pointer;
+  transition: transform 0.4s ease; /* Hiệu ứng chuyển động cho transform */
 }
+
+button:hover {
+  transform: scale(1.02); /* Phóng to 105% khi di chuột qua */
+}
+
 
 .error-message {
   width: 100%;

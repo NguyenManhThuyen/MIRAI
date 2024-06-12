@@ -101,19 +101,20 @@
     </div>
   </div>
 </template>
-
 <script>
+import { computed, watchEffect } from 'vue'; // Import computed và watchEffect từ Vue
+
 import iconPlus from "@/assets/images/addquesttion.svg";
 
 export default {
   props: {
     id: {
       type: Number,
-      required: true,
+      //required: true,
     },
     floor: {
       type: Number,
-      required: true,
+      //required: true,
     },
   },
   data() {
@@ -121,19 +122,41 @@ export default {
       localFloor: this.floor,
       options: [{ text: "" }, { text: "" }, { text: "" }],
       optionErrors: [false, false, false],
-      // Thêm biến để kiểm tra số lượng tùy chọn
       remainingOptions: 4,
       iconPlus: iconPlus,
-      bannerImage: "", // Thêm biến để lưu trữ ảnh đã chọn
+      bannerImage: "",
       bannerImageUploaded: false,
       footerImageUploaded: false,
       questionAdded: false,
-      showErrors: false, // Flag to control error message display
+      showErrors: false,
       footerImage: "",
+      questionData: null,
     };
   },
-
+  mounted() {
+    // Sử dụng watchEffect để theo dõi thay đổi trong route.params.id
+    watchEffect(() => {
+      this.id = Array.isArray(this.$route.params.id) ? this.$route.params.id[0] : this.$route.params.id;
+    });
+    // Gọi hàm để lấy dữ liệu câu hỏi khi component được mounted
+    this.fetchQuestionData();
+  },
   methods: {
+    async fetchQuestionData() {
+      try {
+        const response = await axios.get(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${this.id}`);
+        
+        // Lưu dữ liệu câu hỏi vào biến questionData
+        this.questionData = response.data;
+
+        localStorage.setItem('floor', this.questionData.floor);
+        
+        // In dữ liệu câu hỏi ra console
+        console.log('Question Data:', this.questionData);
+      } catch (error) {
+        console.error('Error fetching question data:', error);
+      }
+    },
     addOption() {
       if (this.options.length >= 0) {
         this.options.push({ text: "" });
@@ -157,37 +180,37 @@ export default {
       this.$emit("update:floor", value);
     },
     validateForm() {
-      this.showErrors = true;
+  this.showErrors = true;
 
-      // Validate the form inputs
-      const isBannerImageValid = this.bannerImageUploaded;
-      const isFloorValid = this.localFloor;
-      const isQuestionValid = this.questionText.trim().length > 0;
-      const areOptionsValid = this.options.every((option, index) => {
-        if (!option.text) {
-          this.optionErrors[index] = true;
-          return false;
-        }
-        this.optionErrors[index] = false;
-        return true;
-      });
-      const isFooterImageValid = this.footerImageUploaded;
+  // Validate the form inputs
+  const isBannerImageValid = this.bannerImageUploaded;
+  const isFloorValid = this.localFloor;
+  const isQuestionValid = this.questionText.trim().length > 0;
+  const areOptionsValid = this.options.every((option, index) => {
+    if (!option.text) {
+      this.optionErrors[index] = true;
+      return false;
+    }
+    this.optionErrors[index] = false;
+    return true;
+  });
+  const isFooterImageValid = this.footerImageUploaded;
 
-      // Set the questionAdded flag based on the validation
-      this.questionAdded = isQuestionValid;
+  // Set the questionAdded flag based on the validation
+  this.questionAdded = isQuestionValid;
 
-      if (
-        isBannerImageValid &&
-        isFloorValid &&
-        isQuestionValid &&
-        areOptionsValid &&
-        isFooterImageValiggd
-      ) {
-        alert("Form submitted successfully!");
-      } else {
-        console.log("Form validation failed.");
-      }
-    },
+  if (
+    isBannerImageValid &&
+    isFloorValid &&
+    isQuestionValid &&
+    areOptionsValid &&
+    isFooterImageValid // Corrected spelling here
+  ) {
+    alert("Form submitted successfully!");
+  } else {
+    console.log("Form validation failed.");
+  }
+},
 
     uploadImage() {
       // Tạo một input element dạng file

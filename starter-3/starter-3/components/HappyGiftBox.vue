@@ -9,7 +9,7 @@
             alt="Cloud Left"
           />
         </div>
-        <div class="question-text">質問 {{ questionId }}</div>
+        <div class="question-text">質問 {{ floorFromLocalStorage }}</div>
         <div class="svg-container">
           <img
             src="@/assets/images/cloud_right.svg"
@@ -24,13 +24,15 @@
     </div>
     <img src="@/assets/images/happy-giftbox.svg" class="correct-image" alt="Correct" />
     <div class="correct-answer-container">
-      <div class="correct-answer">{{ trueAnswerQuestion }}/{{ totalQuestion }}</div>
+      <div class="correct-answer">
+        {{ trueAnswerQuestionFromStorage }}/{{ totalQuestionFromStorage }}
+      </div>
     </div>
 
     <div class="custom-text">
       （この画面を審査員にご提示いただき、正解数に応じてプレゼントを差し上げます。）
     </div>
-    <button class="custom-button" @click='share'>
+    <button class="custom-button" @click="share">
       <span class="button-content">
         <img src="@/assets/images/share.svg" class="share" alt="share" />
         共有
@@ -44,39 +46,75 @@
     v-bind:title="title"
     text="Hello World"
   ></navigator-share> -->
-
   </div>
 </template>
 
 <script>
-import NavigatorShare from 'vue-navigator-share'
+import NavigatorShare from "vue-navigator-share";
 export default {
   props: {
     questionId: {
       type: Number,
-      required: true
+      required: true,
     },
     trueAnswerQuestion: {
       type: Number,
-      required: true
+      required: true,
     },
     totalQuestion: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   name: "HappyGiftBox",
   components: {
-    NavigatorShare
+    NavigatorShare,
   },
+  data() {
+    return {
+      // trueAnswerQuestion: 0, // Không cần khai báo lại
+      // totalQuestion: 0 // Không cần khai báo lại
+      floor: null,
+    };
+  },
+
   computed: {
     url() {
       return window.location.href;
     },
     title() {
       return document.title;
+    },
+    trueAnswerQuestionFromStorage() {
+      return localStorage.getItem("correctAnswer") || 0; // Nếu không có giá trị, sử dụng 0
+    },
+    totalQuestionFromStorage() {
+      return localStorage.getItem("totalAnswer") || 0; // Nếu không có giá trị, sử dụng 0
+    },
+  },
+
+  mounted() {
+    // Gán giá trị từ localStorage vào trueAnswerQuestion và totalQuestion
+    if (!this.trueAnswerQuestion && !this.totalQuestion) {
+      this.trueAnswerQuestion = parseInt(this.trueAnswerQuestionFromStorage);
+      this.totalQuestion = parseInt(this.totalQuestionFromStorage);
+    }
+
+    // Lấy giá trị floor từ local storage
+    const floorFromLocalStorage = localStorage.getItem("floor");
+
+    // Kiểm tra nếu giá trị floorFromLocalStorage không null và không rỗng
+    if (floorFromLocalStorage) {
+      // Gán giá trị của floorFromLocalStorage vào floor
+      this.floor = parseInt(floorFromLocalStorage);
+
+      // Gán giá trị của floor cho questionId
+      this.questionId = this.floor;
+    } else {
+      console.error("Floor value not found in local storage.");
     }
   },
+
   methods: {
     onError(err) {
       alert(err);
@@ -84,28 +122,28 @@ export default {
     },
     onSuccess(err) {
       console.log(err);
-    }
+    },
   },
   methods: {
     share() {
       if (navigator.share) {
-        navigator.share({
-          title: 'Title',
-          text: 'Text content',
-          url: 'URL'
-        })
-        .then(() => console.log('Shared successfully'))
-        .catch((error) => console.error('Error sharing:', error));
+        navigator
+          .share({
+            title: "Title",
+            text: "Text content",
+            url: "URL",
+          })
+          .then(() => console.log("Shared successfully"))
+          .catch((error) => console.error("Error sharing:", error));
       } else {
-        console.log('Web Share API not supported');
+        console.log("Web Share API not supported");
         // Thực hiện hành động khác nếu trình duyệt không hỗ trợ Web Share API
-        alert('Shared successfully');
+        alert("Shared successfully");
       }
-    }
-  }
+    },
+  },
 };
 </script>
-
 
 <style scoped>
 .notification {

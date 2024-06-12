@@ -1,30 +1,38 @@
 <template>
   <div class="quiz-container">
+    <!-- <img :src="bannerUrl" alt="Mirai Tower" class="quiz-image" /> -->
     <img src="@/assets/images/mirai-tower.svg" alt="Mirai Tower" class="quiz-image" />
+
     <div class="content">
       <div class="question-counter">
-        <span class="counter-text">{{ `質問 ${id + 1}` }}</span>
+        <span class="counter-text">{{ `質問 ${floor}` }}</span>
       </div>
       <div class="question">
-        <h2>{{ question }}</h2>
+        <h2>{{ questionName }}</h2>
       </div>
       <div class="answers">
-        <button 
-          v-for="(answer, index) in answers" 
-          :key="index" 
+        <button
+          v-for="(option, key) in options"
+          :key="key"
           :class="[
             'answer',
             {
-              correct: isAnswered && correctAnswers[index],
-              wrong: isAnswered && index === selectedAnswerIndex && !correctAnswers[index],
-              'no-hover': isAnswered
-            }
-          ]" 
-          @click="handleAnswer(index)"
+              correct:
+                isAnswered &&
+                selectedAnswer === correctAnswerName &&
+                selectedAnswer === key,
+              wrong:
+                isAnswered &&
+                selectedAnswer !== correctAnswerName &&
+                selectedAnswer === key,
+              'no-hover': isAnswered,
+            },
+          ]"
+          @click="handleAnswer(key)"
           :disabled="isAnswered"
           class="answer-button"
         >
-          {{ answer }}
+          {{ option }}
         </button>
       </div>
     </div>
@@ -35,54 +43,68 @@
 export default {
   name: "QuizQuestion",
   props: {
-    totalQuestions: {
-      type: Number,
-      required: true
-    },
-    question: {
+    bannerUrl: {
       type: String,
-      required: true
     },
-    answers: {
-      type: Array,
-      required: true
+    correctAnswerExplain: {
+      type: String,
     },
-    correctAnswers: {
-      type: Array,
-      required: true
+    correctAnswerName: {
+      type: String,
+    },
+    footerUrl: {
+      type: String,
     },
     id: {
       type: Number,
-      required: true
+    },
+    options: {
+      type: Object,
+    },
+    questionName: {
+      type: String,
+    },
+    floor: {
+      type: Number,
     },
   },
   data() {
     return {
       isAnswered: false,
-      selectedAnswerIndex: null
+      selectedAnswer: null,
     };
   },
   methods: {
-    handleAnswer(index) {
+    handleAnswer(key) {
       if (!this.isAnswered) {
-        this.selectedAnswerIndex = index;
+        this.selectedAnswer = key;
         this.isAnswered = true;
-        const isCorrect = this.correctAnswers[index];
-        const correctAnswerText = this.answers[this.correctAnswers.indexOf(true)];
+        const isCorrect = key === this.correctAnswerName;
+
+        // Tăng giá trị của totalAnswer
+        let totalAnswer = parseInt(localStorage.getItem("totalAnswer") || 0, 10) + 1;
+        localStorage.setItem("totalAnswer", totalAnswer.toString());
+
+        // Nếu trả lời đúng, tăng giá trị của correctAnswer
+        if (isCorrect) {
+          let correctAnswer =
+            parseInt(localStorage.getItem("correctAnswer") || 0, 10) + 1;
+          localStorage.setItem("correctAnswer", correctAnswer.toString());
+        }
 
         setTimeout(() => {
           this.$router.push({
             path: `/AnswerNotificationView`,
             query: {
-              isCorrect: isCorrect.toString(), // Convert boolean to string
-              correctAnswer: correctAnswerText,
-              questionId: this.id
-            }
+              isCorrect: isCorrect.toString(),
+              correctAnswer: this.options[this.correctAnswerName],
+              correctAnswerExplain: this.correctAnswerExplain,
+            },
           });
         }, 5000);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -112,7 +134,6 @@ export default {
   padding-right: 12px;
 }
 
-
 .question-counter {
   margin: 16px 0 0 0;
   font-size: 16px; /* Tăng kích thước chữ */
@@ -128,7 +149,7 @@ export default {
   padding: 10px 14px; /* Tăng padding */
   background-color: #0e0e2c;
   color: #fff;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   font-size: 14px; /* Tăng kích thước chữ */
   font-weight: 400;
   line-height: 17.38px;
@@ -140,7 +161,7 @@ export default {
 }
 
 .question h2 {
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   font-size: 24px; /* Tăng kích thước chữ */
   font-weight: 700;
   line-height: 28.96px;
@@ -151,7 +172,7 @@ export default {
 .answers {
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px; /* Tăng khoảng cách dưới */
+  margin-bottom: 12px; /* Tăng khoảng cách dưới */
 }
 
 .answer-button {

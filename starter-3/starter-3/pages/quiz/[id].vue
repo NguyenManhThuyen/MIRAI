@@ -1,21 +1,26 @@
 <template>
   <div class="quiz-view">
     <QuizQuestion 
+      v-if="questionData.question_name"
+      :bannerUrl="questionData.banner_url"
+      :correctAnswerExplain="questionData.correct_answer_explain"
+      :correctAnswerName="questionData.correct_answer_name"
+      :footerUrl="questionData.footer_url"
       :id="id"
-      :total-questions="totalQuestions"
-      :question="questions[id].text"
-      :answers="questions[id].answers"
-      :correct-answers="questions[id].correctAnswers"
+      :options="questionData.options"
+      :questionName="questionData.question_name"
+      :floor="questionData.floor"
     />
+  
     <FooterQuestion :footerImage="footerImage" class="footer-question" />
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 import QuizQuestion from '@/components/QuizQuestion.vue';
 import FooterQuestion from '@/components/FooterQuestion.vue';
-import footerImage from '@/assets/images/footerQuestion.png'; // Import the image
-import questionsData from '@/pages/questions.json';
+import footerImage from '@/assets/images/footerQuestion.png';
 
 export default {
   components: {
@@ -25,31 +30,69 @@ export default {
   
   data() {
     return {
-      id: parseInt(this.$route.params.id), // Convert id from string to number
-      footerImage, // Use the imported image
-      questions: questionsData
+      footerImage,
+      questionData: {},
+      id: null, // Khởi tạo giá trị ban đầu cho id
+      apiCalled: false // Biến flag để kiểm tra đã gọi API hay chưa
     };
-  },
-  
-  computed: {
-    totalQuestions() {
-      return this.questions.length;
-    }
   },
   
   methods: {
     toggleDropdown(newLanguage) {
       console.log('Language changed to:', newLanguage);
       // Handle language change logic here
+    },
+    redirectToHomeUserView() {
+      this.$router.push({ name: 'HomeUserView'});
+    },
+    fetchQuestionData(id) {
+      axios.get(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${id}`)
+        .then(response => {
+          this.questionData = response.data;
+          console.log('Fetched question data:', this.questionData);
+        })
+        .catch(error => {
+          console.error('Error fetching question data:', error);
+        })
+        .finally(() => {
+          // Đặt biến flag thành true sau khi gọi API
+          this.apiCalled = true;
+        });
     }
   },
 
   mounted() {
-    console.log('questions:', this.questions);
-    console.log('id:', this.id);
-  }
+    // Lấy ID từ route parameters
+    this.id = this.$route.params.id;
+
+    // Kiểm tra nếu người dùng đã truy cập trang web trước đó
+    const hasVisited = localStorage.getItem('hasVisited');
+    
+    localStorage.setItem('currentId', this.id);
+
+    // Kiểm tra nếu giá trị chưa tồn tại trong localStorage thì gán giá trị mặc định là 0
+    if (localStorage.getItem('correctAnswer') === null) {
+      localStorage.setItem('correctAnswer', 0);
+    }
+
+    if (localStorage.getItem('totalAnswer') === null) {
+      localStorage.setItem('totalAnswer', 0);
+    }
+
+    if (hasVisited !== 'true') {
+      // Nếu chưa truy cập, chuyển hướng đến HomeUserView
+      this.redirectToHomeUserView();
+    } else {
+      // Gọi API chỉ khi biến flag là false
+      if (!this.apiCalled) {
+        this.fetchQuestionData(this.id);
+      }
+    }
+  },
+
 };
 </script>
+
 
 <style scoped>
 .quiz-view {

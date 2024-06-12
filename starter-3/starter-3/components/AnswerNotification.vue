@@ -20,7 +20,7 @@
     </div>
 
     <div class="custom-text">
-      東京は、本州の南東部にある関東地方の一部であり、伊豆諸島と小笠原諸島が含まれています。東京が江戸と名付けられたのは、徳川家康の時代でした。
+      {{ correctAnswerExplain }}
     </div>
     <nuxt-link to="/HappyGiftBoxView" class="custom-button">次に</nuxt-link>
   </div>
@@ -29,11 +29,11 @@
 <script>
 export default {
   props: {
-    questionId: {
-      type: Number,
+    correctAnswer: {
+      type: String,
       required: true
     },
-    correctAnswer: {
+    correctAnswerExplain: {
       type: String,
       required: true
     },

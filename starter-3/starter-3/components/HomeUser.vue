@@ -46,6 +46,7 @@
 </template>
 
 <script>
+
 export default {
   data() {
     return {
@@ -56,16 +57,19 @@ export default {
     disagree() {
       this.$router.go(-1); // Quay lại trang trước đó
     },
-
     agree() {
       if (this.isAgreed) {
-        this.$router.push("/quiz/0");
+        const currentId = localStorage.getItem('currentId');
+        // Lưu trạng thái đã truy cập
+        localStorage.setItem('hasVisited', 'true');
+        this.$router.push(`/quiz/${currentId}`);
       }
-    },
+    }
   },
   name: "HomeUser",
 };
 </script>
+
 
 <style scoped>
 .terms-container {

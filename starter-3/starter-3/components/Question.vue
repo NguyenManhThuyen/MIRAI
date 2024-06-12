@@ -1,13 +1,12 @@
 <template>
   <div class="question-component" @click="isLastQuestion && $emit('addNewQuestion')">
-    <router-link :to="{ path: '/Admin/AddQuestion', props: { id: id } }" class="question-id">
-      <span>{{ id }}</span>
+    <router-link :to="{ path: '/Admin/AddQuestion/' + id }" class="question-id">
+      <span>{{ questionIndex + 1 }}</span>
     </router-link>
 
-    <router-link :to="{ path: '/Admin/AddQuestion', props: { id: id } }" class="question-text" :style="{ color: questionTextColor }">
-  <span>{{ questionText }}</span>
-</router-link>
-
+    <router-link :to="{ path: '/Admin/AddQuestion/' + id}" class="question-text" :style="{ color: questionTextColor }">
+      <span>{{ questionText }}</span>
+    </router-link>
 
     <div class="floor-number">
       <button class="floor-button">{{ floor }}階</button>
@@ -31,10 +30,18 @@
 </template>
 
 <script setup>
-import { defineProps, ref, computed } from 'vue';
+import { defineProps, ref, computed, onMounted } from 'vue';
 
 const props = defineProps({
   id: {
+    type: Number,
+    required: true
+  },
+  key: {
+    type: Number,
+    required: true
+  },
+  questionIndex: { 
     type: Number,
     required: true
   },
@@ -67,6 +74,10 @@ const confirmDelete = () => {
 const cancelDelete = () => {
   showModal.value = false;
 };
+
+onMounted(() => {
+  localStorage.setItem('questionIndex', props.questionIndex);
+});
 </script>
 
 

@@ -26,11 +26,11 @@
     props: {
       id: {
         type: Number,
-        required: true,
+        //required: true,
       },
       options: {
         type: Array,
-        required: true,
+        //required: true,
       },
     },
     data() {

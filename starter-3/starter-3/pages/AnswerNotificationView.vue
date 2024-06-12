@@ -1,15 +1,16 @@
 <template>
   <div class="view-container">
     <AnswerNotification
-      :questionId="Number($route.params.questionId)"
       :correctAnswer="$route.query.correctAnswer"
       :isCorrect="$route.query.isCorrect === 'true'"
+      :correctAnswerExplain="$route.query.correctAnswerExplain"
     />
     <div class="footer-wrapper">
       <FooterQuestion :footerImage="footerImage" class="footer-question" />
     </div>
   </div>
 </template>
+
 
 <script>
 import AnswerNotification from '@/components/AnswerNotification.vue';
@@ -22,11 +23,11 @@ export default {
     FooterQuestion,
   },
   props: {
-    questionId: {
-      type: Number,
+    correctAnswer: {
+      type: String,
       required: true
     },
-    correctAnswer: {
+    correctAnswerExplain: {
       type: String,
       required: true
     },

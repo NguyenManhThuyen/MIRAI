@@ -8,7 +8,7 @@
       <HeaderAddQuestion :id="1" />
     </div>
     <div class="body-addquestion">
-      <BodyAddQuestion :id="questionId" />
+      <BodyAddQuestion :questionId="questionId" />
     </div>
   </div>
 </template>
@@ -27,15 +27,15 @@ export default {
     },
   },
 
-  setup() {
-    const router = useRouter();
-    const questionId = router.currentRoute.value.query.id
-      ? parseInt(router.currentRoute.value.query.id)
-      : null;
-
+  data() {
     return {
-      questionId,
+      questionId: null,
     };
+  },
+
+  mounted() {
+    // Lấy giá trị của route param từ this.$route.params
+    this.questionId = parseInt(this.$route.params.id);
   },
 };
 </script>

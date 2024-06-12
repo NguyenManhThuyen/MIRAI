@@ -2,13 +2,14 @@
   <div>
     <Question
       v-for="(question, index) in questions"
-      :key="question.id"
+      :key="index"
       :id="question.id"
-      :questionText="question.text"
+      :questionText="question.question_name"
       :floor="question.floor"
       @delete="handleDelete"
       :isLastQuestion="index === questions.length - 1"
       @addNewQuestion="addNewQuestion"
+      :questionIndex="index"
       :style="{ marginBottom: '12px' }"
     />
   </div>
@@ -17,19 +18,28 @@
 <script setup>
 import { ref } from 'vue';
 import Question from './Question.vue';
+import axios from 'axios';
 
-const questions = ref([
-  { id: 1, text: 'Appleが最初に発売した製品は何ですか?', floor: 1 },
-  { id: 2, text: '着物を着る文化的伝統がある国はどこですか?', floor: 5 },
-  { id: 3, text: '着物を着る文化的伝統がある国はどこですか?', floor: 7 },
-  { id: 4, text: '着物を着る文化的伝統がある国はどこですか?', floor: 9 },
-  { id: 5, text: '着物を着る文化的伝統がある国はどこですか?', floor: 10 },
-  { id: 6, text: '質問番号6', floor: null },
-  { id: 7, text: '質問番号7', floor: null },
-  { id: 8, text: '質問番号8', floor: null },
-  { id: 9, text: '質問番号9', floor: null },
-  { id: 10, text: '+ さらに質問を', floor: null },
-]);
+const questions = ref([]);
+
+const fetchQuestionsFromAPI = async () => {
+  try {
+    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
+    questions.value = response.data.map(question => ({
+      id: question.id,
+      question_name: question.question_name,
+      floor: question.floor
+    }));
+    // Thêm dòng câu hỏi mới "+ さらに質問を" vào cuối danh sách
+    questions.value.push({ id: questions.value.length + 1, question_name: '+ さらに質問を', floor: null });
+  } catch (error) {
+    console.error('Error fetching questions:', error);
+    // Xử lý lỗi khi gọi API thất bại
+  }
+};
+
+// Gọi hàm fetchQuestionsFromAPI khi component được mounted
+fetchQuestionsFromAPI();
 
 const handleDelete = (id) => {
   questions.value = questions.value.filter(question => question.id !== id);
@@ -38,15 +48,14 @@ const handleDelete = (id) => {
 const addNewQuestion = () => {
   const lastQuestion = questions.value[questions.value.length - 1];
   const newId = lastQuestion.id + 1;
-  const newQuestionText = `質問番号 ${newId}`;
+  const newQuestionquestion_name = `質問番号 ${newId}`;
   
   // Cập nhật nội dung của câu hỏi thứ 10 thành "質問番号 10"
-  questions.value[questions.value.length - 1].text = `質問番号 ${lastQuestion.id}`;
+  questions.value[questions.value.length - 1].question_name = `質問番号 ${lastQuestion.id}`;
 
   // Thêm câu hỏi mới với nội dung "+ さらに質問を"
-  questions.value.push({ id: newId, text: '+ さらに質問を', floor: null });
+  questions.value.push({ id: newId, question_name: '+ さらに質問を', floor: null });
 };
-
 </script>
 
 
