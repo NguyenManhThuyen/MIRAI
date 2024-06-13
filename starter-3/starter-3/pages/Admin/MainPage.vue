@@ -116,9 +116,9 @@
     
     /* For small devices such as phones */
 @media (max-width: 576px) {
-  .login-page {
+  /* .login-page {
     height: auto;
-  }
+  } */
   
   .header-container {
     width: 100%;
@@ -136,9 +136,9 @@
 }
 /* For small devices such as phones */
 @media (max-width: 576px) {
-  .login-page {
+  /* .login-page {
     height: auto;
-  }
+  } */
   
   .header-container {
     width: 100%;
@@ -157,9 +157,9 @@
 
 /* For medium devices such as tablets */
 @media (min-width: 577px) and (max-width: 768px) {
-  .login-page {
+  /* .login-page {
     height: auto;
-  }
+  } */
   
   .header-container {
     width: 90%;
@@ -178,9 +178,9 @@
 
 /* For large devices such as laptops */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .login-page {
+  /* .login-page {
     height: calc(100vh - 56px);
-  }
+  } */
   
   .header-container {
     width: 90%;
@@ -199,9 +199,9 @@
 
 /* For extra small devices such as small phones */
 @media (max-width: 425px) {
-  .login-page {
+  /* .login-page {
     height: auto;
-  }
+  } */
   
   .header-container {
     width: 100%;

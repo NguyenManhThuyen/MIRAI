@@ -16,8 +16,8 @@
     <!-- Modal -->
     <div class="modal" v-if="showModal">
       <div class="modal-content">
-        <h2 class="modal-title">質問番号 {{ id }} を削除しますか?</h2>
-        <p class="modal-subtitle">システムは質問番号 {{ id }} を削除します</p>
+        <h2 class="modal-title">質問番号 {{ floor }} を削除しますか?</h2>
+        <p class="modal-subtitle">システムは質問番号 {{ floor }} を削除します</p>
         <div class="modal-buttons">
           <button class="cancel-button" @click="cancelDelete">キャンセル</button>
           <button class="confirm-button" @click="confirmDelete">確認する</button>
@@ -156,7 +156,7 @@ onMounted(() => {
 .modal {
   position: fixed;
   width: 592px;
-  height: 266px;
+  height: auto;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
