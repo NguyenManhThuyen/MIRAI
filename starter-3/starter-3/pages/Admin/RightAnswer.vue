@@ -1,87 +1,180 @@
 <template>
-    <div class="login-page">
-      <div class="login-banner">
-        <div class="banner-text">ル・ヴァン・サン</div>
+  <div class="login-page">
+    <div class="login-banner">
+      <div class="banner-text">ル・ヴァン・サン</div>
+    </div>
+    
+    <div class="parent-component">
+      <HeaderAddQuestion :id="3"/>
+    </div>
+
+    <div class="body">
+      <div class="question-label">質問 {{ localFloor }}</div>
+
+      <div class="qr-code-container">
+        <img src="@/assets/images/assignment-turned-in-red.svg" alt="QR Code" class="qr-code-image">
+        <div class="qr-code-text">正しい答えを選択してください</div>
       </div>
-      
-      <div class="parent-component">
-        <HeaderAddQuestion :id="3"/>
+
+      <div class="answer-list">
+        <template v-if="options && options.length > 0">
+          <label v-for="(option, index) in options" :key="index" class="answer-item">
+            <input type="radio" name="answer" :value="index + 1" :checked="index + 1 === selectedOption">
+            <span class="answer-text">{{ option.text || 'null' }}</span>
+          </label>
+        </template>
+        <template v-else>
+          <p>Loading options...</p>
+        </template>
       </div>
-  
-      <div class="body">
-        <!-- Thêm class để hiển thị "質問" với ID câu hỏi -->
-        <div class="question-label">質問 {{ questionId }}</div>
-  
-        <!-- Thêm QR code và văn bản bên cạnh -->
-        <div class="qr-code-container">
-          <img src="@/assets/images/assignment-turned-in-red.svg" alt="QR Code" class="qr-code-image">
-          <div class="qr-code-text">正しい答えを選択してください</div>
-        </div>
-  
-        <!-- Thêm phần danh sách các オプション-->
-        <div class="answer-list">
-          <label class="answer-item">
-            <input type="radio" name="answer" value="1" checked>
-            <span class="answer-text">オプション1</span>
-          </label>
-          
-          <label class="answer-item">
-            <input type="radio" name="answer" value="2">
-            <span class="answer-text">オプション2</span>
-          </label>
-          <label class="answer-item">
-            <input type="radio" name="answer" value="3">
-            <span class="answer-text">オプション3</span>
-          </label>
-          <label class="answer-item">
-            <input type="radio" name="answer" value="4">
-            <span class="answer-text">オプション4</span>
-          </label>
-        </div>
-  
-        <!-- Thêm button trong class generate -->
-        <div class="generate">
-          <nuxt-link to="/Admin/DescriptionAnswer" class="generate-button generate-button-text">次に</nuxt-link>
-        </div>
-        
+
+      <div class="generate">
+        <button @click="saveAnswer" class="generate-button generate-button-text">次に</button>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import HeaderAddQuestion from '@/components/HeaderAddQuestion.vue';
-  import { useRouter } from 'vue-router';
-  
-  export default {
-    components: {
-      HeaderAddQuestion,
-    },
-    setup() {
-      const router = useRouter();
-      const questionId = router.currentRoute.value.query.id ? parseInt(router.currentRoute.value.query.id) : null;
-  
-      const saveAnswer = () => {
-        // Lấy giá trị của オプションđã chọn
-        const selectedAnswer = document.querySelector('input[name="answer"]:checked');
-        if (selectedAnswer) {
-          const selectedValue = selectedAnswer.value;
-          // Thực hiện xử lý lưu オプションđã chọn vào cơ sở dữ liệu hoặc thực hiện hành động khác
-          console.log('オプションđã chọn:', selectedValue);
-        } else {
-          // Hiển thị thông báo nếu không có オプションnào được chọn
-          console.log('Vui lòng chọn một câu trả lời');
-        }
-      };
-  
-      return {
-        questionId,
-        saveAnswer,
-      };
-    },
-  };
-  </script>
+  </div>
+</template>
 
-  
+<script>
+import HeaderAddQuestion from '@/components/HeaderAddQuestion.vue';
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import axios from 'axios';
+
+export default {
+  props: {
+    questionId: {
+      type: Number,
+      required: true,
+    },
+    correctAnswerExplain: {
+      type: String,
+      default: "",
+    },
+  },
+  components: {
+    HeaderAddQuestion,
+  },
+  setup() {
+    const router = useRouter();
+    const options = ref([]);
+    const localFloor = ref(null);
+    const qrcodeUrl = ref("");
+    const bannerUrl = ref("");
+    const footerUrl = ref("");
+    const questionText = ref("");
+    const correctAnswerExplain = ref("");
+    const id = ref("");
+
+    const selectedOption = computed(() => {
+      const savedData = localStorage.getItem('AnswerDataPayload');
+      if (savedData) {
+        try {
+          const dataPayload = JSON.parse(savedData);
+
+          
+          // Lặp qua các option để tìm chỉ số của selectedOption
+          for (const [index, option] of options.value.entries()) {
+            if (option.text === savedData) {
+              // Chuyển đổi chỉ số từ chuỗi sang số nguyên và trả về index + 1
+              return index + 1;
+            }
+          }
+        } catch (error) {
+          console.error('Error parsing saved data:', error);
+        }
+      }
+      
+      // Trả về mặc định là 1 nếu không có dữ liệu hoặc dữ liệu không hợp lệ
+      return 1;
+    });
+
+
+    const fetchQuestionData = () => {
+      const savedData = localStorage.getItem('dataPayload');
+      if (savedData) {
+        try {
+          const dataPayload = JSON.parse(savedData);
+          localFloor.value = dataPayload.floor;
+          qrcodeUrl.value = dataPayload.qrcode_url;
+          questionText.value = dataPayload.question_name;
+          correctAnswerExplain.value = dataPayload.correct_answer_explain;
+          id.value = dataPayload.id;
+          bannerUrl.value = dataPayload.banner_url;
+          footerUrl.value = dataPayload.footer_url;
+          options.value = Object.keys(dataPayload.options).map(key => ({
+            text: dataPayload.options[key],
+          }));
+        } catch (error) {
+          console.error('Error parsing saved data:', error);
+        }
+      } else {
+        console.log('No saved data found in local storage.');
+      }
+
+      console.log("right answer getdata", savedData)
+    };
+
+    onMounted(() => {
+      fetchQuestionData();
+    });
+
+    const saveAnswer = () => {
+      const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+      if (selectedAnswer) {
+        const selectedIndex = parseInt(selectedAnswer.value);
+        const correctAnswerName = "option_" + selectedIndex;
+
+
+        const dataPayload = {
+          question_name: questionText.value,
+          correct_answer_explain: correctAnswerExplain.value,
+          correct_answer_name: correctAnswerName,
+          options: {
+            option_1: options.value[0]?.text,
+            option_2: options.value[1]?.text,
+            option_3: options.value[2]?.text,
+            option_4: options.value[3]?.text,
+          },
+          floor: localFloor.value,
+          qrcode_url: qrcodeUrl.value,
+          banner_url: bannerUrl.value,
+          footer_url: footerUrl.value,
+          id: id.value
+        };
+        console.log("right answer postdata", dataPayload)
+        localStorage.setItem('AnswerDataPayload',options.value[selectedIndex-1]?.text);
+        localStorage.setItem('dataPayload',JSON.stringify(dataPayload));
+        router.push(`/Admin/DescriptionAnswer`);
+        // axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayload)
+        //   .then(response => {
+        //     console.log('API Response:', response.data);
+        //     const id = props.questionId;
+        //     router.push(`/Admin/DescriptionAnswer`);
+        //   })
+        //   .catch(error => {
+        //     console.error('Error submitting form:', error);
+        //   });
+      } else {
+        console.log('Please select an answer');
+      }
+    };
+
+    return {
+      options,
+      saveAnswer,
+      localFloor,
+      qrcodeUrl,
+      questionText,
+      id,
+      selectedOption,
+    };
+  }
+};
+</script>
+
+
+
   <style scoped>
     /* Banner */
     .login-banner {
@@ -152,7 +245,7 @@
   
     /* Hiển thị "質問" với ID câu hỏi */
     .question-label {
-      width: 60px;
+      width: fit-content;
       height: 36px;
       padding: 8px 12px;
       gap: 10px;

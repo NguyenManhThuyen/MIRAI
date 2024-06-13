@@ -9,7 +9,7 @@
             alt="Cloud Left"
           />
         </div>
-        <div class="question-text">質問 {{ floorFromLocalStorage }}</div>
+        <div class="question-text">結果です</div>
         <div class="svg-container">
           <img
             src="@/assets/images/cloud_right.svg"
@@ -20,8 +20,12 @@
       </div>
     </div>
     <div class="notification-image">
-      <div class="text">トップになりましょう！ ギフトが待たされるよ！</div>
+      <div class="text">トップになりましょう！</div>
     </div>
+    <div class="notification-image">
+      <div class="text"> ギフトが待たされるよ！</div>
+    </div>
+
     <img src="@/assets/images/happy-giftbox.svg" class="correct-image" alt="Correct" />
     <div class="correct-answer-container">
       <div class="correct-answer">
@@ -72,9 +76,6 @@ export default {
   },
   data() {
     return {
-      // trueAnswerQuestion: 0, // Không cần khai báo lại
-      // totalQuestion: 0 // Không cần khai báo lại
-      floor: null,
     };
   },
 
@@ -166,6 +167,7 @@ export default {
 
 .notification-content {
   position: relative;
+  margin-bottom: 24px;
 }
 
 .notification-items {
@@ -189,11 +191,12 @@ export default {
 .text {
   font-family: "Noto Sans JP", sans-serif;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 23.17px;
   letter-spacing: 0.01em;
   text-align: center;
-  margin-top: 24px; /* Khoảng cách từ phần text đến phần trên cùng của notification */
+  font-family: Noto Sans JP;
+  
 }
 
 .notification-image {

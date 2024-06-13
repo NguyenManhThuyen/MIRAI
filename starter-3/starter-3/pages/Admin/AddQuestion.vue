@@ -29,13 +29,11 @@ export default {
 
   data() {
     return {
-      questionId: null,
+      questionId:localStorage.getItem("adminQuestionIDCurrent"),
     };
   },
 
   mounted() {
-    // Lấy giá trị của route param từ this.$route.params
-    this.questionId = parseInt(this.$route.params.id);
   },
 };
 </script>

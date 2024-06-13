@@ -40,23 +40,25 @@
       </div>
 
       <div class="question-header">
-        <span class="question-label">質問 {{ id }}</span>
+        <span class="question-label">質問 {{ this.localFloor }}</span>
       </div>
 
       <div class="question-heading">
         <div class="image-container">
           <img src="@/assets/images/line_help.svg" alt="Image" />
         </div>
-        <!-- Thay thế h2 bằng một trường nhập dữ liệu textarea -->
-        <textarea
-          v-model="questionText"
-          class="question-textarea"
-          placeholder="質問を追加してください"
-        ></textarea>
+        <input
+        type="text"
+        v-model="questionText"
+        class="question-textarea"
+        placeholder="質問を追加してください"
+      />
+      
       </div>
       <div v-if="showErrors && !questionAdded" class="error-message">
         まだ質問を入力していません
       </div>
+
 
       <div class="question-section">
         <div v-for="(option, index) in options" :key="index" class="option-row-container">
@@ -101,18 +103,14 @@
     </div>
   </div>
 </template>
-<script>
-import { computed, watchEffect } from 'vue'; // Import computed và watchEffect từ Vue
 
+<script>
 import iconPlus from "@/assets/images/addquesttion.svg";
+import axios from "axios";
 
 export default {
   props: {
-    id: {
-      type: Number,
-      //required: true,
-    },
-    floor: {
+    questionId: {
       type: Number,
       //required: true,
     },
@@ -120,8 +118,8 @@ export default {
   data() {
     return {
       localFloor: this.floor,
-      options: [{ text: "" }, { text: "" }, { text: "" }],
-      optionErrors: [false, false, false],
+      options: [{ text: "" }, { text: "" }, { text: "" }, { text: "" }],
+      optionErrors: [false, false, false,false],
       remainingOptions: 4,
       iconPlus: iconPlus,
       bannerImage: "",
@@ -131,47 +129,113 @@ export default {
       showErrors: false,
       footerImage: "",
       questionData: null,
+      // Additional properties from API response
+      questionText: "", // Placeholder for the question text
+      id: null, // Placeholder for the question ID
+      correctAnswerName: "", // Placeholder for correct answer name
+      correctAnswerExplain: "", // Placeholder for correct answer explanation
+      optionsData: {}, // Placeholder for options array from API response
+      qrcodeUrl: "", // Placeholder for QR code URL
+      createdAt: "", // Placeholder for created at timestamp
+      updatedAt: "", // Placeholder for updated at timestamp
     };
   },
+
   mounted() {
-    // Sử dụng watchEffect để theo dõi thay đổi trong route.params.id
-    watchEffect(() => {
-      this.id = Array.isArray(this.$route.params.id) ? this.$route.params.id[0] : this.$route.params.id;
-    });
     // Gọi hàm để lấy dữ liệu câu hỏi khi component được mounted
+    console.log(this.questionId);
     this.fetchQuestionData();
   },
+
+  computed: {
+    // Example of using computed property for banner image validity
+    isBannerImageValid() {
+      return this.bannerImageUploaded;
+    },
+
+    isQuestionValid() {
+      return this.questionText.trim() !== '';
+    },
+
+
+    areOptionsValid() {
+    // Reset optionErrors array
+    this.optionErrors = [];
+
+    // Validate each option
+    let isValid = true;
+    this.options.forEach((option, index) => {
+      if (option.text.trim().length === 0) {
+        this.optionErrors[index] = true; // Set error for this option
+        isValid = false;
+      } else {
+        this.optionErrors[index] = false; // No error for this option
+      }
+    });
+
+    return isValid;
+  },
+
+    // Example of using computed property for footer image validity
+    isFooterImageValid() {
+      return this.footerImageUploaded;
+    },
+  },
+
   methods: {
     async fetchQuestionData() {
       try {
-        const response = await axios.get(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${this.id}`);
-        
-        // Lưu dữ liệu câu hỏi vào biến questionData
-        this.questionData = response.data;
+        console.log("Fetching question data for ID:", this.questionId);
+        const response = await axios.get(
+          `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${this.questionId}`
+        );
+        console.log("API Response:", response.data);
 
-        localStorage.setItem('floor', this.questionData.floor);
+        // Populate data from API response into component data properties
+        this.localFloor = response.data.floor;
+        this.bannerImage = response.data.banner_url;
+        this.footerImage = response.data.footer_url;
+        this.bannerImageUploaded = true; // Assuming you want to show the uploaded banner image
+        this.footerImageUploaded = true; // Assuming you want to show the uploaded footer image
+        this.questionText = response.data.question_name;
+        this.id = response.data.id;
+        this.correctAnswerExplain = response.data.correct_answer_explain;
+        this.correctAnswerName = response.data.correct_answer_name;
+        this.qrcodeUrl = response.data.qrcode_url;
+
+        // Convert options object to array
+        this.options = Object.keys(response.data.options).map((key) => ({
+          text: response.data.options[key],
+        }));
+
+          // Get correct answer name (e.g., "option_2")
+          const correctAnswerName = response.data.correct_answer_name;
+
+        // Get correct answer option value from options
+        const correctAnswerOption = response.data.options[correctAnswerName];
         
-        // In dữ liệu câu hỏi ra console
-        console.log('Question Data:', this.questionData);
+        localStorage.setItem('AnswerDataPayload', correctAnswerOption);
+
+        // Additional data handling if needed
       } catch (error) {
-        console.error('Error fetching question data:', error);
+        console.error("Error fetching question data:", error);
       }
     },
+
     addOption() {
-      if (this.options.length >= 0) {
+      if (this.options.length < 4) {
         this.options.push({ text: "" });
         this.remainingOptions -= 1;
-        this.optionErrors.push(false); // Thêm một flag mới cho tùy chọn mới
+        this.optionErrors.push(false);
       } else {
-        // Hiển thị thông báo khi đã đạt đến số lượng tùy chọn tối đa
-        this.options.pop();
         alert("追加できる質問は最大 4 つまでです。");
       }
     },
+
     removeOption(index) {
       this.options.splice(index, 1);
       this.remainingOptions += 1;
-      this.optionErrors.splice(index, 1); // Xóa flag của tùy chọn bị xóa
+      this.optionErrors.splice(index, 1);
     },
 
     updateFloor(event) {
@@ -179,62 +243,74 @@ export default {
       this.localFloor = value;
       this.$emit("update:floor", value);
     },
+
     validateForm() {
-  this.showErrors = true;
+      this.showErrors = true;
+      this.questionAdded = this.isQuestionValid
+      // Validate the form inputs using computed properties
+      // Validate the form inputs using computed properties
+      if (
+        this.isBannerImageValid &&
+        this.localFloor &&
+        this.isQuestionValid &&
+        this.areOptionsValid &&
+        this.isFooterImageValid
+      ) {
+        // Prepare data payload to send to the API
+        const dataPayload = {
+          question_name: this.questionText,
+          correct_answer_explain: this.correctAnswerExplain,
+          correct_answer_name: this.correctAnswerName,
+          options: {
+            option_1: this.options[0].text,
+            option_2: this.options[1].text,
+            option_3: this.options[2].text,
+            option_4: this.options[3].text,
+          },
+          floor: this.localFloor,
+          banner_url: this.bannerImage,
+          footer_url: this.footerImage,
+          qrcode_url: this.qrcodeUrl,
+          id: this.questionId
+        };
+        // Save dataPayload to local storage
+        localStorage.setItem('dataPayload', JSON.stringify(dataPayload));
+        this.$router.push(`/Admin/RightAnswer`);
 
-  // Validate the form inputs
-  const isBannerImageValid = this.bannerImageUploaded;
-  const isFloorValid = this.localFloor;
-  const isQuestionValid = this.questionText.trim().length > 0;
-  const areOptionsValid = this.options.every((option, index) => {
-    if (!option.text) {
-      this.optionErrors[index] = true;
-      return false;
-    }
-    this.optionErrors[index] = false;
-    return true;
-  });
-  const isFooterImageValid = this.footerImageUploaded;
-
-  // Set the questionAdded flag based on the validation
-  this.questionAdded = isQuestionValid;
-
-  if (
-    isBannerImageValid &&
-    isFloorValid &&
-    isQuestionValid &&
-    areOptionsValid &&
-    isFooterImageValid // Corrected spelling here
-  ) {
-    alert("Form submitted successfully!");
-  } else {
-    console.log("Form validation failed.");
-  }
-},
+        // // Send data to API using Axios POST request
+        // axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayload)
+        //   .then(response => {
+        //     console.log('API Response:', response.data);
+        //       // Redirect to another route (assuming 'right-answer' is the route name)
+        //       const id = this.questionId;
+        //       this.$router.push(`/Admin/RightAnswer/${id}`);
+        //     // Optionally, you can handle any further logic after successful submission
+        //   })
+        //   .catch(error => {
+        //     console.error('Error submitting form:', error);
+        //   });
+      } else {
+        console.log('Form validation failed.');
+      }
+    },
 
     uploadImage() {
-      // Tạo một input element dạng file
       const input = document.createElement("input");
       input.type = "file";
-      // Sét thuộc tính 'onchange' để xử lý việc chọn file
       input.onchange = (e) => {
-        const file = e.target.files[0]; // Lấy file đã chọn
+        const file = e.target.files[0];
         if (file) {
-          // Tạo một đối tượng FileReader để đọc file
           const reader = new FileReader();
           reader.onload = (e) => {
-            // Khi file được đọc thành công, gán nội dung vào biến bannerImageUploaded và hiển thị ảnh
             this.bannerImageUploaded = true;
-            const image = e.target.result;
-            this.bannerImage = image; // Gán ảnh đã chọn vào biến bannerImage để hiển thị
+            this.bannerImage = e.target.result;
           };
-          // Đọc file ảnh dưới dạng URL
           reader.readAsDataURL(file);
         }
       };
-      // Bắt đầu chọn file khi button được nhấp
       input.click();
     },
+
     uploadFooterImage() {
       const input = document.createElement("input");
       input.type = "file";
@@ -243,9 +319,7 @@ export default {
         if (file) {
           const reader = new FileReader();
           reader.onload = (e) => {
-            // Gán ảnh đã chọn vào biến footerImage để hiển thị
             this.footerImage = e.target.result;
-            // Đặt flag footerImageUploaded thành true để chỉ ra rằng ảnh đã được tải lên
             this.footerImageUploaded = true;
           };
           reader.readAsDataURL(file);
@@ -256,6 +330,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .container {
@@ -404,7 +479,7 @@ export default {
 
 /* Hiển thị "質問" với ID câu hỏi */
 .question-label {
-  max-width: 60px;
+  width: fit-content;
   max-height: 36px;
   padding: 8px 12px;
   gap: 10px;
@@ -442,6 +517,7 @@ export default {
 .option-row input {
   flex-grow: 1;
   margin-right: 8px; /* Thêm margin để tạo khoảng cách giữa input và nút x */
+  min-width: none;
 }
 
 .remove-button {

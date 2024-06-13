@@ -4,6 +4,7 @@
       :correctAnswer="$route.query.correctAnswer"
       :isCorrect="$route.query.isCorrect === 'true'"
       :correctAnswerExplain="$route.query.correctAnswerExplain"
+      :floor="$route.query.floor"
     />
     <div class="footer-wrapper">
       <FooterQuestion :footerImage="footerImage" class="footer-question" />
@@ -33,6 +34,10 @@ export default {
     },
     isCorrect: {
       type: Boolean,
+      required: true
+    },
+    floor: {
+      type: Number,
       required: true
     }
   },

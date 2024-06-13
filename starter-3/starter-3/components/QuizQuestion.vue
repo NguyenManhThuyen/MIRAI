@@ -99,6 +99,7 @@ export default {
               isCorrect: isCorrect.toString(),
               correctAnswer: this.options[this.correctAnswerName],
               correctAnswerExplain: this.correctAnswerExplain,
+              floor: this.floor
             },
           });
         }, 5000);

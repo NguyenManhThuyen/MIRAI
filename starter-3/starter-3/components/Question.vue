@@ -1,92 +1,139 @@
 <template>
   <div class="question-component" @click="isLastQuestion && $emit('addNewQuestion')">
-    <router-link :to="{ path: '/Admin/AddQuestion/' + id }" class="question-id">
-      <span>{{ questionIndex + 1 }}</span>
-    </router-link>
+    <template v-if="questionText === '+ さらに質問を'">
+      <span class="question-id">
+        <span>{{ questionIndex  + 1}}</span>
+      </span>
+    </template>
+    <template v-else>
+      <router-link :to="`/Admin/AddQuestion`" class="question-id" @click="saveAdminQuestionID">
+        <span>{{ questionIndex + 1 }}</span>
+      </router-link>
+    </template>
 
-    <router-link :to="{ path: '/Admin/AddQuestion/' + id}" class="question-text" :style="{ color: questionTextColor }">
-      <span>{{ questionText }}</span>
-    </router-link>
+    <!-- Conditional rendering for question-text -->
+    <template v-if="questionText === '+ さらに質問を'">
+      <span class="question-text" :style="{ color: questionTextColor }">
+        <span>{{ questionText }}</span>
+      </span>
+    </template>
+    <template v-else>
+      <router-link
+        :to="`/Admin/AddQuestion`"
+        class="question-text"
+        :style="{ color: questionTextColor }"
+        @click="saveAdminQuestionID"
+      >
+        <span>{{ questionText }}</span>
+      </router-link>
 
-    <div class="floor-number">
-      <button class="floor-button">{{ floor }}階</button>
-      <button @click="deleteQuestion" class="delete-icon"></button>
-    </div>
+      <div class="floor-number">
+        <button class="floor-button">{{ floor }}階</button>
+        <button @click="deleteQuestion" class="delete-icon"></button>
+      </div>
 
-    <!-- Modal -->
-    <div class="modal" v-if="showModal">
-      <div class="modal-content">
-        <h2 class="modal-title">質問番号 {{ floor }} を削除しますか?</h2>
-        <p class="modal-subtitle">システムは質問番号 {{ floor }} を削除します</p>
-        <div class="modal-buttons">
-          <button class="cancel-button" @click="cancelDelete">キャンセル</button>
-          <button class="confirm-button" @click="confirmDelete">確認する</button>
+      <!-- Modal -->
+      <div class="modal" v-if="showModal">
+        <div class="modal-content">
+          <h2 class="modal-title">質問番号 {{ floor }} を削除しますか?</h2>
+          <p class="modal-subtitle">システムは質問番号 {{ floor }} を削除します</p>
+          <div class="modal-buttons">
+            <button class="cancel-button" @click="cancelDelete">キャンセル</button>
+            <button class="confirm-button" @click="confirmDelete">確認する</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="overlay" v-if="showModal"></div>
+      <div class="overlay" v-if="showModal"></div>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { defineProps, ref, computed, onMounted } from 'vue';
+import { defineProps, defineEmits, computed, ref } from 'vue';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 const props = defineProps({
   id: {
     type: Number,
-    required: true
+    required: true,
   },
   key: {
     type: Number,
-    required: true
+    required: true,
   },
-  questionIndex: { 
+  questionIndex: {
     type: Number,
-    required: true
+    required: true,
   },
   questionText: {
     type: String,
-    required: true
+    required: true,
   },
   floor: {
     type: Number,
-    required: true
+    required: true,
   },
-  isLastQuestion: Boolean
+  isLastQuestion: Boolean,
 });
+
+const emit = defineEmits(['delete', 'addNewQuestion']);
 
 const questionTextColor = computed(() => {
-  return props.floor === null ? '#BDBDBD' : '#1A1A1A';
+  return (props.questionText === '+ さらに質問を' ||props.questionText === `質問番号${props.floor}`) ? '#BDBDBD' : '#1A1A1A';
 });
 
+const router = useRouter();
 const showModal = ref(false);
+
+const saveAdminQuestionID = () => {
+  localStorage.setItem('adminQuestionIDCurrent', props.id.toString());
+
+  // Xóa AnswerDataPayload và dataPayload từ local storage
+  localStorage.removeItem('method')
+  localStorage.removeItem('AnswerDataPayload');
+  localStorage.removeItem('dataPayload');
+
+  if (props.questionText === '+ さらに質問を'||props.questionText === `質問番号${props.floor}`) {
+    localStorage.setItem('method', 'POST');
+  } else {
+    localStorage.setItem('method', 'PUT');
+  }
+};
 
 const deleteQuestion = () => {
   showModal.value = true;
 };
 
-const confirmDelete = () => {
-  emit('delete', props.id);
-  showModal.value = false;
+const confirmDelete = async () => {
+  try {
+    await axios.delete(
+      `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${props.id}`
+    );
+    emit('delete', props.id);
+    showModal.value = false;
+    // Reload current page after deletion
+    router.go();
+  } catch (error) {
+    console.error('Error deleting question:', error);
+    // Handle error
+  } finally {
+    showModal.value = false;
+  }
 };
 
 const cancelDelete = () => {
   showModal.value = false;
 };
-
-onMounted(() => {
-  localStorage.setItem('questionIndex', props.questionIndex);
-});
 </script>
-
 
 
 <style scoped>
 .question-component {
   display: flex;
   align-items: center;
-  border: 1px solid #D9D9D9;
+  border: 1px solid #d9d9d9;
   width: 769px;
   height: 58px;
   gap: 0px;
@@ -107,7 +154,7 @@ onMounted(() => {
 }
 
 .question-id span {
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   font-size: 16px;
   font-weight: 600;
   line-height: 23.17px;
@@ -117,7 +164,7 @@ onMounted(() => {
 .question-text {
   flex: 1;
   padding: 18px 0 15px 12px;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   font-size: 16px;
   font-weight: 500;
   line-height: 23.17px;
@@ -131,7 +178,7 @@ onMounted(() => {
 }
 
 .floor-button {
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   font-size: 16px;
   font-weight: 500;
   line-height: 22.4px;
@@ -142,14 +189,14 @@ onMounted(() => {
   padding: 6px 0px 6px 0px;
   gap: 10px;
   border-radius: 4px;
-  border: 1px solid #D9D9D9;
-  color: #C8C8C8;
+  border: 1px solid #d9d9d9;
+  color: #c8c8c8;
 }
 
 .delete-icon {
   width: 34px;
   height: 34px;
-  background-image: url('@/assets/images/bin.svg');
+  background-image: url("@/assets/images/bin.svg");
   background-size: cover;
 }
 
@@ -177,18 +224,18 @@ onMounted(() => {
   font-weight: 700;
   line-height: 56px;
   text-align: center;
-  color: #E13A4B;
+  color: #e13a4b;
   margin-top: 0;
   margin-bottom: 12px;
 }
 
 .modal-subtitle {
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   font-size: 16px;
   font-weight: 500;
   line-height: 22.4px;
   text-align: center;
-  color: #1A1A1A;
+  color: #1a1a1a;
 }
 
 .modal-content {
@@ -210,14 +257,14 @@ onMounted(() => {
 }
 
 .confirm-button {
-  background-color: #E13A4B;
+  background-color: #e13a4b;
   color: white;
 }
 
 .cancel-button {
   background-color: white;
-  color: #E13A4B;
-  border: 1px solid #E13A4B;
+  color: #e13a4b;
+  border: 1px solid #e13a4b;
 }
 
 .overlay {

@@ -100,13 +100,13 @@ export default {
     },
     getLink(id) {
       if (id === 6) {
-        return "/Admin/QRcode"; // Đặt đường dẫn của component khác ở đây
+        return `/Admin/QRcode`;
       } else if (id === 0) {
-        return "/Admin/AddQuestion/0"; // Nếu không phải icon điều hướng, đặt đường dẫn là #
+        return `/Admin/AddQuestion`;
       } else if (id === 4) {
-        return "/Admin/DescriptionAnswer"; // Nếu không phải icon điều hướng, đặt đư��ng dẫn là #
+        return `/Admin/DescriptionAnswer`;
       } else if (id === 2) {
-        return "/Admin/RightAnswer"; // Nếu không phải icon điều hướng, đặt đư��ng dẫn là #
+        return `/Admin/RightAnswer`;
       }
     },
   },
@@ -152,8 +152,8 @@ export default {
 .icon-container img.line-icon {
   width: 92.66px;
   height: 2px;
-  margin-top: 4px; /* Dịch chuyển lên trên để căn giữa */
-  margin-bottom: 4px; /* Dịch chuyển xuống dưới để căn giữa */
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .icon-text {
@@ -167,13 +167,13 @@ export default {
 
 @media (max-width: 1024px) {
   .icon-container {
-    width: 600px; /* Adjusted width for smaller screens */
+    width: 600px;
   }
 }
 
 @media (max-width: 768px) {
   .icon-container {
-    width: 400px; /* Adjusted width for even smaller screens */
+    width: 400px;
   }
 }
 

@@ -10,7 +10,8 @@
 
     <div class="body">
       <!-- Thêm class để hiển thị "質問" với ID câu hỏi -->
-      <div class="question-label">質問 {{ questionId }}</div>
+      <div class="question-label">質問 {{ id }}</div>
+
 
       <!-- Thêm QR code và văn bản bên cạnh -->
       <div class="qr-code-container">
@@ -49,7 +50,7 @@
 
       <!-- Thêm button trong class generate -->
       <div class="generate">
-        <button class="generate-button generate-button-text" @click="validateForm">
+        <button class="generate-button generate-button-text" @click="validateForm" :disabled="generateButtonDisabled">
           完了
         </button>
       </div>
@@ -59,39 +60,153 @@
 
 <script>
 import HeaderAddQuestion from "@/components/HeaderAddQuestion.vue";
+import { ref } from 'vue';
 import { useRouter } from "vue-router";
+import axios from "axios";
 
 export default {
+  props: {
+    questionId: {
+      type: Number,
+      //required: true,
+    },
+  },
   components: {
     HeaderAddQuestion,
   },
+  
   setup() {
     const router = useRouter();
-    const questionId = router.currentRoute.value.query.id
-      ? parseInt(router.currentRoute.value.query.id)
-      : null;
+    const questionId = ref(null); // Change to ref if you intend to use reactive state
     const qrCodeUrl = ref(null);
-    const qrCodeGenerated = ref(false); // Biến boolean để theo dõi trạng thái tạo QR code
+    const qrCodeGenerated = ref(false);
+    const generateButtonDisabled = ref(true); // Initially disable the button
+
+    const options = ref([]);
+    const localFloor = ref(null);
+    const qrcodeUrl = ref("");
+    const bannerUrl = ref("");
+    const footerUrl = ref("");
+    const questionText = ref("");
+    const correctAnswerExplain = ref("");
+    const correctAnswerName = ref("");
+    const id = ref(null);
+
+    const fetchQuestionData = () => {
+      const savedData = localStorage.getItem('dataPayload');
+      if (savedData) {
+        try {
+          const dataPayload = JSON.parse(savedData);
+          localFloor.value = dataPayload.floor;
+          qrcodeUrl.value = dataPayload.qrcode_url;
+          questionText.value = dataPayload.question_name;
+          correctAnswerExplain.value = dataPayload.correct_answer_explain;
+          id.value = dataPayload.id;
+          bannerUrl.value = dataPayload.banner_url;
+          footerUrl.value = dataPayload.footer_url;
+          correctAnswerName.value = dataPayload.correct_answer_name;
+          options.value = Object.keys(dataPayload.options).map(key => ({
+            text: dataPayload.options[key],
+          }));
+        } catch (error) {
+          console.error('Error parsing saved data:', error);
+        }
+      } else {
+        console.log('No saved data found in local storage.');
+      }
+    };
+
+    onMounted(() => {
+      fetchQuestionData();
+    });
 
     const generateQRCode = () => {
+      // Disable the button
+      generateButtonDisabled.value = true;
+
       // Gọi API tại đây để tạo QR code
+      let adminQuestionIDCurrent = localStorage.getItem("adminQuestionIDCurrent");
+      let host = "192.168.11.199:3000/quiz";
+      let qrCodeData = `http://${host}/${adminQuestionIDCurrent}`;
+
+      const dataPayload = {
+        question_name: questionText.value,
+        correct_answer_explain: correctAnswerExplain.value,
+        correct_answer_name: correctAnswerName.value,
+        options: {
+          option_1: options.value[0]?.text,
+          option_2: options.value[1]?.text,
+          option_3: options.value[2]?.text,
+          option_4: options.value[3]?.text,
+        },
+        floor: localFloor.value,
+        qrcode_url: qrCodeData,
+        banner_url: bannerUrl.value,
+        footer_url: footerUrl.value,
+        id: id.value
+      };
+
+      const dataPayloadCopy = {
+        question_name: questionText.value,
+        correct_answer_explain: correctAnswerExplain.value,
+        correct_answer_name: correctAnswerName.value,
+        options: {
+          option_1: options.value[0]?.text,
+          option_2: options.value[1]?.text,
+          option_3: options.value[2]?.text,
+          option_4: options.value[3]?.text,
+        },
+        floor: parseInt(localFloor.value),
+        qrCodeData : `http://${host}/${id}`,
+        qrcode_url: qrCodeData,
+        banner_url: bannerUrl.value,
+       // footer_url: footerUrl.value,
+       footerUrl:"Đoạn này test ở mh QrCode do import vào quá dung lượng",
+        id: parseInt(Date.now()), // Chuyển đổi id.value thành kiểu integer
+      };
+
+      localStorage.setItem('dataPayload', JSON.stringify(dataPayload));
+
       fetch(
-        "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://ui.vuestic.dev/"
+        `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrCodeData)}`
       )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.blob();
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        qrCodeUrl.value = url;
+        qrCodeGenerated.value = true; // Đánh dấu rằng QR code đã được tạo thành công
+      })
+      .catch((error) => {
+        console.error("There has been a problem with your fetch operation:", error);
+      })
+      .finally(() => {
+        generateButtonDisabled.value = false; // Re-enable the button after operation completes
+      });
+      const method = localStorage.getItem("method");
+      if (method == "POST") {
+        axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayloadCopy)
+        .then(response => {
+          console.log('API Response:', response.data);
         })
-        .then((blob) => {
-          const url = window.URL.createObjectURL(new Blob([blob]));
-          qrCodeUrl.value = url;
-          qrCodeGenerated.value = true; // Đánh dấu rằng QR code đã được tạo thành công
-        })
-        .catch((error) => {
-          console.error("There has been a problem with your fetch operation:", error);
+        .catch(error => {
+          console.error('Error submitting form:', error);
         });
+      } else if (method == "PUT") {
+        axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayloadCopy)
+        .then(response => {
+          console.log('API Response:', response.data);
+          router.push(`/Admin/Mainpage`);
+        })
+        .catch(error => {
+          console.error('Error submitting form:', error);
+        });
+      }
+      
     };
 
     const downloadQRCode = () => {
@@ -116,6 +231,7 @@ export default {
       qrCodeGenerated,
       generateQRCode,
       downloadQRCode,
+      generateButtonDisabled, // Expose the disabled state to the template
     };
   },
   methods: {
@@ -125,6 +241,8 @@ export default {
   },
 };
 </script>
+
+
 
 <style scoped>
 /* Banner */
@@ -196,7 +314,7 @@ export default {
 
 /* Hiển thị "質問" với ID câu hỏi */
 .question-label {
-  width: 60px;
+  width: fit-content;
   height: 36px;
   padding: 8px 12px;
   gap: 10px;
@@ -378,5 +496,18 @@ export default {
   width: 24px;
   height: 24px;
   margin-right: 10px;
+}
+
+.generate-button:disabled {
+  background-color: #C8C8C8; /* Light red background when disabled */
+  cursor: not-allowed; /* Show disabled cursor */
+  opacity: 0.7; /* Reduce opacity when disabled */
+}
+
+.generate-button:disabled:hover {
+  /* Optional: Adjust hover state when disabled */
+  opacity: 0.7;
+  background-color: #C8C8C8;
+  ;
 }
 </style>

@@ -5,7 +5,7 @@
         <div class="svg-container">
           <img src="@/assets/images/cloud_left.svg" class="svg-image left" alt="Cloud Left" />
         </div>
-        <div class="question-text">質問 {{ questionId }}</div>
+        <div class="question-text">質問 {{ floor }}</div>
         <div class="svg-container">
           <img src="@/assets/images/cloud_right.svg" class="svg-image right" alt="Cloud Right" />
         </div>
@@ -22,7 +22,8 @@
     <div class="custom-text">
       {{ correctAnswerExplain }}
     </div>
-    <nuxt-link to="/HappyGiftBoxView" class="custom-button">次に</nuxt-link>
+    <nuxt-link :to="{ path: '/HappyGiftBoxView', query: { floor: floor } }" class="custom-button">次に</nuxt-link>
+
   </div>
 </template>
 
@@ -40,6 +41,10 @@ export default {
     isCorrect: {
       type: Boolean,
       required: true
+    },
+    floor: {
+      type: Number,
+      required: true
     }
   },
   name: "AnswerNotification"
@@ -51,7 +56,7 @@ export default {
   display: flex;
   flex-direction: column;
   width: 343px;
-  height: 468px;
+  height: auto;
   padding: 16px 0px 24px 0px;
   border-radius: 16px;
   border: 2px solid #FFFFFF;
@@ -121,7 +126,7 @@ export default {
 
 .custom-text {
   width: 100%;
-  height: 80px;
+  height: auto;
   opacity: 1;
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 14px;
@@ -129,9 +134,11 @@ export default {
   line-height: 20.27px;
   text-align: center;
   margin-top: 16px;
+  margin-bottom: 24px;
   max-width: 281px;
   margin-left: auto;
   margin-right: auto;
+  color: #6a6a6a;
 }
 
 .custom-button {
