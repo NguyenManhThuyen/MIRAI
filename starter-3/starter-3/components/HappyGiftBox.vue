@@ -43,6 +43,28 @@
       </span>
     </button>
 
+    <div v-if="showShareModal" class="share-modal">
+      <div class="modal-content">
+        <h2> Share social </h2>
+        <!-- Social share icons -->
+        <div class="flex flex-row gap-2">
+          <SocialShare
+            v-for="network in ['facebook', 'linkedin', 'email','pinterest','whatsapp','telegram']"
+            :key="network"
+            :network="network"
+            :styled="true"
+            :label="false"
+            :title="'212121'"
+            :url="'https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg'" 
+            class="p-4 rounded-none"
+          />
+        </div>
+        <!-- Close button for the modal -->
+        <button @click="closeShareModal" class="close-button">X</button>
+      </div>
+    </div>
+    
+
   </div>
 </template>
 
@@ -67,6 +89,7 @@ export default {
   },
   data() {
     return {
+      showShareModal: false,
       trueAnswerQuestionFromStorage: 0,
       totalQuestionFromStorage: 0,
       floor: null,
@@ -87,18 +110,7 @@ export default {
     this.trueAnswerQuestionFromStorage = parseInt(localStorage.getItem("correctAnswer") || 0, 10);
     this.totalQuestionFromStorage = parseInt(localStorage.getItem("totalAnswer") || 0, 10);
 
-    // // Get floor from localStorage
-    // const floorFromLocalStorage = localStorage.getItem("floor");
 
-    // // Check if floor value is not null or empty
-    // if (floorFromLocalStorage) {
-    //   // Set floor value from localStorage to component's data
-    //   this.floor = parseInt(floorFromLocalStorage, 10);
-    //   // Assign floor value to questionId if needed
-    //   this.questionId = 123;
-    // } else {
-    //   console.error("Floor value not found in local storage.");
-    // }
   },
 
   methods: {
@@ -110,22 +122,12 @@ export default {
       console.log(err);
     },
     share() {
-      if (navigator.share) {
-        navigator
-          .share({
-            title: "Title",
-            text: "Text content",
-            url: "URL",
-          })
-          .then(() => console.log("Shared successfully"))
-          .catch((error) => console.error("Error sharing:", error));
-      } else {
-        console.log("Web Share API not supported");
-        // Alternative action if Web Share API is not supported
-        alert("Shared successfully");
-      }
+      this.showShareModal = true; // Show the modal when share button is clicked
     },
-  },
+    closeShareModal() {
+      this.showShareModal = false; // Close the modal
+    },
+  }
 };
 </script>
 
@@ -257,6 +259,46 @@ export default {
 .share {
   width: 18px; /* Adjusted width */
   height: 20px; /* Adjusted height */
+}
+
+.share-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Ensure modal is on top */
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 90%; /* Adjust as needed */
+  max-height: 90%; /* Adjust as needed */
+  overflow: auto; /* Enable scrolling if content exceeds modal size */
+  position: relative; /* Ensure relative positioning for absolute button */
+}
+.modal-content h2 {
+  font-size: 24px; /* Adjust font size */
+  font-weight: 700; /* Adjust font weight */
+  margin-bottom: 16px; /* Add spacing below the heading */
+  color: #333; /* Text color */
+}
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
 }
 
 @media screen and (max-width: 320px) {

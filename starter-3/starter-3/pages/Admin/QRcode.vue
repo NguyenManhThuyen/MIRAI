@@ -10,7 +10,7 @@
 
     <div class="body">
       <!-- Thêm class để hiển thị "質問" với ID câu hỏi -->
-      <div class="question-label">質問 {{ id }}</div>
+      <div class="question-label">質問 {{ localFloor }}</div>
 
 
       <!-- Thêm QR code và văn bản bên cạnh -->
@@ -48,12 +48,16 @@
         </div>
       </div>
 
-      <!-- Thêm button trong class generate -->
-      <div class="generate">
-        <button class="generate-button generate-button-text" @click="validateForm" :disabled="generateButtonDisabled">
-          完了
-        </button>
-      </div>
+<!-- Thêm button trong class generate -->
+<div class="generate">
+  <button class="generate-button generate-button-text" 
+          @click="validateForm" 
+          :disabled="generateButtonDisabled">
+    完了
+  </button>
+</div>
+
+
     </div>
   </div>
 </template>
@@ -63,7 +67,6 @@ import HeaderAddQuestion from "@/components/HeaderAddQuestion.vue";
 import { ref } from 'vue';
 import { useRouter } from "vue-router";
 import axios from "axios";
-import fs from 'fs';
 export default {
   props: {
     questionId: {
@@ -74,8 +77,22 @@ export default {
   components: {
     HeaderAddQuestion,
   },
-  
+
   setup() {
+    // // Import AWS SDK
+    // const AWS = require('aws-sdk');
+
+    // // Cấu hình AWS SDK bằng cách cung cấp thông tin xác thực
+    // AWS.config.update({
+    //   accessKeyId: 'YOUR_ACCESS_KEY_ID',
+    //   secretAccessKey: 'YOUR_SECRET_ACCESS_KEY',
+    //   region: 'ap-southeast-1', // ví dụ: 'ap-southeast-1'
+    // });
+
+    // // Tạo mới một đối tượng S3
+    // const s3 = new AWS.S3();
+
+
     const router = useRouter();
     const questionId = ref(null); // Change to ref if you intend to use reactive state
     const qrCodeUrl = ref(null);
@@ -90,8 +107,17 @@ export default {
     const questionText = ref("");
     const correctAnswerExplain = ref("");
     const correctAnswerName = ref("");
-    const id = ref(null);
+    let id = ref(null);
 
+    const time = parseInt(Date.now());
+
+    // Gọi API tại đây để tạo QR code
+    let adminQuestionIDCurrent = localStorage.getItem("adminQuestionIDCurrent");
+    let host = "192.168.11.199:3000/quiz";
+    let qrCodeData = `http://${host}/${time}`;
+
+    let fileName = `qrcode_${time}.png`;
+    let downloadPath = `C:/Users/thuyen.nm/Downloads/${fileName}`;
 
     const fetchQuestionData = () => {
       const savedData = localStorage.getItem('dataPayload');
@@ -109,6 +135,14 @@ export default {
           options.value = Object.keys(dataPayload.options).map(key => ({
             text: dataPayload.options[key],
           }));
+
+            // Check if qrcode_url is not null or empty
+            if (dataPayload.qrcode_url && dataPayload.qrcode_url !== "") {
+            qrCodeUrl.value = dataPayload.qrcode_url;
+            qrCodeGenerated.value = true;
+                  // Disable the button
+            generateButtonDisabled.value = false;
+          }
         } catch (error) {
           console.error('Error parsing saved data:', error);
         }
@@ -122,35 +156,65 @@ export default {
     });
 
     const generateQRCode = () => {
-      // Disable the button
-      generateButtonDisabled.value = true;
 
-      // Gọi API tại đây để tạo QR code
-      let adminQuestionIDCurrent = localStorage.getItem("adminQuestionIDCurrent");
-      let host = "192.168.11.199:3000/quiz";
-      let qrCodeData = `http://${host}/${adminQuestionIDCurrent}`;
 
       fetch(
         `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrCodeData)}`
       )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.blob();
-      })
-      .then((blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        qrCodeUrl.value = url;
-        qrCodeGenerated.value = true; // Đánh dấu rằng QR code đã được tạo thành công
-      })
-      .catch((error) => {
-        console.error("There has been a problem with your fetch operation:", error);
-      })
-      .finally(() => {
-        generateButtonDisabled.value = false; // Re-enable the button after operation completes
-      });
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
 
+          // Tạo tên file với thời gian hiện tại
+
+          // Create a temporary anchor element to trigger the download
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          // Log the URL for verification
+          console.log('QR Code image URL:', downloadPath);
+
+          // Lưu URL blob vào qrCodeUrl để sử dụng trong dataPayload
+          qrCodeUrl.value = url;
+          qrCodeGenerated.value = true; // Đánh dấu rằng QR code đã được tạo thành công
+
+        })
+        .catch((error) => {
+          console.error("There has been a problem with your fetch operation:", error);
+        })
+        .finally(() => {
+          generateButtonDisabled.value = false; // Re-enable the button after operation completes
+        });
+        console.log('QR Code image URL:', downloadPath);
+    };
+
+
+    const downloadQRCode = () => {
+      // Kiểm tra nếu đã tạo QR code thành công và có URL của QR code
+      if (qrCodeGenerated.value && qrCodeUrl.value) {
+        // Tạo một thẻ a ẩn
+        const link = document.createElement("a");
+        link.href = qrCodeUrl.value;
+        link.setAttribute('download', `qrcode_${time}.png`); // Set download attribute with dynamic file name
+        // Thêm thẻ a vào body của trang
+        document.body.appendChild(link);
+        // Kích hoạt sự kiện click trên thẻ a để tải xuống
+        link.click();
+        // Xóa thẻ a sau khi đã tải xuống xong
+        document.body.removeChild(link);
+      }
+    };
+
+    const validateForm = () => {
       const dataPayload = {
         question_name: questionText.value,
         correct_answer_explain: correctAnswerExplain.value,
@@ -162,12 +226,13 @@ export default {
           option_4: options.value[3]?.text,
         },
         floor: parseInt(localFloor.value),
-        qrcode_url: qrCodeUrl.value,
+        qrcode_url: downloadPath,
         banner_url: bannerUrl.value,
         footer_url: footerUrl.value,
         id: parseInt(id.value)
       };
-      const time = parseInt(Date.now())
+
+
 
       const dataPayloadCopy = {
         question_name: questionText.value,
@@ -180,10 +245,9 @@ export default {
           option_4: options.value[3]?.text,
         },
         floor: parseInt(localFloor.value),
-        qrcode_url: qrCodeUrl.value,
+        qrcode_url: downloadPath,
         banner_url: bannerUrl.value,
-       // footer_url: footerUrl.value,
-        footer_url:"Đoạn này test ở mh QrCode do import vào quá dung lượng",
+        footer_url: footerUrl.value,
         id: time, // Chuyển đổi id.value thành kiểu integer
       };
 
@@ -192,59 +256,37 @@ export default {
       const method = localStorage.getItem("method");
       if (method == "POST") {
         axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayloadCopy)
-        .then(response => {
-          console.log('API Response:', response.data);
-        })
-        .catch(error => {
-          console.error('Error submitting form:', error);
-        });
+          .then(response => {
+            console.log('API Response:', response.data);
+          })
+          .catch(error => {
+            console.error('Error submitting form:', error);
+          });
       } else if (method == "PUT") {
         axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayload)
-        .then(response => {
-          console.log('API Response:', response.data);
-          router.push(`/Admin/Mainpage`);
-        })
-        .catch(error => {
-          console.error('Error submitting form:', error);
-        });
+          .then(response => {
+            console.log('API Response:', response.data);
+          })
+          .catch(error => {
+            console.error('Error submitting form:', error);
+          });
       }
-    
 
-    };
-
-    const downloadQRCode = () => {
-      // Kiểm tra nếu đã tạo QR code thành công và có URL của QR code
-      if (qrCodeGenerated.value && qrCodeUrl.value) {
-        // Tạo một thẻ a ẩn
-        const link = document.createElement("a");
-        link.href = qrCodeUrl.value;
-        //link.download = "QR_Code.png"; // Tên file khi tải xuống
-        link.setAttribute('download', `QR_Code_${new Date().getTime()}.png`); // Set download attribute with dynamic file name
-        // Thêm thẻ a vào body của trang
-        document.body.appendChild(link);
-        // Kích hoạt sự kiện click trên thẻ a để tải xuống
-        link.click();
-        // Xóa thẻ a sau khi đã tải xuống xong
-        document.body.removeChild(link);
-      }
-    };
-
-    
+      router.push({ path: "/Admin/MainPage", query: { forceReload: true } });
+    }
 
     return {
+      localFloor,
       questionId,
       qrCodeUrl,
       qrCodeGenerated,
       generateQRCode,
       downloadQRCode,
+      validateForm,
       generateButtonDisabled, // Expose the disabled state to the template
     };
   },
-  methods: {
-    validateForm() {
-      this.$router.push("/Admin/MainPage");
-    },
-  },
+
 };
 </script>
 
@@ -253,31 +295,42 @@ export default {
 <style scoped>
 /* Banner */
 .login-banner {
-  background-color: #e13a4b; /* Màu đỏ */
+  background-color: #e13a4b;
+  /* Màu đỏ */
   margin-top: 0px;
-  width: 100%; /* Chiều rộng bằng 100% của trang */
-  height: 56px; /* Chiều cao 56px */
+  width: 100%;
+  /* Chiều rộng bằng 100% của trang */
+  height: 56px;
+  /* Chiều cao 56px */
 }
 
 /* Trang đăng nhập */
 .login-page {
-  background-color: #f9efe3; /* Màu nền */
-  background-image: url("@/assets/images/background.svg"); /* Hình nền */
+  background-color: #f9efe3;
+  /* Màu nền */
+  background-image: url("@/assets/images/background.svg");
+  /* Hình nền */
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
-  flex-direction: column; /* Sắp xếp theo chiều dọc */
+  flex-direction: column;
+  /* Sắp xếp theo chiều dọc */
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Chiều cao của toàn bộ trang */
+  height: 100vh;
+  /* Chiều cao của toàn bộ trang */
   margin: 0;
 
-  max-height: calc(100dvh); /* Set maximum height to 100 viewport height */
-  overflow-y: auto; /* Enable vertical scrollbar */
+  max-height: calc(100dvh);
+  /* Set maximum height to 100 viewport height */
+  overflow-y: auto;
+  /* Enable vertical scrollbar */
 
-    /* Hide scrollbar for WebKit browsers */
-    scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  /* Hide scrollbar for WebKit browsers */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
 }
 
 .banner-text {
@@ -286,7 +339,8 @@ export default {
   font-weight: 500;
   line-height: 23.17px;
   text-align: center;
-  color: white; /* Màu chữ trắng */
+  color: white;
+  /* Màu chữ trắng */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -296,9 +350,12 @@ export default {
 
 .parent-component {
   display: flex;
-  justify-content: center; /* Căn giữa theo chiều ngang */
-  align-items: center; /* Căn giữa theo chiều dọc */
-  flex-direction: column; /* Sắp xếp theo chiều dọc */
+  justify-content: center;
+  /* Căn giữa theo chiều ngang */
+  align-items: center;
+  /* Căn giữa theo chiều dọc */
+  flex-direction: column;
+  /* Sắp xếp theo chiều dọc */
   padding-top: 24px;
   padding-bottom: 24px;
 }
@@ -312,17 +369,23 @@ export default {
 /* CSS cho phần body */
 .body {
   width: 819px;
-  height: auto; /* Sử dụng chiều cao tự động để nội dung có thể mở rộng */
+  height: auto;
+  /* Sử dụng chiều cao tự động để nội dung có thể mở rộng */
   padding: 24px;
   gap: 10px;
   border-radius: 16px;
   opacity: 0px;
   background: #ffffff;
-  margin: 0 auto; /* Canh ra giữa theo chiều ngang */
-  display: flex; /* Sử dụng flexbox để căn giữa button */
-  flex-direction: column; /* Sắp xếp theo chiều dọc */
-  justify-content: center; /* Căn giữa theo chiều dọc */
-  align-items: center; /* Căn giữa theo chiều ngang */
+  margin: 0 auto;
+  /* Canh ra giữa theo chiều ngang */
+  display: flex;
+  /* Sử dụng flexbox để căn giữa button */
+  flex-direction: column;
+  /* Sắp xếp theo chiều dọc */
+  justify-content: center;
+  /* Căn giữa theo chiều dọc */
+  align-items: center;
+  /* Căn giữa theo chiều ngang */
 }
 
 /* Hiển thị "質問" với ID câu hỏi */
@@ -356,19 +419,27 @@ export default {
 
 /* CSS cho hình ảnh QR code */
 .qr-code-image {
-  width: 24px; /* Điều chỉnh kích thước của hình ảnh QR code */
+  width: 24px;
+  /* Điều chỉnh kích thước của hình ảnh QR code */
   height: 24px;
-  margin-right: 8px; /* Khoảng cách giữa hình ảnh và văn bản */
+  margin-right: 8px;
+  /* Khoảng cách giữa hình ảnh và văn bản */
 }
 
 /* CSS cho văn bản QR code */
 .qr-code-text {
-  font-family: "Noto Sans JP", sans-serif; /* Sử dụng font-family Noto Sans JP */
-  font-size: 24px; /* Đặt kích thước font cho văn bản */
-  font-weight: 500; /* Đặt độ đậm cho văn bản */
-  line-height: 36px; /* Đặt chiều cao dòng cho văn bản */
-  text-align: center; /* Căn giữa văn bản */
-  color: #e13a4b; /* Đặt màu cho văn bản */
+  font-family: "Noto Sans JP", sans-serif;
+  /* Sử dụng font-family Noto Sans JP */
+  font-size: 24px;
+  /* Đặt kích thước font cho văn bản */
+  font-weight: 500;
+  /* Đặt độ đậm cho văn bản */
+  line-height: 36px;
+  /* Đặt chiều cao dòng cho văn bản */
+  text-align: center;
+  /* Căn giữa văn bản */
+  color: #e13a4b;
+  /* Đặt màu cho văn bản */
 }
 
 /* CSS cho phần body */
@@ -424,7 +495,8 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%; /* Đảm bảo nút button chiếm toàn bộ chiều cao của phần bao bọc */
+  height: 100%;
+  /* Đảm bảo nút button chiếm toàn bộ chiều cao của phần bao bọc */
 }
 
 .center-button {
@@ -435,7 +507,8 @@ export default {
   border: 1px solid #1a1a1a;
   display: flex;
   align-items: center;
-  justify-content: center; /* Căn giữa cả văn bản và biểu tượng */
+  justify-content: center;
+  /* Căn giữa cả văn bản và biểu tượng */
 }
 
 .icon-plus {
@@ -445,30 +518,38 @@ export default {
 }
 
 .button-text {
-  font-family: "Noto Sans JP", sans-serif; /* Sử dụng font-family Noto Sans JP */
-  font-size: 16px; /* Đặt kích thước font cho văn bản */
-  font-weight: 500; /* Đặt độ đậm cho văn bản */
-  line-height: 20px; /* Đặt chiều cao dòng cho văn bản */
-  color: #1a1a1a; /* Đặt màu cho văn bản */
+  font-family: "Noto Sans JP", sans-serif;
+  /* Sử dụng font-family Noto Sans JP */
+  font-size: 16px;
+  /* Đặt kích thước font cho văn bản */
+  font-weight: 500;
+  /* Đặt độ đậm cho văn bản */
+  line-height: 20px;
+  /* Đặt chiều cao dòng cho văn bản */
+  color: #1a1a1a;
+  /* Đặt màu cho văn bản */
   margin-right: 24px;
 }
 
 .generate {
   display: flex;
   justify-content: center;
-  margin-top: auto; /* Căn giữa phần .generate xuống dưới cùng */
+  margin-top: auto;
+  /* Căn giữa phần .generate xuống dưới cùng */
   margin-bottom: 0px;
 }
 
 .generate-button {
   width: 196px;
   height: 56px;
-  padding: 14px 24px; /* Điều chỉnh giá trị padding ở đây */
+  padding: 14px 24px;
+  /* Điều chỉnh giá trị padding ở đây */
   gap: 10px;
   border-radius: 112px;
   background: #e13a4b;
   color: white;
-  position: relative; /* Thêm thuộc tính position để có thể vị trí đường line */
+  position: relative;
+  /* Thêm thuộc tính position để có thể vị trí đường line */
 }
 
 .generate-button-text {
@@ -482,13 +563,16 @@ export default {
 /* CSS cho QR code result */
 .qr-code-result {
   position: absolute;
-  max-width: 150px; /* Đảm bảo QR code không vượt quá kích thước của phần tử cha */
+  max-width: 150px;
+  /* Đảm bảo QR code không vượt quá kích thước của phần tử cha */
   max-height: 150px;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%; /* Đảm bảo nút button chiếm toàn bộ chiều cao của phần bao bọc */
+  height: 100%;
+  /* Đảm bảo nút button chiếm toàn bộ chiều cao của phần bao bọc */
 }
+
 /* Thêm media queries khác tùy thuộc vào các kịch bản sử dụng của bạn */
 
 .qr-download-container {
@@ -512,9 +596,12 @@ export default {
 }
 
 .generate-button:disabled {
-  background-color: #C8C8C8; /* Light red background when disabled */
-  cursor: not-allowed; /* Show disabled cursor */
-  opacity: 0.7; /* Reduce opacity when disabled */
+  background-color: #C8C8C8;
+  /* Light red background when disabled */
+  cursor: not-allowed;
+  /* Show disabled cursor */
+  opacity: 0.7;
+  /* Reduce opacity when disabled */
 }
 
 .generate-button:disabled:hover {

@@ -101,8 +101,8 @@ export default {
     getLink(id) {
       if (id === 6) {
         return `/Admin/QRcode`;
-      } else if (id === 0) {
-        return `/Admin/AddQuestion`;
+      // } else if (id === 0) {
+      //   return `/Admin/AddQuestion`;
       } else if (id === 4) {
         return `/Admin/DescriptionAnswer`;
       } else if (id === 2) {

@@ -94,7 +94,7 @@ export default {
           qrcode_url: this.qrcodeUrl,
           id: this.id
         };
-        console.log("ádasdsaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", dataPayload)
+        localStorage.setItem('dataPayload',JSON.stringify(dataPayload));
         this.$router.push(`/Admin/QRcode`);
 
       }

@@ -109,36 +109,43 @@ export default {
   align-items: center;
   margin-top: 32px; /* Increased margin */
 }
-
 .correct-answer {
-  height: 50px; /* Increased height */
-  padding: 12px 48px; /* Increased padding */
-  opacity: 1;
+  height: 50px;
+  padding: 12px 48px;
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 18px; /* Increased font size */
+  font-size: 18px;
   font-weight: 700;
-  line-height: 26px; /* Increased line height */
+  line-height: 26px;
   text-align: center;
-  color: #1A1A1A;
   border-top: 1px solid #DADADA;
   border-bottom: 1px solid #DADADA;
 }
-
 .custom-text {
-  width: 100%;
-  height: auto;
+  width: 255px; /* Limit width to 255px */
+  max-height: 100px; /* Limit maximum height */
+  overflow-y: auto; /* Enable vertical scrolling */
   opacity: 1;
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 16px; /* Increased font size */
+  font-size: 16px;
   font-weight: 400;
-  line-height: 24px; /* Increased line height */
+  line-height: 24px;
   text-align: center;
-  margin-top: 24px; /* Increased margin */
-  margin-bottom: 16px; /* Increased margin */
-  max-width: 281px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: 24px;
+  margin-bottom: 16px;
   color: #6a6a6a;
+  overflow-wrap: break-word; /* Ensures long words wrap */
+  margin-left: auto; /* Center horizontally */
+  margin-right: auto; /* Center horizontally */
+}
+
+.custom-text::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome, Safari, Edge */
+}
+
+@media (max-height: 100px) {
+  .custom-text {
+    overflow-y: scroll; /* Enable scroll bar if content exceeds max-height */
+  }
 }
 
 .custom-button {

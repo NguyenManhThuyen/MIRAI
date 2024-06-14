@@ -17,21 +17,31 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import Question from './Question.vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 const questions = ref([]);
+const questionsFloor = ref([]);
+
+const router = useRouter();
 
 const fetchQuestionsFromAPI = async () => {
   try {
     const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
+    
     questions.value = response.data.map(question => ({
       id: question.id,
       question_name: question.question_name,
       floor: question.floor
     }));
+
+    // Extract and save the floor values
+    questionsFloor.value = questions.value.map(question => question.floor);
+    localStorage.setItem("questionsFloor", questionsFloor.value);
+
     // Add new question "+ さらに質問を" at the end of the list
     questions.value.push({ id: questions.value.length + 1, question_name: '+ さらに質問を', floor: null });
+
     // Sort questions by floor in ascending order
     sortQuestionsByFloor();
   } catch (error) {
@@ -66,7 +76,7 @@ const addNewQuestion = () => {
 
   // Add new question "+ さらに質問を" at the end of the list with the next floor number
   const newQuestionFloor = maxFloor !== -Infinity ? maxFloor + 1 : 1;
-  questions.value.push({ id: questions.value.length + 1, question_name: '質問番号' + questions.value.length, floor: maxFloor+1 });
+  questions.value.push({ id: questions.value.length + 1, question_name: '質問番号' + questions.value.length, floor: maxFloor + 1 });
 
   // Sort questions by floor in ascending order
   sortQuestionsByFloor();

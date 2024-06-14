@@ -12,28 +12,25 @@
       </div>
       <div class="answers">
         <button
-          v-for="(option, key) in options"
-          :key="key"
-          :class="[
-            'answer',
-            {
-              correct:
-                isAnswered &&
-                selectedAnswer === correctAnswerName &&
-                selectedAnswer === key,
-              wrong:
-                isAnswered &&
-                selectedAnswer !== correctAnswerName &&
-                selectedAnswer === key,
-              'no-hover': isAnswered,
-            },
-          ]"
-          @click="handleAnswer(key)"
-          :disabled="isAnswered"
-          class="answer-button"
-        >
-          {{ option }}
-        </button>
+        v-for="(option, key) in options"
+        :key="key"
+        :class="[
+          'answer',
+          {
+            correct:
+              isAnswered && key === correctAnswerName,
+            wrong:
+              isAnswered && key !== correctAnswerName && key === selectedAnswer,
+            'no-hover': isAnswered,
+          },
+        ]"
+        @click="handleAnswer(key)"
+        :disabled="isAnswered"
+        class="answer-button"
+      >
+        {{ option }}
+      </button>
+      
       </div>
     </div>
   </div>
@@ -76,40 +73,42 @@ export default {
   },
   methods: {
     handleAnswer(key) {
-      if (!this.isAnswered) {
-        this.selectedAnswer = key;
-        this.isAnswered = true;
-        const isCorrect = key === this.correctAnswerName;
+  if (!this.isAnswered) {
+    this.selectedAnswer = key;
+    this.isAnswered = true;
+    const isCorrect = key === this.correctAnswerName;
 
-        // Tăng giá trị của totalAnswer
-        let totalAnswer = parseInt(localStorage.getItem("totalAnswer") || 0, 10) + 1;
-        localStorage.setItem("totalAnswer", totalAnswer.toString());
+    // Tăng giá trị của totalAnswer
+    let totalAnswer = parseInt(localStorage.getItem("totalAnswer") || 0, 10) + 1;
+    localStorage.setItem("totalAnswer", totalAnswer.toString());
 
-        // Nếu trả lời đúng, tăng giá trị của correctAnswer
-        if (isCorrect) {
-          let correctAnswer =
-            parseInt(localStorage.getItem("correctAnswer") || 0, 10) + 1;
-          localStorage.setItem("correctAnswer", correctAnswer.toString());
-        }
+    // Nếu trả lời đúng, tăng giá trị của correctAnswer
+    if (isCorrect) {
+      let correctAnswer =
+        parseInt(localStorage.getItem("correctAnswer") || 0, 10) + 1;
+      localStorage.setItem("correctAnswer", correctAnswer.toString());
+    }
 
-        // Lưu id của câu hỏi đã trả lời vào mảng và lưu mảng vào local storage
-        let answeredQuestions = JSON.parse(localStorage.getItem("answeredQuestions") || "[]");
-        answeredQuestions.push(this.id);
-        localStorage.setItem("answeredQuestions", JSON.stringify(answeredQuestions));
+    // Lưu id của câu hỏi đã trả lời vào mảng và lưu mảng vào local storage
+    let answeredQuestions = JSON.parse(localStorage.getItem("answeredQuestions") || "[]");
+    answeredQuestions.push(this.id);
+    localStorage.setItem("answeredQuestions", JSON.stringify(answeredQuestions));
 
-        setTimeout(() => {
-          this.$router.push({
-            path: `/AnswerNotificationView`,
-            query: {
-              isCorrect: isCorrect.toString(),
-              correctAnswer: this.options[this.correctAnswerName],
-              correctAnswerExplain: this.correctAnswerExplain,
-              floor: this.floor
-            },
-          });
-        }, 5000);
-      }
-    },
+    // Sau 5 giây, điều hướng đến trang thông báo
+    setTimeout(() => {
+      this.$router.push({
+        path: `/AnswerNotificationView`,
+        query: {
+          isCorrect: isCorrect.toString(),
+          correctAnswer: this.options[this.correctAnswerName],
+          correctAnswerExplain: this.correctAnswerExplain,
+          floor: this.floor
+        },
+      });
+    }, 5000);
+  }
+},
+
   },
 };
 </script>
@@ -215,6 +214,7 @@ export default {
   color: #fff;
   border-color: #dc3545;
 }
+
 
 .correct:hover,
 .wrong:hover {

@@ -35,10 +35,15 @@
           @input="updateFloor"
         />
       </div>
-      <div v-if="showErrors && !localFloor" class="error-message">
-        階数が入力されていません
+      <div v-if="showErrors">
+        <div v-if="!localFloor" class="error-message">
+          階数が入力されていません
+        </div>
+        <div v-else-if="!(this.questionsFloor.split(',').includes(this.localFloor.toString()) && this.method === 'POST') " class="error-message">
+          フロアが存在した
+        </div>
       </div>
-
+      
       <div class="question-header">
         <span class="question-label">質問 {{ this.localFloor }}</span>
       </div>
@@ -118,6 +123,7 @@ export default {
   data() {
     return {
       localFloor: this.floor,
+      localFloorTemp: this.floor,
       options: [{ text: "" }, { text: "" }, { text: "" }, { text: "" }],
       optionErrors: [false, false, false,false],
       remainingOptions: 4,
@@ -138,6 +144,8 @@ export default {
       qrcodeUrl: "", // Placeholder for QR code URL
       createdAt: "", // Placeholder for created at timestamp
       updatedAt: "", // Placeholder for updated at timestamp
+      questionsFloor: "",
+      method:"",
     };
   },
 
@@ -146,6 +154,7 @@ export default {
     console.log(this.questionId);
     this.fetchQuestionData();
   },
+
 
   computed: {
     // Example of using computed property for banner image validity
@@ -159,22 +168,22 @@ export default {
 
 
     areOptionsValid() {
-    // Reset optionErrors array
-    this.optionErrors = [];
+      console.log("sadasd")
+      // Reset optionErrors array
+      this.optionErrors = [];
+      // Validate each option
+      let isValid = true;
+      this.options.forEach((option, index) => {
 
-    // Validate each option
-    let isValid = true;
-    this.options.forEach((option, index) => {
-      if (option.text.trim().length === 0) {
-        this.optionErrors[index] = true; // Set error for this option
-        isValid = false;
-      } else {
-        this.optionErrors[index] = false; // No error for this option
-      }
-    });
-
-    return isValid;
-  },
+        if (option.text.trim().length === 0) {
+          this.optionErrors[index] = true; // Set error for this option
+          isValid = false;
+        } else {
+          this.optionErrors[index] = true; // No error for this option
+        }
+      });
+      return isValid;
+    },
 
     // Example of using computed property for footer image validity
     isFooterImageValid() {
@@ -185,7 +194,6 @@ export default {
   methods: {
     async fetchQuestionData() {
       try {
-        console.log("Fetching question data for ID:", this.questionId);
         const response = await axios.get(
           `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${this.questionId}`
         );
@@ -193,6 +201,7 @@ export default {
 
         // Populate data from API response into component data properties
         this.localFloor = response.data.floor;
+        this.localFloorTemp = response.data.floor;
         this.bannerImage = response.data.banner_url;
         this.footerImage = response.data.footer_url;
         this.bannerImageUploaded = true; // Assuming you want to show the uploaded banner image
@@ -202,6 +211,8 @@ export default {
         this.correctAnswerExplain = response.data.correct_answer_explain;
         this.correctAnswerName = response.data.correct_answer_name;
         this.qrcodeUrl = response.data.qrcode_url;
+        this.questionsFloor =  localStorage.getItem("questionsFloor")
+        this.method = localStorage.getItem("method")
 
         // Convert options object to array
         this.options = Object.keys(response.data.options).map((key) => ({
@@ -214,7 +225,28 @@ export default {
         // Get correct answer option value from options
         const correctAnswerOption = response.data.options[correctAnswerName];
         
-        localStorage.setItem('AnswerDataPayload', correctAnswerOption);
+        // Kiểm tra nếu correctAnswerOption là null hoặc undefined, thì lưu chuỗi rỗng vào localStorage
+        localStorage.setItem('AnswerDataPayload', correctAnswerOption || "");
+
+
+        const dataPayload = {
+          question_name: this.questionText,
+          correct_answer_explain: this.correctAnswerExplain,
+          correct_answer_name: this.correctAnswerName,
+          options: {
+            option_1: this.options[0].text,
+            option_2: this.options[1].text,
+            option_3: this.options[2].text,
+            option_4: this.options[3].text,
+          },
+          floor: this.localFloor,
+          banner_url: this.bannerImage,
+          footer_url: this.footerImage,
+          qrcode_url: this.qrcodeUrl,
+          id: this.questionId
+        };
+        // Save dataPayload to local storage
+        localStorage.setItem('dataPayload', JSON.stringify(dataPayload));
 
         // Additional data handling if needed
       } catch (error) {
@@ -246,15 +278,28 @@ export default {
 
     validateForm() {
       this.showErrors = true;
-      this.questionAdded = this.isQuestionValid
+      this.questionAdded = this.isQuestionValid;
       // Validate the form inputs using computed properties
-      // Validate the form inputs using computed properties
+
+      console.log(this.questionsFloor.split(',').includes(this.localFloor.toString()),"Checking",(this.questionsFloor.split(',').includes(this.localFloor.toString()) && this.method === 'POST'),"Checking",this.method === 'POST')
+
+      // Validate each option
+      let areOptionsValid = true;
+      this.options.forEach((option, index) => {
+        if (option.text.trim().length === 0) {
+          this.optionErrors[index] = true; // Set error for this option
+          areOptionsValid = false;
+        } else {
+          this.optionErrors[index] = false; // No error for this option
+        }
+      });
       if (
         this.isBannerImageValid &&
         this.localFloor &&
         this.isQuestionValid &&
-        this.areOptionsValid &&
+        areOptionsValid &&
         this.isFooterImageValid
+      //  &&!(this.questionsFloor.split(',').includes(this.localFloor.toString()) && this.method === 'POST') 
       ) {
         // Prepare data payload to send to the API
         const dataPayload = {
@@ -276,23 +321,11 @@ export default {
         // Save dataPayload to local storage
         localStorage.setItem('dataPayload', JSON.stringify(dataPayload));
         this.$router.push(`/Admin/RightAnswer`);
-
-        // // Send data to API using Axios POST request
-        // axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayload)
-        //   .then(response => {
-        //     console.log('API Response:', response.data);
-        //       // Redirect to another route (assuming 'right-answer' is the route name)
-        //       const id = this.questionId;
-        //       this.$router.push(`/Admin/RightAnswer/${id}`);
-        //     // Optionally, you can handle any further logic after successful submission
-        //   })
-        //   .catch(error => {
-        //     console.error('Error submitting form:', error);
-        //   });
       } else {
         console.log('Form validation failed.');
       }
     },
+
 
     uploadImage() {
       const input = document.createElement("input");
@@ -523,11 +556,12 @@ margin-bottom: 8px;
 .remove-button {
   background: none;
   border: none;
-  color: #808080; /* Change color to gray */
+  color: #808080;
   cursor: pointer;
-  font-size: 24px; /* Increase the size of the button */
+  font-size: 24px;
   max-width: 24px;
 }
+
 
 .add-option-button {
   background: none;
@@ -597,7 +631,7 @@ margin-bottom: 8px;
 
 .input-container {
  display: flex;
- width: 570px;
+ width: 700px;
 }
 
 
