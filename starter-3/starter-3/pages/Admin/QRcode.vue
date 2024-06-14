@@ -63,7 +63,7 @@ import HeaderAddQuestion from "@/components/HeaderAddQuestion.vue";
 import { ref } from 'vue';
 import { useRouter } from "vue-router";
 import axios from "axios";
-
+import fs from 'fs';
 export default {
   props: {
     questionId: {
@@ -91,6 +91,7 @@ export default {
     const correctAnswerExplain = ref("");
     const correctAnswerName = ref("");
     const id = ref(null);
+
 
     const fetchQuestionData = () => {
       const savedData = localStorage.getItem('dataPayload');
@@ -129,44 +130,6 @@ export default {
       let host = "192.168.11.199:3000/quiz";
       let qrCodeData = `http://${host}/${adminQuestionIDCurrent}`;
 
-      const dataPayload = {
-        question_name: questionText.value,
-        correct_answer_explain: correctAnswerExplain.value,
-        correct_answer_name: correctAnswerName.value,
-        options: {
-          option_1: options.value[0]?.text,
-          option_2: options.value[1]?.text,
-          option_3: options.value[2]?.text,
-          option_4: options.value[3]?.text,
-        },
-        floor: localFloor.value,
-        qrcode_url: qrCodeData,
-        banner_url: bannerUrl.value,
-        footer_url: footerUrl.value,
-        id: id.value
-      };
-
-      const dataPayloadCopy = {
-        question_name: questionText.value,
-        correct_answer_explain: correctAnswerExplain.value,
-        correct_answer_name: correctAnswerName.value,
-        options: {
-          option_1: options.value[0]?.text,
-          option_2: options.value[1]?.text,
-          option_3: options.value[2]?.text,
-          option_4: options.value[3]?.text,
-        },
-        floor: parseInt(localFloor.value),
-        qrCodeData : `http://${host}/${id}`,
-        qrcode_url: qrCodeData,
-        banner_url: bannerUrl.value,
-       // footer_url: footerUrl.value,
-       footerUrl:"Đoạn này test ở mh QrCode do import vào quá dung lượng",
-        id: parseInt(Date.now()), // Chuyển đổi id.value thành kiểu integer
-      };
-
-      localStorage.setItem('dataPayload', JSON.stringify(dataPayload));
-
       fetch(
         `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrCodeData)}`
       )
@@ -187,6 +150,45 @@ export default {
       .finally(() => {
         generateButtonDisabled.value = false; // Re-enable the button after operation completes
       });
+
+      const dataPayload = {
+        question_name: questionText.value,
+        correct_answer_explain: correctAnswerExplain.value,
+        correct_answer_name: correctAnswerName.value,
+        options: {
+          option_1: options.value[0]?.text,
+          option_2: options.value[1]?.text,
+          option_3: options.value[2]?.text,
+          option_4: options.value[3]?.text,
+        },
+        floor: parseInt(localFloor.value),
+        qrcode_url: qrCodeUrl.value,
+        banner_url: bannerUrl.value,
+        footer_url: footerUrl.value,
+        id: parseInt(id.value)
+      };
+      const time = parseInt(Date.now())
+
+      const dataPayloadCopy = {
+        question_name: questionText.value,
+        correct_answer_explain: correctAnswerExplain.value,
+        correct_answer_name: correctAnswerName.value,
+        options: {
+          option_1: options.value[0]?.text,
+          option_2: options.value[1]?.text,
+          option_3: options.value[2]?.text,
+          option_4: options.value[3]?.text,
+        },
+        floor: parseInt(localFloor.value),
+        qrcode_url: qrCodeUrl.value,
+        banner_url: bannerUrl.value,
+       // footer_url: footerUrl.value,
+        footer_url:"Đoạn này test ở mh QrCode do import vào quá dung lượng",
+        id: time, // Chuyển đổi id.value thành kiểu integer
+      };
+
+      localStorage.setItem('dataPayload', JSON.stringify(dataPayload));
+
       const method = localStorage.getItem("method");
       if (method == "POST") {
         axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayloadCopy)
@@ -197,7 +199,7 @@ export default {
           console.error('Error submitting form:', error);
         });
       } else if (method == "PUT") {
-        axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayloadCopy)
+        axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayload)
         .then(response => {
           console.log('API Response:', response.data);
           router.push(`/Admin/Mainpage`);
@@ -206,7 +208,8 @@ export default {
           console.error('Error submitting form:', error);
         });
       }
-      
+    
+
     };
 
     const downloadQRCode = () => {
@@ -215,7 +218,8 @@ export default {
         // Tạo một thẻ a ẩn
         const link = document.createElement("a");
         link.href = qrCodeUrl.value;
-        link.download = "QR_Code.png"; // Tên file khi tải xuống
+        //link.download = "QR_Code.png"; // Tên file khi tải xuống
+        link.setAttribute('download', `QR_Code_${new Date().getTime()}.png`); // Set download attribute with dynamic file name
         // Thêm thẻ a vào body của trang
         document.body.appendChild(link);
         // Kích hoạt sự kiện click trên thẻ a để tải xuống
@@ -224,6 +228,8 @@ export default {
         document.body.removeChild(link);
       }
     };
+
+    
 
     return {
       questionId,
@@ -265,6 +271,13 @@ export default {
   align-items: center;
   height: 100vh; /* Chiều cao của toàn bộ trang */
   margin: 0;
+
+  max-height: calc(100dvh); /* Set maximum height to 100 viewport height */
+  overflow-y: auto; /* Enable vertical scrollbar */
+
+    /* Hide scrollbar for WebKit browsers */
+    scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
 }
 
 .banner-text {

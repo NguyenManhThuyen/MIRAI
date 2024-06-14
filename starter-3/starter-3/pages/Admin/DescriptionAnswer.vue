@@ -172,6 +172,13 @@ export default {
   height: 100vh;
   /* Chiều cao của toàn bộ trang */
   margin: 0;
+
+  max-height: calc(100dvh); /* Set maximum height to 100 viewport height */
+  overflow-y: auto; /* Enable vertical scrollbar */
+
+    /* Hide scrollbar for WebKit browsers */
+    scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
 }
 
 .banner-text {

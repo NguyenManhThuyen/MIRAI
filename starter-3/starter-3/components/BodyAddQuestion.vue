@@ -471,6 +471,7 @@ export default {
 }
 
 .question-header {
+margin-bottom: 8px;
   align-items: center; /* Căn giữa theo chiều dọc */
   justify-content: center;
   padding: 8px 8px;
@@ -515,17 +516,17 @@ export default {
 }
 
 .option-row input {
-  flex-grow: 1;
   margin-right: 8px; /* Thêm margin để tạo khoảng cách giữa input và nút x */
-  min-width: none;
+  width: 100%; /* Chiều rộng của input chiếm toàn bộ không gian */
 }
 
 .remove-button {
   background: none;
   border: none;
-  color: #ff4081;
+  color: #808080; /* Change color to gray */
   cursor: pointer;
-  margin-left: auto; /* Đưa nút x về phía lề phải */
+  font-size: 24px; /* Increase the size of the button */
+  max-width: 24px;
 }
 
 .add-option-button {
@@ -594,13 +595,18 @@ export default {
   margin-top: 4px;
 }
 
+.input-container {
+ display: flex;
+ width: 570px;
+}
+
+
 .input-container .error-message {
   text-align: left; /* Để căn trái nếu bạn muốn */
   margin-top: 4px;
 }
 
 .question-textarea {
-  margin-top: 12px;
   font-family: "Noto Sans JP";
   font-size: 24px;
   font-weight: 500;
@@ -647,7 +653,7 @@ export default {
   }
 
   .question-label {
-    max-width: 50px; /* Giảm kích thước của question label */
+    max-width: fit-content; /* Giảm kích thước của question label */
     font-size: 12px; /* Giảm kích thước font cho question label */
     padding: 6px 8px; /* Giảm khoảng cách giữa text và viền */
   }
@@ -684,7 +690,7 @@ export default {
   }
 
   .question-label {
-    max-width: 40px; /* Giảm kích thước của question label */
+    max-width: fit-content; /* Giảm kích thước của question label */
     font-size: 10px; /* Giảm kích thước font cho question label */
     padding: 4px 6px; /* Giảm khoảng cách giữa text và viền */
   }
@@ -705,3 +711,4 @@ export default {
   }
 }
 </style>
+

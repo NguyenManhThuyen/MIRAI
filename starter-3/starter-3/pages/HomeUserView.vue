@@ -28,5 +28,7 @@ export default {
   height: 100dvh; /* Chiều cao của phần còn lại của trang */
   margin: 0;
   padding-top: 60px; /* Khoảng cách từ trên cùng */
+
+  
 }
 </style>

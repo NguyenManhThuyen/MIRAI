@@ -13,6 +13,7 @@
     "@pinia/nuxt": "^0.5.1",
     "@stefanobartoletti/nuxt-social-share": "^0.7.0",
     "axios": "^1.7.2",
+    "file-saver": "^2.0.5",
     "nuxt": "^3.11.2",
     "pinia": "^2.1.7",
     "vue": "^3.4.27",

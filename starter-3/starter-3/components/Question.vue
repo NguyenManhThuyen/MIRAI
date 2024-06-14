@@ -81,7 +81,7 @@ const props = defineProps({
 const emit = defineEmits(['delete', 'addNewQuestion']);
 
 const questionTextColor = computed(() => {
-  return (props.questionText === '+ さらに質問を' ||props.questionText === `質問番号${props.floor}`) ? '#BDBDBD' : '#1A1A1A';
+  return (props.questionText === '+ さらに質問を' ||props.questionText === `質問番号${props.questionIndex+1}`) ? '#BDBDBD' : '#1A1A1A';
 });
 
 const router = useRouter();
@@ -95,7 +95,7 @@ const saveAdminQuestionID = () => {
   localStorage.removeItem('AnswerDataPayload');
   localStorage.removeItem('dataPayload');
 
-  if (props.questionText === '+ さらに質問を'||props.questionText === `質問番号${props.floor}`) {
+  if (props.questionText === '+ さらに質問を'||props.questionText === `質問番号${props.questionIndex+1}`) {
     localStorage.setItem('method', 'POST');
   } else {
     localStorage.setItem('method', 'PUT');

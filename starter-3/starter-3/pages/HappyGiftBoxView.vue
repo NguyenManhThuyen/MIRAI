@@ -35,6 +35,8 @@
     background-color: #F9EFE3; /* Màu nền */
     background-image: url('@/assets/images/background.svg'); /* Hình nền */
     height: 100dvh; /* Chiều cao của phần còn lại của trang */
+
+    
   }
   
   .footer-wrapper {

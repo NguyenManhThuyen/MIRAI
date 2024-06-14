@@ -45,6 +45,9 @@ export default {
     redirectToHomeUserView() {
       this.$router.push({ name: 'HomeUserView'});
     },
+    redirectToHappyGiftBoxView() {
+      this.$router.push({ name: 'HappyGiftBoxView'});
+    },
     fetchQuestionData(id) {
       axios.get(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${id}`)
         .then(response => {
@@ -79,17 +82,22 @@ export default {
       localStorage.setItem('totalAnswer', 0);
     }
 
-    if (hasVisited !== 'true') {
-      // Nếu chưa truy cập, chuyển hướng đến HomeUserView
-      this.redirectToHomeUserView();
+    // Kiểm tra nếu quiz id đã được trả lời
+    const answeredQuestions = JSON.parse(localStorage.getItem('answeredQuestions') || '[]');
+    if (answeredQuestions.includes(this.id)) {
+      alert('この質問にはすでに回答しています。');
+      // Chuyển hướng nếu quiz đã được trả lời
+      this.redirectToHappyGiftBoxView();
     } else {
       // Gọi API chỉ khi biến flag là false
-      if (!this.apiCalled) {
+      if (hasVisited !== 'true') {
+        // Nếu chưa truy cập, chuyển hướng đến HomeUserView
+        this.redirectToHomeUserView();
+      } else if (!this.apiCalled) {
         this.fetchQuestionData(this.id);
       }
     }
   },
-
 };
 </script>
 
@@ -103,6 +111,13 @@ export default {
   background-color: #F9EFE3; /* Màu nền */
   background-image: url('@/assets/images/background.svg'); /* Hình nền */
   height: 100dvh; /* Chiều cao của phần còn lại của trang */
+
+  max-height: calc(100dvh); /* Set maximum height to 100 viewport height */
+  overflow-y: auto; /* Enable vertical scrollbar */
+
+    /* Hide scrollbar for WebKit browsers */
+    scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
 }
 
 .footer-question {

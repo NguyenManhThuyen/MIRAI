@@ -66,7 +66,7 @@ const addNewQuestion = () => {
 
   // Add new question "+ さらに質問を" at the end of the list with the next floor number
   const newQuestionFloor = maxFloor !== -Infinity ? maxFloor + 1 : 1;
-  questions.value.push({ id: questions.value.length + 1, question_name: '質問番号' + questions.value.length, floor: questions.value.length });
+  questions.value.push({ id: questions.value.length + 1, question_name: '質問番号' + questions.value.length, floor: maxFloor+1 });
 
   // Sort questions by floor in ascending order
   sortQuestionsByFloor();
@@ -81,11 +81,7 @@ watch(questions, (newQuestions, oldQuestions) => {
 
 <style scoped>
 /* Scrollbar styles */
-.scroll-container {
-  max-height: calc(100dvh - 200px); /* Set maximum height to 100 viewport height */
-  overflow-y: auto; /* Enable vertical scrollbar */
-  padding-right: 8px; /* Adjust padding to avoid content being covered by scrollbar */
-}
+
 
 /* Add any other necessary styles here */
 

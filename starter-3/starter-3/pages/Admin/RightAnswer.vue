@@ -63,31 +63,29 @@ export default {
     const bannerUrl = ref("");
     const footerUrl = ref("");
     const questionText = ref("");
+    const correctAnswerName = ref("");
     const correctAnswerExplain = ref("");
     const id = ref("");
 
     const selectedOption = computed(() => {
-      const savedData = localStorage.getItem('AnswerDataPayload');
-      if (savedData) {
-        try {
-          const dataPayload = JSON.parse(savedData);
-
-          
-          // Lặp qua các option để tìm chỉ số của selectedOption
-          for (const [index, option] of options.value.entries()) {
-            if (option.text === savedData) {
-              // Chuyển đổi chỉ số từ chuỗi sang số nguyên và trả về index + 1
-              return index + 1;
-            }
-          }
-        } catch (error) {
-          console.error('Error parsing saved data:', error);
-        }
-      }
+    // Sử dụng regular expression để lấy phần số cuối cùng từ chuỗi
+    const match = correctAnswerName.value.match(/\d+$/);
       
+      if (match) {
+        // Lấy số từ kết quả match và chuyển đổi thành số nguyên
+        const index = parseInt(match[0], 10);
+        
+        // Trả về index + 1 vì value trong radio button thường bắt đầu từ 1
+        return index;
+      } else {
+        console.error('Invalid correctAnswerName format:', correctAnswerName);
+        // Trường hợp không tìm thấy số cuối cùng, trả về mặc định là 1
+        return 1;
+      }
       // Trả về mặc định là 1 nếu không có dữ liệu hoặc dữ liệu không hợp lệ
       return 1;
     });
+
 
 
     const fetchQuestionData = () => {
@@ -99,6 +97,7 @@ export default {
           qrcodeUrl.value = dataPayload.qrcode_url;
           questionText.value = dataPayload.question_name;
           correctAnswerExplain.value = dataPayload.correct_answer_explain;
+          correctAnswerName.value = dataPayload.correct_answer_name;
           id.value = dataPayload.id;
           bannerUrl.value = dataPayload.banner_url;
           footerUrl.value = dataPayload.footer_url;
@@ -196,6 +195,13 @@ export default {
       align-items: center;
       height: 100vh; /* Chiều cao của toàn bộ trang */
       margin: 0;
+
+      max-height: calc(100dvh); /* Set maximum height to 100 viewport height */
+  overflow-y: auto; /* Enable vertical scrollbar */
+
+    /* Hide scrollbar for WebKit browsers */
+    scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
     }
   
     .banner-text {

@@ -92,6 +92,11 @@ export default {
           localStorage.setItem("correctAnswer", correctAnswer.toString());
         }
 
+        // Lưu id của câu hỏi đã trả lời vào mảng và lưu mảng vào local storage
+        let answeredQuestions = JSON.parse(localStorage.getItem("answeredQuestions") || "[]");
+        answeredQuestions.push(this.id);
+        localStorage.setItem("answeredQuestions", JSON.stringify(answeredQuestions));
+
         setTimeout(() => {
           this.$router.push({
             path: `/AnswerNotificationView`,
