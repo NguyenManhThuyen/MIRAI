@@ -214,7 +214,7 @@ export default {
       }
     };
 
-    const validateForm = () => {
+    const validateForm = async () => {
       const dataPayload = {
         question_name: questionText.value,
         correct_answer_explain: correctAnswerExplain.value,
@@ -254,25 +254,23 @@ export default {
       localStorage.setItem('dataPayload', JSON.stringify(dataPayload));
 
       const method = localStorage.getItem("method");
-      if (method == "POST") {
-        axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayloadCopy)
-          .then(response => {
-            console.log('API Response:', response.data);
-          })
-          .catch(error => {
-            console.error('Error submitting form:', error);
-          });
-      } else if (method == "PUT") {
-        axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayload)
-          .then(response => {
-            console.log('API Response:', response.data);
-          })
-          .catch(error => {
-            console.error('Error submitting form:', error);
-          });
-      }
+      try {
+        if (method == "POST") {
+          await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayloadCopy);
+        } else if (method == "PUT") {
+          await axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', dataPayload);
+        }
 
-      router.push({ path: "/Admin/MainPage", query: { forceReload: true } });
+        // Fetch the updated data
+        const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
+        // Process the response data if needed
+
+        
+        router.push({ path: "/Admin/MainPage" });
+       // router.go(0);
+      } catch (error) {
+        console.error('Error submitting form:', error);
+      }
     }
 
     return {

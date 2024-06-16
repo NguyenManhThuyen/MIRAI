@@ -8,7 +8,6 @@
       :floor="question.floor"
       @delete="handleDelete"
       :isLastQuestion="index === questions.length - 1"
-      @addNewQuestion="addNewQuestion"
       :questionIndex="index"
       :style="{ marginBottom: '12px' }"
     />
@@ -16,7 +15,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -35,9 +34,10 @@ const fetchQuestionsFromAPI = async () => {
       floor: question.floor
     }));
 
-    // Extract and save the floor values
-    questionsFloor.value = questions.value.map(question => question.floor);
+        // Extract and save the floor values
+        questionsFloor.value = questions.value.map(question => question.floor);
     localStorage.setItem("questionsFloor", questionsFloor.value);
+
 
     // Add new question "+ さらに質問を" at the end of the list
     questions.value.push({ id: questions.value.length + 1, question_name: '+ さらに質問を', floor: null });
@@ -54,45 +54,31 @@ const sortQuestionsByFloor = () => {
   questions.value.sort((a, b) => (a.floor === null ? Infinity : a.floor) - (b.floor === null ? Infinity : b.floor));
 };
 
-// Call fetchQuestionsFromAPI when the component is mounted
-onMounted(() => {
-  fetchQuestionsFromAPI();
-});
-
 const handleDelete = async (id) => {
   try {
-    await axios.delete(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${id}`);
+    await axios.delete(
+      `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${id}`
+    );
+
+    // Filter out the deleted question from the local list
+    questions.value = questions.value.filter(question => question.id !== id);
+
+    // Update the questions list with new data
     await fetchQuestionsFromAPI();
   } catch (error) {
     console.error('Error deleting question:', error);
+    // Handle error when deleting question fails
   }
 };
 
-const addNewQuestion = () => {
-  // Find the maximum floor value
-  const maxFloor = questions.value.reduce((max, question) => {
-    return question.floor !== null && question.floor > max ? question.floor : max;
-  }, -Infinity);
+// Fetch initial questions data when component is mounted
+onMounted(fetchQuestionsFromAPI);
 
-  // Add new question "+ さらに質問を" at the end of the list with the next floor number
-  const newQuestionFloor = maxFloor !== -Infinity ? maxFloor + 1 : 1;
-  questions.value.push({ id: questions.value.length + 1, question_name: '質問番号' + questions.value.length, floor: maxFloor + 1 });
 
-  // Sort questions by floor in ascending order
-  sortQuestionsByFloor();
-};
-
-// Optional: Use watch to react to changes in the questions array
-watch(questions, (newQuestions, oldQuestions) => {
-  console.log('Questions updated:', newQuestions);
-});
 </script>
-
 
 <style scoped>
 /* Scrollbar styles */
-
-
 /* Add any other necessary styles here */
 
 /* For small devices such as phones */

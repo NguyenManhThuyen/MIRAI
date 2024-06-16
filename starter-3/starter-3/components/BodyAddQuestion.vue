@@ -27,22 +27,24 @@
       </div>
 
       <div :class="['floor-display', { 'error-border': showErrors && !localFloor }]">
-        <span>階</span>
-        <input
-          type="number"
-          v-model.number="localFloor"
-          class="floor-input"
-          @input="updateFloor"
-        />
-      </div>
-      <div v-if="showErrors">
-        <div v-if="!localFloor" class="error-message">
-          階数が入力されていません
-        </div>
-        <div v-else-if="!(this.questionsFloor.split(',').includes(this.localFloor.toString()) && this.method === 'POST') " class="error-message">
-          フロアが存在した
-        </div>
-      </div>
+  <span>階</span>
+  <input
+    type="number"
+    v-model.number="localFloor"
+    class="floor-input"
+    @input="updateFloor"
+    :disabled="method === 'PUT'"
+  />
+</div>
+<div v-if="showErrors">
+  <div v-if="!localFloor" class="error-message">
+    階数が入力されていません
+  </div>
+  <div v-else-if="(questionsFloor.split(',').includes(localFloor.toString()) && method === 'POST')" class="error-message">
+    フロアが存在した
+  </div>
+</div>
+
       
       <div class="question-header">
         <span class="question-label">質問 {{ this.localFloor }}</span>
@@ -66,25 +68,27 @@
 
 
       <div class="question-section">
-        <div v-for="(option, index) in options" :key="index" class="option-row-container">
-          <div class="option-row">
-            <div class="input-container">
-              <input v-model="option.text" :placeholder="'オプション' + (index + 1)" />
-            </div>
-            <button @click="removeOption(index)" class="remove-button">×</button>
-          </div>
-          <div v-if="showErrors && optionErrors[index]" class="option-error-message">
-            オプションを入力してください
-          </div>
-        </div>
-
-        <!-- "さらに多くの回答" được hiển thị khi số lượng options không đạt 4 -->
-        <div v-if="options.length < 4" class="option-row">
+      <div v-for="(option, index) in options" :key="index" class="option-row-container">
+        <div class="option-row">
           <div class="input-container">
-            <span class="add-option-button" @click="addOption">+ さらに多くの回答</span>
+            <input v-model="option.text" :placeholder="'オプション' + (index + 1)" />
           </div>
+          <button @click="removeOption(index)" class="remove-button">×</button>
         </div>
+        <!-- Hiển thị lỗi khi không nhập text cho option -->
+        <div v-if="showErrors && !option.text.trim()" class="option-error-message">オプションを入力してください</div>
       </div>
+
+     <!-- Hiển thị lỗi khi không đủ 4 options và không có lỗi option trống -->
+     <div v-if="showErrors && options.length < 4 && options.every(option => option.text.trim())" class="option-error-message">4 つの回答すべてを入力していません</div>
+
+<!-- Hiển thị "さらに多くの回答" khi số lượng options không đủ 4 -->
+<div v-if="options.length < 4" class="option-row">
+  <div class="input-container">
+    <span class="add-option-button" @click="addOption">+ さらに多くの回答</span>
+  </div>
+</div>
+</div>
 
       <div class="footer-image-upload" :style="footerImageStyle">
         <button class="footer-upload-button" @click="uploadFooterImage">
@@ -121,33 +125,33 @@ export default {
     },
   },
   data() {
-    return {
-      localFloor: this.floor,
-      localFloorTemp: this.floor,
-      options: [{ text: "" }, { text: "" }, { text: "" }, { text: "" }],
-      optionErrors: [false, false, false,false],
-      remainingOptions: 4,
-      iconPlus: iconPlus,
-      bannerImage: "",
-      bannerImageUploaded: false,
-      footerImageUploaded: false,
-      questionAdded: false,
-      showErrors: false,
-      footerImage: "",
-      questionData: null,
-      // Additional properties from API response
-      questionText: "", // Placeholder for the question text
-      id: null, // Placeholder for the question ID
-      correctAnswerName: "", // Placeholder for correct answer name
-      correctAnswerExplain: "", // Placeholder for correct answer explanation
-      optionsData: {}, // Placeholder for options array from API response
-      qrcodeUrl: "", // Placeholder for QR code URL
-      createdAt: "", // Placeholder for created at timestamp
-      updatedAt: "", // Placeholder for updated at timestamp
-      questionsFloor: "",
-      method:"",
-    };
-  },
+  return {
+    localFloor: this.floor,
+    localFloorTemp: this.floor,
+    options: [{ text: "" }], // Chỉ có một option ban đầu
+    optionErrors: [false], // Mảng error cho option tương ứng
+    remainingOptions: 3, // Số option còn lại có thể thêm
+    iconPlus: iconPlus,
+    bannerImage: "",
+    bannerImageUploaded: false,
+    footerImageUploaded: false,
+    questionAdded: false,
+    showErrors: false,
+    footerImage: "",
+    questionData: null,
+    questionText: "", // Placeholder for the question text
+    id: null, // Placeholder for the question ID
+    correctAnswerName: "", // Placeholder for correct answer name
+    correctAnswerExplain: "", // Placeholder for correct answer explanation
+    optionsData: {}, // Placeholder for options array from API response
+    qrcodeUrl: "", // Placeholder for QR code URL
+    createdAt: "", // Placeholder for created at timestamp
+    updatedAt: "", // Placeholder for updated at timestamp
+    questionsFloor: "",
+    method:"",
+  };
+},
+
 
   mounted() {
     // Gọi hàm để lấy dữ liệu câu hỏi khi component được mounted
@@ -168,22 +172,21 @@ export default {
 
 
     areOptionsValid() {
-      console.log("sadasd")
       // Reset optionErrors array
       this.optionErrors = [];
       // Validate each option
       let isValid = true;
       this.options.forEach((option, index) => {
-
         if (option.text.trim().length === 0) {
           this.optionErrors[index] = true; // Set error for this option
           isValid = false;
         } else {
-          this.optionErrors[index] = true; // No error for this option
+          this.optionErrors[index] = false; // No error for this option
         }
       });
       return isValid;
     },
+
 
     // Example of using computed property for footer image validity
     isFooterImageValid() {
@@ -278,29 +281,42 @@ export default {
 
     validateForm() {
       this.showErrors = true;
-      this.questionAdded = this.isQuestionValid;
-      // Validate the form inputs using computed properties
+      let isValid = true;
 
-      console.log(this.questionsFloor.split(',').includes(this.localFloor.toString()),"Checking",(this.questionsFloor.split(',').includes(this.localFloor.toString()) && this.method === 'POST'),"Checking",this.method === 'POST')
+      // Validate the question text
+      this.questionAdded = this.isQuestionValid;
 
       // Validate each option
-      let areOptionsValid = true;
       this.options.forEach((option, index) => {
         if (option.text.trim().length === 0) {
           this.optionErrors[index] = true; // Set error for this option
-          areOptionsValid = false;
+          isValid = false;
         } else {
           this.optionErrors[index] = false; // No error for this option
         }
       });
+
+      // Check if all options are entered
+      if (!isValid) {
+        return; // Stop further validation if any option is empty
+      }
+
+      // Check if all 4 options are entered if there are no empty options
+      if (this.options.length < 4 && this.options.every(option => option.text.trim())) {
+        isValid = false;
+      }
+      this.method = localStorage.getItem("method");
+      this.questionsFloor=localStorage.getItem("questionsFloor");
+      console.log( (this.questionsFloor.split(',').includes(this.localFloor.toString()) && this.method === 'POST'),"ádasdas",this.questionsFloor.split(',').includes(this.localFloor.toString()),"ádasd", this.method === 'POST')
+      // Additional validations for banner image, footer image, floor, etc.
       if (
         this.isBannerImageValid &&
-        this.localFloor &&
+        this.isFooterImageValid &&
         this.isQuestionValid &&
-        areOptionsValid &&
-        this.isFooterImageValid
-      //  &&!(this.questionsFloor.split(',').includes(this.localFloor.toString()) && this.method === 'POST') 
-      ) {
+        isValid &&
+        this.localFloor 
+        && !(this.questionsFloor.split(',').includes(this.localFloor.toString()) && this.method === 'POST')
+      ){
         // Prepare data payload to send to the API
         const dataPayload = {
           question_name: this.questionText,

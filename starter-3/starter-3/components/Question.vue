@@ -1,56 +1,42 @@
 <template>
   <div class="question-component" @click="isLastQuestion && $emit('addNewQuestion')">
-    <template v-if="questionText === '+ さらに質問を'">
-      <span class="question-id">
-        <span>{{ questionIndex  + 1}}</span>
-      </span>
-    </template>
-    <template v-else>
-      <router-link :to="`/Admin/AddQuestion`" class="question-id" @click="saveAdminQuestionID">
-        <span>{{ questionIndex + 1 }}</span>
-      </router-link>
-    </template>
+    <router-link :to="`/Admin/AddQuestion`" class="question-id" @click="saveAdminQuestionID">
+      <span>{{ questionIndex + 1 }}</span>
+    </router-link>
 
-    <!-- Conditional rendering for question-text -->
-    <template v-if="questionText === '+ さらに質問を'">
-      <span class="question-text" :style="{ color: questionTextColor }">
-        <span>{{ questionText }}</span>
-      </span>
-    </template>
-    <template v-else>
-      <router-link
-        :to="`/Admin/AddQuestion`"
-        class="question-text"
-        :style="{ color: questionTextColor }"
-        @click="saveAdminQuestionID"
-      >
-        <span>{{ questionText }}</span>
-      </router-link>
+    <router-link
+      :to="`/Admin/AddQuestion`"
+      class="question-text"
+      :style="{ color: questionTextColor }"
+      @click="saveAdminQuestionID"
+    >
+      <span>{{ questionText }}</span>
+    </router-link>
 
-      <div class="floor-number">
-        <button class="floor-button">{{ floor }}階</button>
-        <button @click="deleteQuestion" class="delete-icon"></button>
-      </div>
+    <!-- Thêm điều kiện v-if để ẩn floor-number -->
+    <div class="floor-number" v-if="shouldDisplayFloorNumber">
+      <button class="floor-button">{{ floor }}階</button>
+      <button @click="deleteQuestion" class="delete-icon"></button>
+    </div>
 
-      <!-- Modal -->
-      <div class="modal" v-if="showModal">
-        <div class="modal-content">
-          <h2 class="modal-title">質問番号 {{ floor }} を削除しますか?</h2>
-          <p class="modal-subtitle">システムは質問番号 {{ floor }} を削除します</p>
-          <div class="modal-buttons">
-            <button class="cancel-button" @click="cancelDelete">キャンセル</button>
-            <button class="confirm-button" @click="confirmDelete">確認する</button>
-          </div>
+    <!-- Modal -->
+    <div class="modal" v-if="showModal">
+      <div class="modal-content">
+        <h2 class="modal-title">質問番号 {{ floor }} を削除しますか?</h2>
+        <p class="modal-subtitle">システムは質問番号 {{ floor }} を削除します</p>
+        <div class="modal-buttons">
+          <button class="cancel-button" @click="cancelDelete">キャンセル</button>
+          <button class="confirm-button" @click="confirmDelete">確認する</button>
         </div>
       </div>
+    </div>
 
-      <div class="overlay" v-if="showModal"></div>
-    </template>
+    <div class="overlay" v-if="showModal"></div>
   </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits, computed, ref } from 'vue';
+import { defineProps, defineEmits, computed, ref, watch } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -81,7 +67,7 @@ const props = defineProps({
 const emit = defineEmits(['delete', 'addNewQuestion']);
 
 const questionTextColor = computed(() => {
-  return (props.questionText === '+ さらに質問を' ||props.questionText === `質問番号${props.questionIndex+1}`) ? '#BDBDBD' : '#1A1A1A';
+  return (props.questionText === '+ さらに質問を' || props.questionText === `質問番号${props.questionIndex + 1}`) ? '#BDBDBD' : '#1A1A1A';
 });
 
 const router = useRouter();
@@ -95,7 +81,7 @@ const saveAdminQuestionID = () => {
   localStorage.removeItem('AnswerDataPayload');
   localStorage.removeItem('dataPayload');
 
-  if (props.questionText === '+ さらに質問を'||props.questionText === `質問番号${props.questionIndex+1}`) {
+  if (props.questionText === '+ さらに質問を') {
     localStorage.setItem('method', 'POST');
   } else {
     localStorage.setItem('method', 'PUT');
@@ -113,8 +99,8 @@ const confirmDelete = async () => {
     );
     emit('delete', props.id);
     showModal.value = false;
-    // Reload current page after deletion
-    router.go();
+    // Không cần reload trang sau khi xóa
+    // router.go();
   } catch (error) {
     console.error('Error deleting question:', error);
     // Handle error
@@ -126,6 +112,37 @@ const confirmDelete = async () => {
 const cancelDelete = () => {
   showModal.value = false;
 };
+
+// Theo dõi sự thay đổi trong props.questionText để xác định liệu có hiển thị floor-number hay không
+const shouldDisplayFloorNumber = computed(() => {
+  return props.questionText !== '+ さらに質問を';
+});
+
+// Watch for changes in props.questionText and fetch new questions from API if needed
+watch(() => props.questionText, async () => {
+  // Perform an API call to fetch new questions
+  try {
+    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
+    
+    const updatedQuestions = response.data.map(question => ({
+      id: question.id,
+      question_name: question.question_name,
+      floor: question.floor
+    }));
+
+    // Add new question "+ さらに質問を" at the end of the list
+    updatedQuestions.push({ id: updatedQuestions.length + 1, question_name: '+ さらに質問を', floor: null });
+
+    // Sort questions by floor in ascending order
+    updatedQuestions.sort((a, b) => (a.floor === null ? Infinity : a.floor) - (b.floor === null ? Infinity : b.floor));
+
+    // Update the local questions list
+    questions.value = updatedQuestions;
+  } catch (error) {
+    console.error('Error fetching questions:', error);
+    // Handle error
+  }
+});
 </script>
 
 

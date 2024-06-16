@@ -1,4 +1,5 @@
 <template>
+    <div ref="captureContainer">
   <div class="notification">
     <div class="notification-content">
       <div class="notification-items">
@@ -63,13 +64,14 @@
         <button @click="closeShareModal" class="close-button">X</button>
       </div>
     </div>
-    
+  </div>
 
   </div>
 </template>
 
 <script>
 import NavigatorShare from "vue-navigator-share";
+import html2canvas from 'html2canvas';
 
 export default {
   props: {
@@ -122,11 +124,38 @@ export default {
       console.log(err);
     },
     share() {
+      this.captureComponentAsImage();
       this.showShareModal = true; // Show the modal when share button is clicked
     },
     closeShareModal() {
       this.showShareModal = false; // Close the modal
     },
+    captureComponentAsImage() {
+      
+      const captureContainer = this.$refs.captureContainer;
+
+      html2canvas(captureContainer, {
+        scale: 2,
+        scrollX: 0,
+        scrollY: 0,
+        logging: true,
+        letterRendering: true,
+        allowTaint: true,
+        useCORS: true
+      }).then(canvas => {
+        const imageData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = 'component-screenshot.png';
+        link.href = imageData;
+        link.click();
+        this.onSuccess();
+        console.log("ok!");
+      }).catch(error => {
+        console.error('Error while capturing component:', error);
+        this.onError('Failed to capture component as image');
+      });
+    }
+
   }
 };
 </script>
@@ -234,6 +263,7 @@ export default {
   margin-bottom: 8px; /* Increased margin */
 }
 
+
 .button-content {
   display: flex;
   align-items: center;
@@ -301,6 +331,20 @@ export default {
   color: #333;
 }
 
+/* Close button */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
+}
+
+
+
 @media screen and (max-width: 320px) {
   .notification {
     width: 90%;
@@ -313,6 +357,12 @@ export default {
     line-height: 20px; /* Adjusted line height */
     height: auto;
     margin-top: 16px; /* Increased margin */
+  }
+
+  .social-share-button {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
   }
 }
 

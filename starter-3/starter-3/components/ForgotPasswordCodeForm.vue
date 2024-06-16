@@ -5,12 +5,16 @@
     <form @submit.prevent="handleSubmit">
       <div class="input-group">
         <input type="text" v-model="username" placeholder="コードを入力する" />
-        <div v-if="showErrors && (!username || username === 'thuyen')" class="error-message">{{ errorMessage }}</div>
+        <!-- Hiển thị lỗi khi chưa nhập mã -->
+        <div v-if="showErrors && !username" class="error-message">{{ errorMessageEmpty }}</div>
+        <!-- Hiển thị lỗi khi mã không chính xác -->
+        <div v-if="showErrors && username === 'thuyen'" class="error-message">{{ errorMessageIncorrect }}</div>
       </div>
       <button type="submit">確認する</button>
     </form>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -18,17 +22,20 @@ export default {
     return {
       username: '',
       showErrors: false,
-      success: false, // Biến để kiểm tra trạng thái thành công
-      errorMessage: 'コードが正しくありません', // Thông báo lỗi
+      success: false,
+      errorMessageEmpty: 'まだコードが入力されていません', // Thông báo lỗi khi chưa nhập mã
+      errorMessageIncorrect: 'コードが正しくありません', // Thông báo lỗi khi mã không chính xác
     };
   },
   methods: {
     handleSubmit() {
       this.showErrors = true; // Hiển thị thông báo lỗi
       if (!this.username) {
-        // Nếu username trống, hiển thị thông báo lỗi
+        // Nếu username trống, hiển thị thông báo lỗi chưa nhập mã
+        return;
       } else if (this.username === 'thuyen') {
-        // Nếu username là 'thuyen', hiển thị thông báo lỗi
+        // Nếu username là 'thuyen', hiển thị thông báo lỗi mã không chính xác
+        return;
       } else {
         // Nếu không có lỗi, tiếp tục xử lý
         console.log('Username:', this.username);

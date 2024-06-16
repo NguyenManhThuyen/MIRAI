@@ -53,7 +53,7 @@ export default {
       type: String,
     },
     id: {
-      type: Number,
+      type: String,
     },
     options: {
       type: Object,
@@ -105,7 +105,7 @@ export default {
           floor: this.floor
         },
       });
-    }, 5000);
+    }, 3000);
   }
 },
 

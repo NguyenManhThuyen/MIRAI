@@ -10,7 +10,8 @@
         <img @click="togglePasswordVisibility" src="@/assets/images/remove-red-eye.svg" alt="Toggle Password Visibility" class="eye-icon"/>
       </div>
       <div class="forgot-password">
-        <nuxt-link v-if="username && password" to="/Admin/MainPage">パスワードを忘れましたか?</nuxt-link>
+        <!-- Điều kiện kiểm tra loginError để xác định xem có nên chuyển hướng hay không -->
+        <nuxt-link v-if="!loginError && username && password" to="/Admin/MainPage">パスワードを忘れましたか?</nuxt-link>
         <nuxt-link v-else to="/Admin/ForgotPassword">パスワードを忘れましたか?</nuxt-link>
       </div>
       <p v-if="loginError" class="error-message">{{ loginError }}</p>
