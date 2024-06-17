@@ -2,6 +2,7 @@
   <div class="login-page">
     <div class="login-banner">
       <div class="banner-text">ル・ヴァン・サン</div>
+      <div class="logout-button" @click="logout">ログアウト</div>
     </div>
 
     <div class="parent-component">
@@ -70,6 +71,12 @@ export default {
 },
 
   methods: {
+    logout() {
+      // Perform logout actions here (if any)
+
+      // Navigate to /Admin/Login
+      this.$router.push('/Admin/Login');
+    },
     submitUserInput() {
       if (this.userInput.trim() === '') {
         this.inputError = true; // Nếu input rỗng, hiển thị thông báo lỗi
@@ -147,6 +154,7 @@ export default {
 <style scoped>
 /* Banner */
 .login-banner {
+  display: flex;
   background-color: #E13A4B;
   /* Màu đỏ */
   margin-top: 0px;
@@ -194,6 +202,7 @@ export default {
   align-items: center;
   width: 100%;
   height: 100%;
+  margin-left: 100px;
 }
 
 .parent-component {
@@ -424,6 +433,15 @@ export default {
   justify-content: center;
 }
 
+.text-overlay textarea {
+  border: none; /* Xóa đường viền */
+  outline: none; /* Xóa đường viền nổi */
+  width: 100%; /* Đảm bảo textarea đầy đủ chiều rộng */
+  padding: 10px; /* Tăng đệm nếu cần thiết */
+  resize: none; /* Ngăn người dùng thay đổi kích thước */
+  /* Thêm các thuộc tính CSS khác tùy vào thiết kế của bạn */
+}
+
 .text-overlay span {
   font-size: 16px;
   /* Điều chỉnh kích thước font cho văn bản */
@@ -474,5 +492,15 @@ export default {
   line-height: 23.17px;
   letter-spacing: 0.02em;
 
+}
+
+.logout-button {
+  display: flex; /* Sử dụng display: flex để có thể căn giữa */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  cursor: pointer;
+  color: white; /* Màu chữ trắng */
+  height: 100%; /* Chiều cao của nút */
+  width: 120px;
 }
 </style>

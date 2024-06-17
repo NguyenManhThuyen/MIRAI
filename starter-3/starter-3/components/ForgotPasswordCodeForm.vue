@@ -8,42 +8,72 @@
         <!-- Hiển thị lỗi khi chưa nhập mã -->
         <div v-if="showErrors && !username" class="error-message">{{ errorMessageEmpty }}</div>
         <!-- Hiển thị lỗi khi mã không chính xác -->
-        <div v-if="showErrors && username === 'thuyen'" class="error-message">{{ errorMessageIncorrect }}</div>
+        <div v-if="showErrors" class="error-message">{{ errorMessageIncorrect }}</div>
       </div>
       <button type="submit">確認する</button>
     </form>
   </div>
 </template>
 
-
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
       username: '',
       showErrors: false,
       success: false,
+      errorCode: null, // Trạng thái lưu mã lỗi từ API
       errorMessageEmpty: 'まだコードが入力されていません', // Thông báo lỗi khi chưa nhập mã
       errorMessageIncorrect: 'コードが正しくありません', // Thông báo lỗi khi mã không chính xác
     };
   },
   methods: {
-    handleSubmit() {
-      this.showErrors = true; // Hiển thị thông báo lỗi
-      if (!this.username) {
-        // Nếu username trống, hiển thị thông báo lỗi chưa nhập mã
-        return;
-      } else if (this.username === 'thuyen') {
-        // Nếu username là 'thuyen', hiển thị thông báo lỗi mã không chính xác
-        return;
+    async handleSubmit() {
+  this.showErrors = true; // Hiển thị thông báo lỗi
+  this.errorCode = null; // Đặt lại mã lỗi
+
+  if (!this.username) {
+    // Nếu username trống, hiển thị thông báo lỗi chưa nhập mã
+    return;
+  } else if (this.username === 'thuyen') {
+    // Nếu username là 'thuyen', hiển thị thông báo lỗi mã không chính xác
+    return;
+  } else {
+    // Nếu không có lỗi, tiếp tục xử lý
+    axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/verifyCode', {
+      email: localStorage.getItem('email'),
+      code: this.username
+    })
+    .then((response) => {
+      if (response.data.status === 404 || response.data.status === 403) {
+        // Nếu API trả về lỗi 404 hoặc 403, hiển thị thông báo lỗi
+        this.errorCode = response.data.status;
+        this.errorMessage = 'コードが正しくありません';
       } else {
-        // Nếu không có lỗi, tiếp tục xử lý
-        console.log('Username:', this.username);
+        localStorage.setItem("code", this.username);
+        console.log('Response:', response.data);
         this.success = true; // Đặt trạng thái thành công
-        this.$router.push('/Admin/ChangePassword'); // Chuyển hướng tới trang login
+        this.$router.push('/Admin/ChangePassword'); // Chuyển hướng tới trang đổi mật khẩu
         this.$emit('success');
       }
-    },
+    })
+    .catch((error) => {
+      // Kiểm tra mã lỗi và đặt thông báo lỗi tương ứng
+      if (error.response && error.response.status === 403) {
+        this.errorMessage = 'コードが正しくありません';
+      } else {
+        this.errorMessage = 'リクエストの送信に失敗しました。もう一度試してください。';
+      }
+    })
+    .finally(() => {
+      // Sau khi hoàn thành, enable lại nút generate
+      generateButtonDisabled.value = false;
+    });
+  }
+},
+
   },
 };
 </script>

@@ -5,7 +5,7 @@
     <form @submit.prevent="handleSubmit">
       <div class="input-group">
         <input type="text" v-model="username" placeholder="メールアドレスを入力して" />
-        <div v-if="showErrors && (!username || username === 'thuyen')" class="error-message">{{ errorMessage }}</div>
+        <div v-if="showErrors" class="error-message">{{ errorMessage }}</div>
       </div>
       <button type="submit">確認する</button>
     </form>
@@ -14,17 +14,19 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
       username: '',
       showErrors: false,
       success: false,
-      errorMessage: 'あなたのメールアドレスが間違っています', // Error message
+      errorMessage: '', // Error message
     };
   },
   methods: {
-    handleSubmit() {
+    async handleSubmit() {
       this.showErrors = true; // Hiển thị thông báo lỗi
       if (!this.username) {
         // Hiển thị thông báo lỗi nếu username trống
@@ -34,14 +36,22 @@ export default {
         this.errorMessage = 'メールアドレスが正しくありません';
       } else {
         // Nếu không có lỗi, tiếp tục xử lý
-        console.log('Username:', this.username);
-        this.success = true;
-        this.$emit('success');
+        try {
+          const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/sendCode', {
+            email: this.username
+          });
+          localStorage.setItem("email", this.username);
+          this.success = true;
+          this.$emit('success');
+        } catch (error) {
+          this.errorMessage = 'リクエストの送信に失敗しました。もう一度試してください。';
+        }
       }
     },
   },
 };
 </script>
+
 <style scoped>
 .login-container {
   background-color: #ffffff;

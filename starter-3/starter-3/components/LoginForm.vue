@@ -40,7 +40,7 @@ export default {
       }
 
       try {
-        const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users', {
+        const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/login', {
           email: this.username,
           password: this.password,
         }, {

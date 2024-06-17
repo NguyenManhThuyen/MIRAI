@@ -2,6 +2,7 @@
   <div>
     <div class="login-banner">
       <div class="banner-text">ル・ヴァン・サン</div>
+      <div class="logout-button" @click="logout">ログアウト</div>
     </div>
 
     <div class="login-page">
@@ -24,12 +25,21 @@ export default {
   components: {
     QuestionList,
   },
+  methods: {
+    logout() {
+      // Perform logout actions here (if any)
+
+      // Navigate to /Admin/Login
+      this.$router.push('/Admin/Login');
+    }
+  },
 };
 </script>
 
 <style scoped>
 /* Banner */
 .login-banner {
+  display: flex;
   background-color: #e13a4b; /* Red color */
   width: 100%; /* Full width */
   height: 56px; /* Height of 56px */
@@ -69,7 +79,15 @@ export default {
   box-shadow: 0px 6px 12px 0px #0000001f; /* Box shadow */
   border-radius: 16px; /* Top rounded corners */
 }
-
+.logout-button {
+  display: flex; /* Sử dụng display: flex để có thể căn giữa */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  cursor: pointer;
+  color: white; /* Màu chữ trắng */
+  height: 100%; /* Chiều cao của nút */
+  width: 120px;
+}
 .wrapper {
   background-color: #ffffff; /* Màu nền là trắng */
   height: 92px; /* Độ cao là 92px */

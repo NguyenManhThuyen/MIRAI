@@ -41,7 +41,7 @@
     階数が入力されていません
   </div>
   <div v-else-if="(questionsFloor.split(',').includes(localFloor.toString()) && method === 'POST')" class="error-message">
-    フロアが存在した
+   階が存在した 
   </div>
 </div>
 

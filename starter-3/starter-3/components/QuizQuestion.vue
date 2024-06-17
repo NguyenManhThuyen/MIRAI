@@ -105,7 +105,7 @@ export default {
           floor: this.floor
         },
       });
-    }, 3000);
+    }, 2000);
   }
 },
 

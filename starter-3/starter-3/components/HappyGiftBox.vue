@@ -46,24 +46,24 @@
 
     <div v-if="showShareModal" class="share-modal">
       <div class="modal-content">
-        <h2> Share social </h2>
-        <!-- Social share icons -->
+        <h2>Share social</h2>
         <div class="flex flex-row gap-2">
           <SocialShare
-            v-for="network in ['facebook', 'linkedin', 'email','pinterest','whatsapp','telegram']"
-            :key="network"
-            :network="network"
-            :styled="true"
-            :label="false"
-            :title="'212121'"
-            :url="'https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg'" 
-            class="p-4 rounded-none"
-          />
+          v-for="network in ['facebook', 'linkedin', 'email', 'pinterest', 'whatsapp', 'telegram']"
+          :key="network"
+          :network="network"
+          :styled="true"
+          :label="false"
+          :title="'Title of your share'"
+          :url="imageUrl"
+          class="p-4 rounded-none"
+        />
+        
         </div>
-        <!-- Close button for the modal -->
         <button @click="closeShareModal" class="close-button">X</button>
       </div>
     </div>
+    
   </div>
 
   </div>
@@ -72,6 +72,7 @@
 <script>
 import NavigatorShare from "vue-navigator-share";
 import html2canvas from 'html2canvas';
+import axios from 'axios';
 
 export default {
   props: {
@@ -91,6 +92,7 @@ export default {
   },
   data() {
     return {
+      imageUrl: '',
       showShareModal: false,
       trueAnswerQuestionFromStorage: 0,
       totalQuestionFromStorage: 0,
@@ -111,8 +113,6 @@ export default {
     // Get values from localStorage and set to component's data
     this.trueAnswerQuestionFromStorage = parseInt(localStorage.getItem("correctAnswer") || 0, 10);
     this.totalQuestionFromStorage = parseInt(localStorage.getItem("totalAnswer") || 0, 10);
-
-
   },
 
   methods: {
@@ -123,39 +123,88 @@ export default {
     onSuccess(err) {
       console.log(err);
     },
-    share() {
-      this.captureComponentAsImage();
-      this.showShareModal = true; // Show the modal when share button is clicked
+    async share() {
+      try {
+        await this.captureComponentAsImage(); // Chụp và upload hình ảnh
+        // Sau khi capture và upload thành công, thiết lập showShareModal = true
+      } catch (error) {
+        console.error('Error while capturing and sharing:', error);
+        this.onError('Failed to share the image');
+      }
     },
+
     closeShareModal() {
       this.showShareModal = false; // Close the modal
     },
     captureComponentAsImage() {
-      
-      const captureContainer = this.$refs.captureContainer;
+  const captureContainer = this.$refs.captureContainer;
 
-      html2canvas(captureContainer, {
-        scale: 2,
-        scrollX: 0,
-        scrollY: 0,
-        logging: true,
-        letterRendering: true,
-        allowTaint: true,
-        useCORS: true
-      }).then(canvas => {
-        const imageData = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = 'component-screenshot.png';
-        link.href = imageData;
-        link.click();
-        this.onSuccess();
-        console.log("ok!");
-      }).catch(error => {
-        console.error('Error while capturing component:', error);
-        this.onError('Failed to capture component as image');
-      });
-    }
+  html2canvas(captureContainer, {
+    scale: 3,
+    scrollX: 0,
+    scrollY: 0,
+    logging: true,
+    letterRendering: true,
+    allowTaint: true,
+    useCORS: true
+  }).then(canvas => {
+    const imageData = canvas.toDataURL('image/png').split(',')[1]; // Lấy phần base64 từ imageData
 
+    const apiKey = '710756e5d8714a4edc180eb163347fd5'; // Thay thế YOUR_API_KEY bằng API Key của bạn từ ImgBB
+    // Tạo đối tượng FormData để gửi dữ liệu lên
+    const formData = new FormData();
+    formData.append('image', imageData);
+
+    // Gửi yêu cầu POST đến ImgBB API
+    axios.post('https://api.imgbb.com/1/upload?key=' + apiKey, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    .then(response => {
+      console.log('Upload successful');
+      console.log(response.data);
+
+      // Lấy URL hình ảnh từ response và gán vào biến this.imageUrl
+      this.imageUrl = response.data.data.url;
+
+      console.log("ád",this.imageUrl);
+
+      // Sau khi có URL, hiển thị modal chia sẻ
+      this.showShareModal = true;
+    })
+    .catch(error => {
+      console.error('Error uploading image:', error);
+    });
+
+
+  }).catch(error => {
+    console.error('Error while capturing component:', error);
+    this.onError('Failed to capture component as image');
+  });
+    },
+    takeScreenshotWithPuppeteer () {
+  try {
+    const puppeteer = require('puppeteer');
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.setViewport({ width: 1080, height: 1024 });
+
+    await page.goto('https://example.com'); // Replace with your target URL
+
+    await page.waitForSelector('.some-element'); // Example: Wait for a specific element
+
+    await page.screenshot({ path: 'screenshot.png' });
+
+    console.log('Screenshot taken successfully.');
+
+    await browser.close();
+  } catch (error) {
+    console.error('Error while taking screenshot with Puppeteer:', error);
+  }
+};
   }
 };
 </script>
@@ -164,25 +213,23 @@ export default {
 .notification {
   display: flex;
   flex-direction: column;
-  width: 343px; /* Increased width */
+  width: 343px;
   height: auto;
-  padding: 24px 16px 32px 16px; /* Increased padding */
+  padding: 24px 16px 32px 16px;
   border-radius: 16px;
   border: 2px solid #ffffff;
-  box-shadow: 0px 6px 18px 0px rgba(0, 0, 0, 0.1);
   background-color: #ffffff;
 }
 
-/* Center the button */
 .notification .custom-button {
   display: flex;
   justify-content: center;
-  margin-top: 24px; /* Ensure button is spaced from elements above */
+  margin-top: 24px;
 }
 
 .notification-content {
   position: relative;
-  margin-bottom: 32px; /* Increased margin */
+  margin-bottom: 32px;
 }
 
 .notification-items {
@@ -190,14 +237,14 @@ export default {
   align-items: center;
   justify-content: space-between;
   position: relative;
-  margin: 0 12px; /* Increased margin */
+  margin: 0 12px;
 }
 
 .question-text {
-  margin-top: 10px; /* Increased margin */
+  margin-top: 10px;
   opacity: 1;
   font-family: "Noto Sans JP", sans-serif;
-  font-size: 28px; /* Increased font size */
+  font-size: 28px;
   font-weight: 700;
   text-align: center;
   color: #e13a4b;
@@ -205,9 +252,9 @@ export default {
 
 .text {
   font-family: "Noto Sans JP", sans-serif;
-  font-size: 18px; /* Increased font size */
+  font-size: 18px;
   font-weight: 700;
-  line-height: 26px; /* Increased line height */
+  line-height: 26px;
   letter-spacing: 0.01em;
   text-align: center;
 }
@@ -228,18 +275,18 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 32px; /* Increased margin */
+  margin-top: 32px;
 }
 
 .correct-answer {
-  width: 160px; /* Increased width */
-  height: 50px; /* Increased height */
-  padding: 12px 48px; /* Increased padding */
+  width: 160px;
+  height: 50px;
+  padding: 12px 48px;
   opacity: 1;
   font-family: "Noto Sans JP", sans-serif;
-  font-size: 18px; /* Increased font size */
+  font-size: 18px;
   font-weight: 700;
-  line-height: 26px; /* Increased line height */
+  line-height: 26px;
   text-align: center;
   color: #e13a4b;
   border-top: 1px solid #dadada;
@@ -251,18 +298,17 @@ export default {
   height: auto;
   opacity: 1;
   font-family: "Noto Sans JP", sans-serif;
-  font-size: 16px; /* Increased font size */
+  font-size: 16px;
   font-weight: 400;
-  line-height: 24px; /* Increased line height */
+  line-height: 24px;
   text-align: center;
-  margin-top: 24px; /* Increased margin */
-  max-width: 300px; /* Adjusted max-width */
+  margin-top: 24px;
+  max-width: 300px;
   margin-left: auto;
   margin-right: auto;
   color: #6a6a6a;
-  margin-bottom: 8px; /* Increased margin */
+  margin-bottom: 8px;
 }
-
 
 .button-content {
   display: flex;
@@ -271,12 +317,12 @@ export default {
 }
 
 .share {
-  margin-right: 8px; /* Spacing between icon and text */
+  margin-right: 8px;
 }
 
 .custom-button {
-  width: 150px; /* Increased width */
-  height: 48px; /* Increased height */
+  width: 150px;
+  height: 48px;
   border-radius: 112px;
   opacity: 1;
   align-items: center;
@@ -287,8 +333,8 @@ export default {
 }
 
 .share {
-  width: 18px; /* Adjusted width */
-  height: 20px; /* Adjusted height */
+  width: 18px;
+  height: 20px;
 }
 
 .share-modal {
@@ -297,11 +343,11 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* Ensure modal is on top */
+  z-index: 9999;
 }
 
 .modal-content {
@@ -309,17 +355,19 @@ export default {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-width: 90%; /* Adjust as needed */
-  max-height: 90%; /* Adjust as needed */
-  overflow: auto; /* Enable scrolling if content exceeds modal size */
-  position: relative; /* Ensure relative positioning for absolute button */
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+  position: relative;
 }
+
 .modal-content h2 {
-  font-size: 24px; /* Adjust font size */
-  font-weight: 700; /* Adjust font weight */
-  margin-bottom: 16px; /* Add spacing below the heading */
-  color: #333; /* Text color */
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #333;
 }
+
 .close-button {
   position: absolute;
   top: 10px;
@@ -330,20 +378,6 @@ export default {
   cursor: pointer;
   color: #333;
 }
-
-/* Close button */
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #333;
-}
-
-
 
 @media screen and (max-width: 320px) {
   .notification {
@@ -353,10 +387,10 @@ export default {
   }
 
   .custom-text {
-    font-size: 14px; /* Adjusted font size */
-    line-height: 20px; /* Adjusted line height */
+    font-size: 14px;
+    line-height: 20px;
     height: auto;
-    margin-top: 16px; /* Increased margin */
+    margin-top: 16px;
   }
 
   .social-share-button {
@@ -367,3 +401,4 @@ export default {
 }
 
 </style>
+

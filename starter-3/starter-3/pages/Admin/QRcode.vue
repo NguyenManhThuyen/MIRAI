@@ -2,6 +2,7 @@
   <div class="login-page">
     <div class="login-banner">
       <div class="banner-text">ル・ヴァン・サン</div>
+      <div class="logout-button" @click="logout">ログアウト</div>
     </div>
 
     <div class="parent-component">
@@ -77,21 +78,16 @@ export default {
   components: {
     HeaderAddQuestion,
   },
+  methods: {
+    logout() {
+      // Perform logout actions here (if any)
+
+      // Navigate to /Admin/Login
+      this.$router.push('/Admin/Login');
+    }
+  },
 
   setup() {
-    // // Import AWS SDK
-    // const AWS = require('aws-sdk');
-
-    // // Cấu hình AWS SDK bằng cách cung cấp thông tin xác thực
-    // AWS.config.update({
-    //   accessKeyId: 'YOUR_ACCESS_KEY_ID',
-    //   secretAccessKey: 'YOUR_SECRET_ACCESS_KEY',
-    //   region: 'ap-southeast-1', // ví dụ: 'ap-southeast-1'
-    // });
-
-    // // Tạo mới một đối tượng S3
-    // const s3 = new AWS.S3();
-
 
     const router = useRouter();
     const questionId = ref(null); // Change to ref if you intend to use reactive state
@@ -156,46 +152,43 @@ export default {
     });
 
     const generateQRCode = () => {
+  fetch(
+    `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrCodeData)}`
+  )
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.blob();
+    })
+    .then((blob) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result;
+        
+        // Log the base64 data for verification
+        console.log('QR Code image base64:', base64data);
 
+        // Lưu URL base64 vào qrCodeUrl để sử dụng trong dataPayload
+        qrCodeUrl.value = base64data;
+        qrCodeGenerated.value = true; // Đánh dấu rằng QR code đã được tạo thành công
+      };
+      reader.readAsDataURL(blob);
 
-      fetch(
-        `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrCodeData)}`
-      )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.blob();
-        })
-        .then((blob) => {
-          const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(blob);
 
-          // Tạo tên file với thời gian hiện tại
+      // Log the URL for verification
+      console.log('QR Code image URL:', url);
 
-          // Create a temporary anchor element to trigger the download
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = fileName;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
+    })
+    .catch((error) => {
+      console.error("There has been a problem with your fetch operation:", error);
+    })
+    .finally(() => {
+      generateButtonDisabled.value = false; // Re-enable the button after operation completes
+    });
+};
 
-          // Log the URL for verification
-          console.log('QR Code image URL:', downloadPath);
-
-          // Lưu URL blob vào qrCodeUrl để sử dụng trong dataPayload
-          qrCodeUrl.value = url;
-          qrCodeGenerated.value = true; // Đánh dấu rằng QR code đã được tạo thành công
-
-        })
-        .catch((error) => {
-          console.error("There has been a problem with your fetch operation:", error);
-        })
-        .finally(() => {
-          generateButtonDisabled.value = false; // Re-enable the button after operation completes
-        });
-        console.log('QR Code image URL:', downloadPath);
-    };
 
 
     const downloadQRCode = () => {
@@ -226,7 +219,7 @@ export default {
           option_4: options.value[3]?.text,
         },
         floor: parseInt(localFloor.value),
-        qrcode_url: downloadPath,
+        qrcode_url: qrCodeUrl.value,
         banner_url: bannerUrl.value,
         footer_url: footerUrl.value,
         id: parseInt(id.value)
@@ -245,7 +238,7 @@ export default {
           option_4: options.value[3]?.text,
         },
         floor: parseInt(localFloor.value),
-        qrcode_url: downloadPath,
+        qrcode_url: qrCodeUrl.value,
         banner_url: bannerUrl.value,
         footer_url: footerUrl.value,
         id: time, // Chuyển đổi id.value thành kiểu integer
@@ -293,6 +286,7 @@ export default {
 <style scoped>
 /* Banner */
 .login-banner {
+  display: flex;
   background-color: #e13a4b;
   /* Màu đỏ */
   margin-top: 0px;
@@ -608,4 +602,9 @@ export default {
   background-color: #C8C8C8;
   ;
 }
+
+.logout-button {
+  display: flexbox;
+   color: white; /* Màu chữ trắng */
+ }
 </style>
