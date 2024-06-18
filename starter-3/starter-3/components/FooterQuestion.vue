@@ -1,6 +1,6 @@
 <template>
   <footer class="site-footer">
-    <img :src="footerImage" alt="Footer" class="footer-image" />
+    <img :src="footerImage" class="footer-image" />
   </footer>
 </template>
 
