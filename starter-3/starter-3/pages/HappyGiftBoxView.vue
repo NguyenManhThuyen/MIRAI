@@ -10,7 +10,6 @@
   <script>
   import HappyGiftBox from '@/components/HappyGiftBox.vue';
   import FooterQuestion from '@/components/FooterQuestion.vue';
-  import footerImage from '@/assets/images/footerQuestion.png';
   
   export default {
     name: "HappyGiftBoxView",
@@ -20,7 +19,7 @@
     },
     data() {
       return {
-        footerImage,
+        footerImage : localStorage.getItem("imageFooter"),
       };
     },
   };

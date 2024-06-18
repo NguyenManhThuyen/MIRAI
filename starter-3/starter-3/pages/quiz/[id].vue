@@ -20,7 +20,6 @@
 import axios from 'axios';
 import QuizQuestion from '@/components/QuizQuestion.vue';
 import FooterQuestion from '@/components/FooterQuestion.vue';
-import footerImage from '@/assets/images/footerQuestion.png';
 
 export default {
   components: {
@@ -30,7 +29,7 @@ export default {
   
   data() {
     return {
-      footerImage,
+      footerImage:'',
       questionData: {},
       id: null, // Khởi tạo giá trị ban đầu cho id
       apiCalled: false // Biến flag để kiểm tra đã gọi API hay chưa
@@ -52,6 +51,8 @@ export default {
       axios.get(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${id}`)
         .then(response => {
           this.questionData = response.data;
+          this.footerImage = this.questionData.footer_url;
+          localStorage.setItem("imageFooter", this.footerImage);
           console.log('Fetched question data:', this.questionData);
         })
         .catch(error => {

@@ -29,12 +29,14 @@
       <div :class="['floor-display', { 'error-border': showErrors && !localFloor }]">
   <span>階</span>
   <input
-    type="number"
-    v-model.number="localFloor"
-    class="floor-input"
-    @input="updateFloor"
-    :disabled="method === 'PUT'"
-  />
+  type="number"
+  v-model.number="localFloor"
+  class="floor-input"
+  @input="validateAndUpdateFloor"
+  :disabled="method === 'PUT'"
+  min="0"
+/>
+
 </div>
 <div v-if="showErrors">
   <div v-if="!localFloor" class="error-message">
@@ -195,6 +197,14 @@ export default {
   },
 
   methods: {
+    validateAndUpdateFloor(event) {
+      const value = Number(event.target.value);
+      if (value < 0) {
+        this.localFloor = 0;
+      } else {
+        this.localFloor = value;
+      }
+    },
     async fetchQuestionData() {
       try {
         const response = await axios.get(
@@ -314,7 +324,7 @@ export default {
         this.isFooterImageValid &&
         this.isQuestionValid &&
         isValid &&
-        this.localFloor 
+        this.localFloor >=0
         && !(this.questionsFloor.split(',').includes(this.localFloor.toString()) && this.method === 'POST')
       ){
         // Prepare data payload to send to the API
@@ -681,6 +691,9 @@ margin-bottom: 8px;
     left: 50%; /* Đặt left là 50% so với phần tử cha */
     transform: translateX(-50%); /* Dịch chuyển vị trí sang trái 50% để căn giữa */
   }
+}
+.next-button-container {
+  margin-bottom: 12px;
 }
 
 /* Tối ưu hóa layout cho màn hình có độ rộng nhỏ hơn */

@@ -23,7 +23,7 @@
     <div class="modal" v-if="showModal">
       <div class="modal-content">
         <h2 class="modal-title">質問番号 {{ floor }} を削除しますか?</h2>
-        <p class="modal-subtitle">システムは質問番号 {{ floor }} を削除します</p>
+        <p class="modal-subtitle">システムは{{ floor }} 階の質問を削除する</p>
         <div class="modal-buttons">
           <button class="cancel-button" @click="cancelDelete">キャンセル</button>
           <button class="confirm-button" @click="confirmDelete">確認する</button>

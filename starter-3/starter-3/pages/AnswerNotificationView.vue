@@ -16,7 +16,6 @@
 <script>
 import AnswerNotification from '@/components/AnswerNotification.vue';
 import FooterQuestion from '@/components/FooterQuestion.vue';
-import footerImage from '@/assets/images/footerQuestion.png';
 
 export default {
   components: {
@@ -43,7 +42,7 @@ export default {
   },
   data() {
     return {
-      footerImage,
+      footerImage : localStorage.getItem("imageFooter"),
     };
   },
   mounted() {

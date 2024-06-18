@@ -4,11 +4,13 @@
       <div class="banner-text">ル・ヴァン・サン</div>
       <div class="logout-button" @click="logout">ログアウト</div>
     </div>
-    <div class="parent-component">
-      <HeaderAddQuestion :id="1" />
-    </div>
-    <div class="body-addquestion">
-      <BodyAddQuestion :questionId="questionId" />
+    <div class="scrollable-content">
+      <div class="parent-component">
+        <HeaderAddQuestion :id="1" />
+      </div>
+      <div class="body-addquestion">
+        <BodyAddQuestion :questionId="questionId" />
+      </div>
     </div>
   </div>
 </template>
@@ -20,29 +22,26 @@ import BodyAddQuestion from "~/components/BodyAddQuestion.vue";
 export default {
   components: {
     HeaderAddQuestion,
+    BodyAddQuestion,
   },
   props: {
     id: {
       type: Number,
     },
   },
-
   data() {
     return {
-      questionId:localStorage.getItem("adminQuestionIDCurrent"),
+      questionId: localStorage.getItem("adminQuestionIDCurrent"),
     };
   },
   methods: {
     logout() {
       // Perform logout actions here (if any)
-
       // Navigate to /Admin/Login
       this.$router.push('/Admin/Login');
-    }
+    },
   },
-
-  mounted() {
-  },
+  mounted() {},
 };
 </script>
 
@@ -54,6 +53,10 @@ export default {
   margin-top: 0px;
   width: 100%; /* Chiều rộng bằng 100% của trang */
   height: 56px; /* Chiều cao 56px */
+  position: fixed; /* Cố định vị trí của header */
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Đảm bảo header luôn nằm trên các phần tử khác */
 }
 
 /* Trang đăng nhập */
@@ -69,11 +72,29 @@ export default {
   height: 100vh; /* Chiều cao của toàn bộ trang */
   margin: 0;
   max-height: calc(100dvh); /* Set maximum height to 100 viewport height */
-  overflow-y: auto; /* Enable vertical scrollbar */
+  overflow: hidden; /* Disable scroll on the body */
 
-    /* Hide scrollbar for WebKit browsers */
-    scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  /* Hide scrollbar for WebKit browsers */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.scrollable-content {
+  margin-top: 56px; /* Khoảng cách bằng chiều cao của header để không bị che khuất */
+  width: 100%;
+  height: calc(100vh - 56px); /* Chiều cao trừ đi chiều cao của header */
+  overflow-y: auto; /* Enable vertical scrolling */
+
+  /* Hide scrollbar for WebKit browsers */
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+
+  /* Hide scrollbar for WebKit-based browsers */
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; /* Optional: just in case it's visible in some browser */
+  }
 }
 
 .banner-content {
@@ -82,7 +103,6 @@ export default {
   align-items: center;
   padding: 0 16px; /* Khoảng cách giữa các phần tử */
 }
-
 
 .banner-text {
   font-family: "Noto Sans JP", sans-serif;
@@ -96,7 +116,7 @@ export default {
   align-items: center;
   width: 100%;
   height: 100%;
-  margin-left: 100px
+  margin-left: 100px;
 }
 
 .parent-component {
@@ -118,4 +138,7 @@ export default {
   width: 120px;
 }
 
+.body-addquestion {
+  margin-bottom: 24px;
+}
 </style>

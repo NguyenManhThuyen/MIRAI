@@ -28,5 +28,6 @@ max-height: 90px;
 .footer-image {
   width: 100%;
 height: auto;
+max-height: 56px;
 }
 </style>

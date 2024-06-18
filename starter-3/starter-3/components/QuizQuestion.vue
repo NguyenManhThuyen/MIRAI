@@ -1,7 +1,7 @@
 <template>
   <div class="quiz-container">
-    <!-- <img :src="bannerUrl" alt="Mirai Tower" class="quiz-image" /> -->
-    <img src="@/assets/images/mirai-tower.svg" alt="Mirai Tower" class="quiz-image" />
+    <img :src="bannerUrl" alt="Mirai Tower" class="quiz-image" />
+    <!-- <img src="@/assets/images/mirai-tower.svg" alt="Mirai Tower" class="quiz-image" /> -->
 
     <div class="content">
       <div class="question-counter">
@@ -128,6 +128,7 @@ export default {
 .quiz-image {
   width: 120%;
   height: auto;
+  max-height: 150px;
   padding: 1px;
   transition: transform 0.3s;
   max-width: 100%;
