@@ -8,7 +8,7 @@
         <!-- Hiển thị lỗi khi chưa nhập mã -->
         <div v-if="showErrors && !username" class="error-message">{{ errorMessageEmpty }}</div>
         <!-- Hiển thị lỗi khi mã không chính xác -->
-        <div v-if="showErrors" class="error-message">{{ errorMessageIncorrect }}</div>
+        <div v-if="showErrors && errorCode === 403" class="error-message">{{ errorMessageIncorrect }}</div>
       </div>
       <button type="submit">確認する</button>
     </form>
@@ -31,52 +31,43 @@ export default {
   },
   methods: {
     async handleSubmit() {
-  this.showErrors = true; // Hiển thị thông báo lỗi
-  this.errorCode = null; // Đặt lại mã lỗi
+      this.showErrors = true; // Hiển thị thông báo lỗi
 
-  if (!this.username) {
-    // Nếu username trống, hiển thị thông báo lỗi chưa nhập mã
-    return;
-  } else if (this.username === 'thuyen') {
-    // Nếu username là 'thuyen', hiển thị thông báo lỗi mã không chính xác
-    return;
-  } else {
-    // Nếu không có lỗi, tiếp tục xử lý
-    axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/verifyCode', {
-      email: localStorage.getItem('email'),
-      code: this.username
-    })
-    .then((response) => {
-      if (response.data.status === 404 || response.data.status === 403) {
-        // Nếu API trả về lỗi 404 hoặc 403, hiển thị thông báo lỗi
-        this.errorCode = response.data.status;
-        this.errorMessage = 'コードが正しくありません';
-      } else {
-        localStorage.setItem("code", this.username);
-        console.log('Response:', response.data);
-        this.success = true; // Đặt trạng thái thành công
-        this.$router.push('/Admin/ChangePassword'); // Chuyển hướng tới trang đổi mật khẩu
-        this.$emit('success');
+      if (!this.username) {
+        // Nếu username trống, hiển thị thông báo lỗi chưa nhập mã
+        return;
       }
-    })
-    .catch((error) => {
-      // Kiểm tra mã lỗi và đặt thông báo lỗi tương ứng
-      if (error.response && error.response.status === 403) {
-        this.errorMessage = 'コードが正しくありません';
-      } else {
-        this.errorMessage = 'リクエストの送信に失敗しました。もう一度試してください。';
-      }
-    })
-    .finally(() => {
-      // Sau khi hoàn thành, enable lại nút generate
-      generateButtonDisabled.value = false;
-    });
-  }
-},
 
+      axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/verifyCode', {
+        email: localStorage.getItem('email'),
+        code: this.username
+      })
+      .then((response) => {
+        if (response.data.status === 404 || response.data.status === 403) {
+          // Nếu API trả về lỗi 404 hoặc 403, hiển thị thông báo lỗi
+          this.errorCode = response.data.status;
+          // Hiển thị thông báo lỗi khi mã không chính xác
+          if (this.errorCode === 403) {
+            this.errorMessageIncorrect = 'コードが正しくありません';
+          }
+        } else {
+          localStorage.setItem("code", this.username);
+          console.log('Response:', response.data);
+          this.success = true; // Đặt trạng thái thành công
+          this.$router.push('/Admin/ChangePassword'); // Chuyển hướng tới trang đổi mật khẩu
+          this.$emit('success');
+        }
+      })
+      .catch((error) => {
+        // Xử lý lỗi khi gửi yêu cầu
+        console.error('Error:', error);
+        this.errorMessageIncorrect = 'リクエストの送信に失敗しました。もう一度試してください。';
+      });
+    },
   },
 };
 </script>
+
 
 <style scoped>
 .login-container {

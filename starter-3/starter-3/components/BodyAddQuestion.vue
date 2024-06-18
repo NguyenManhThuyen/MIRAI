@@ -512,7 +512,12 @@ export default {
   border-radius: 12px;
   padding: 4px; /* Thêm padding để tạo khoảng cách xung quanh nội dung */
 }
-
+.body_inner{
+  width: auto;
+  height: auto;
+  padding-left: 12px;
+  padding-right: 12px;
+}
 .image-container {
   margin-right: 16px; /* Adjust as needed */
   padding: 8px; /* Optional padding */

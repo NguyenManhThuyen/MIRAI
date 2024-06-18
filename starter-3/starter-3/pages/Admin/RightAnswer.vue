@@ -56,16 +56,8 @@ export default {
   components: {
     HeaderAddQuestion,
   },
-  mounted() {
-    if (localStorage.getItem("loginStatus") != "true") {
-      // Navigate to /Admin/Login
-      this.$router.push('/Admin/Login');
-    }
-  },
   methods: {
     logout() {
-      // Perform logout actions here (if any)
-      localStorage.setItem("loginStatus", "false");
       // Navigate to /Admin/Login
       this.$router.push('/Admin/Login');
     }

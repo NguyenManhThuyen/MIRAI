@@ -3,10 +3,10 @@
     <h2>ログイン</h2>
     <form @submit.prevent="handleSubmit">
       <div class="input-group">
-        <input type="text" v-model="username" placeholder="ユーザー名または電子メール" required />
+        <input type="text" v-model="username" placeholder="ユーザー名または電子メール" />
       </div>
       <div class="input-group relative">
-        <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="パスワード。" required />
+        <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="パスワード。" />
         <img @click="togglePasswordVisibility" src="@/assets/images/remove-red-eye.svg" alt="Toggle Password Visibility" class="eye-icon"/>
       </div>
       <div class="forgot-password">

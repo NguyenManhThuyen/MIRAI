@@ -3,11 +3,13 @@
     <h2>パスワードを変更する</h2>
     <form @submit.prevent="handleSubmit">
       <div class="input-group">
-        <input type="password" v-model="password" placeholder="新しいパスワード" required />
+        <input type="password" v-model="password" placeholder="新しいパスワード" />
+        <div v-if="showErrors && !password" class="error-message">まだ新しいパスワードが入力していません</div>
       </div>
       <div class="input-group">
-        <input type="password" v-model="confirmPassword" placeholder="新しいパスワードを確認" required />
-        <div v-if="showErrors && passwordMismatch" class="error-message">{{ errorMessage }}</div>
+        <input type="password" v-model="confirmPassword" placeholder="新しいパスワードを確認" />
+        <div v-if="showErrors && !confirmPassword" class="error-message">まだ新しいパスワードの確認が入力していません</div>
+        <div v-if="showErrors && password && confirmPassword && password !== confirmPassword" class="error-message">パスワードが一致しません</div>
       </div>
       <button type="submit">パスワードを変更する</button>
     </form>
@@ -23,41 +25,43 @@ export default {
       password: '',
       confirmPassword: '',
       showErrors: false,
-      passwordMismatch: false,
-      errorMessage: 'パスワードが一致しません', // Thông báo lỗi bằng tiếng Nhật
     };
   },
   methods: {
     async handleSubmit() {
       this.showErrors = true; // Hiển thị thông báo lỗi
-      this.passwordMismatch = this.password !== this.confirmPassword;
 
-      if (!this.passwordMismatch) {
-        console.log('新しいパスワード:', this.password);
-        console.log('新しいパスワードを確認:', this.confirmPassword);
+      // Kiểm tra xem đã nhập đủ thông tin chưa
+      if (!this.password || !this.confirmPassword) {
+        return;
+      }
 
-        try {
-          const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/changePassword', {
-            email: localStorage.getItem('email'),
-            newpassword: this.password,
-            code: localStorage.getItem('code'),
-          });
+      // Kiểm tra xem mật khẩu và xác nhận mật khẩu có khớp nhau không
+      if (this.password !== this.confirmPassword) {
+        return;
+      }
 
-          console.log('Response:', response.data);
-          this.success = true;
-          this.$emit('success');
-          this.showErrors = false;
-          this.$router.push('/Admin/Login'); // Chuyển hướng tới trang login
-        } catch (error) {
-          console.error('Error:', error);
-          this.errorMessage = 'リクエストの送信に失敗しました。もう一度試してください。'; // Thông báo lỗi khi gọi API thất bại
-        }
+      // Nếu mọi thông tin đều hợp lệ, gửi yêu cầu API để thay đổi mật khẩu
+      try {
+        const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/changePassword', {
+          email: localStorage.getItem('email'),
+          newpassword: this.password,
+          code: localStorage.getItem('code'),
+        });
+
+        console.log('Response:', response.data);
+        this.success = true;
+        this.$emit('success');
+        this.showErrors = false;
+        this.$router.push('/Admin/Login'); // Chuyển hướng tới trang login
+      } catch (error) {
+        console.error('Error:', error);
+        this.errorMessage = 'リクエストの送信に失敗しました。もう一度試してください。'; // Thông báo lỗi khi gọi API thất bại
       }
     },
   },
 };
 </script>
-
 <style scoped>
 .login-container {
   background-color: #ffffff;

@@ -78,16 +78,9 @@ export default {
   components: {
     HeaderAddQuestion,
   },
-  mounted() {
-    if (localStorage.getItem("loginStatus") != "true") {
-      // Navigate to /Admin/Login
-      this.$router.push('/Admin/Login');
-    }
-  },
+
   methods: {
     logout() {
-      // Perform logout actions here (if any)
-      localStorage.setItem("loginStatus", "false");
       // Navigate to /Admin/Login
       this.$router.push('/Admin/Login');
     }
@@ -115,7 +108,7 @@ export default {
 
     // Gọi API tại đây để tạo QR code
     let adminQuestionIDCurrent = localStorage.getItem("adminQuestionIDCurrent");
-    let host = "192.168.11.199:3000/quiz";
+    let host = "192.168.11.199:3001/quiz";
     let qrCodeData = `http://${host}/${time}`;
 
     let fileName = `qrcode_${time}.png`;

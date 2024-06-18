@@ -66,19 +66,9 @@ export default {
       correctAnswerOption: "",
     };
   },
-  mounted() {
-  this.fetchQuestionData();
-  if (localStorage.getItem("loginStatus") != "true") {
-      // Navigate to /Admin/Login
-      this.$router.push('/Admin/Login');
-    }
-},
-
 
   methods: {
     logout() {
-      // Perform logout actions here (if any)
-localStorage.setItem("loginStatus", "false");
       // Navigate to /Admin/Login
       this.$router.push('/Admin/Login');
     },
@@ -95,10 +85,10 @@ localStorage.setItem("loginStatus", "false");
           correct_answer_explain: this.correctAnswerExplain,
           correct_answer_name: this.correctAnswerName,
           options: {
-            option_1: this.options[0].text,
-            option_2: this.options[1].text,
-            option_3: this.options[2].text,
-            option_4: this.options[3].text,
+            option_1: this.options.length > 0 ? this.options[0].text : '',
+            option_2: this.options.length > 1 ? this.options[1].text : '',
+            option_3: this.options.length > 2 ? this.options[2].text : '',
+            option_4: this.options.length > 3 ? this.options[3].text : '',
           },
           floor: this.localFloor,
           banner_url: this.bannerUrl,
@@ -114,6 +104,7 @@ localStorage.setItem("loginStatus", "false");
     async fetchQuestionData() {
     // Lấy dữ liệu từ local storage
     const savedData = localStorage.getItem('dataPayload');
+    console.log("getdata",savedData);
 
     // Kiểm tra nếu có dữ liệu đã lưu
     if (savedData) {
@@ -150,6 +141,9 @@ localStorage.setItem("loginStatus", "false");
     }
   }
 
+  },
+  mounted() {
+    this.fetchQuestionData();
   },
 
 };

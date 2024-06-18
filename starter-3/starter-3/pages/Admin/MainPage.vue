@@ -27,8 +27,6 @@ export default {
   },
   methods: {
     logout() {
-      // Perform logout actions here (if any)
-      localStorage.setItem("loginStatus", "false");
       // Navigate to /Admin/Login
       this.$router.push('/Admin/Login');
     }
@@ -227,27 +225,6 @@ export default {
   .content-container {
     width: 90%;
     padding: 16px;
-  }
-}
-
-/* For large devices such as laptops */
-@media (min-width: 769px) and (max-width: 1024px) {
-  /* .login-page {
-    height: calc(100vh - 56px);
-  } */
-
-  .header-container {
-    width: 90%;
-  }
-
-  .nagoya-heading {
-    width: 100%;
-    text-align: left;
-  }
-
-  .content-container {
-    width: 95%;
-    padding: 24px;
   }
 }
 
