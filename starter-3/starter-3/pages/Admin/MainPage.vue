@@ -80,13 +80,24 @@ export default {
   border-radius: 16px; /* Top rounded corners */
 }
 .logout-button {
-  display: flex; /* Sử dụng display: flex để có thể căn giữa */
-  justify-content: center; /* Căn giữa theo chiều ngang */
-  align-items: center; /* Căn giữa theo chiều dọc */
-  cursor: pointer;
+  width: 100px;
+  display: flex; /* Sửa 'flexbox' thành 'flex' */
   color: white; /* Màu chữ trắng */
-  height: 100%; /* Chiều cao của nút */
-  width: 120px;
+  white-space: nowrap; /* Ngăn không cho văn bản ngắt dòng */
+  align-items: center; /* Căn giữa nội dung theo trục dọc nếu có các phần tử con */
+  justify-content: center; /* Căn giữa nội dung theo trục ngang nếu có các phần tử con */
+  padding: 10px 20px; /* Thêm padding cho button */
+  background-color: #E13A4B; /* Màu nền (có thể thay đổi theo nhu cầu) */
+  border: none; /* Loại bỏ đường viền */
+  border-radius: 25px; /* Tạo góc bo tròn cho button */
+  cursor: pointer; /* Hiển thị con trỏ khi hover */
+  font-family: 'Noto Sans JP', sans-serif; /* Font chữ (thay đổi theo nhu cầu) */
+  font-size: 16px; /* Kích thước chữ (thay đổi theo nhu cầu) */
+  transition: background-color 0.3s; /* Thêm hiệu ứng chuyển đổi màu nền khi hover */
+}
+
+.logout-button:hover {
+  background-color: #c12a3b; /* Màu nền khi hover (có thể thay đổi theo nhu cầu) */
 }
 .wrapper {
   background-color: #ffffff; /* Màu nền là trắng */
@@ -154,6 +165,7 @@ export default {
   align-items: center;
   width: 100%;
   height: 100%;
+  margin-left: 100px;
 }
 
 /* For small devices such as phones */

@@ -338,6 +338,7 @@ export default {
   align-items: center;
   width: 100%;
   height: 100%;
+  margin-left: 100px;
 }
 
 .parent-component {
@@ -604,7 +605,169 @@ export default {
 }
 
 .logout-button {
-  display: flexbox;
-   color: white; /* Màu chữ trắng */
- }
+  width: 100px;
+  display: flex; /* Sửa 'flexbox' thành 'flex' */
+  color: white; /* Màu chữ trắng */
+  white-space: nowrap; /* Ngăn không cho văn bản ngắt dòng */
+  align-items: center; /* Căn giữa nội dung theo trục dọc nếu có các phần tử con */
+  justify-content: center; /* Căn giữa nội dung theo trục ngang nếu có các phần tử con */
+  padding: 10px 20px; /* Thêm padding cho button */
+  background-color: #E13A4B; /* Màu nền (có thể thay đổi theo nhu cầu) */
+  border: none; /* Loại bỏ đường viền */
+  border-radius: 25px; /* Tạo góc bo tròn cho button */
+  cursor: pointer; /* Hiển thị con trỏ khi hover */
+  font-family: 'Noto Sans JP', sans-serif; /* Font chữ (thay đổi theo nhu cầu) */
+  font-size: 16px; /* Kích thước chữ (thay đổi theo nhu cầu) */
+  transition: background-color 0.3s; /* Thêm hiệu ứng chuyển đổi màu nền khi hover */
+}
+
+.logout-button:hover {
+  background-color: #c12a3b; /* Màu nền khi hover (có thể thay đổi theo nhu cầu) */
+}
+
+/* Responsive CSS for screens up to 768px */
+@media (max-width: 768px) {
+  .login-banner {
+    height: 52px;
+  }
+  .banner-text {
+    font-size: 16px;
+    margin-left: 100px;
+  }
+  .logout-button {
+    width: 90px;
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  .body {
+    width: 100%;
+    padding: 16px;
+  }
+  .question-label {
+    font-size: 14px;
+    height: 32px;
+  }
+  .qr-code-text {
+    font-size: 18px;
+  }
+  .generate-button {
+    width: 100%;
+    height: 44px;
+    padding: 14px 24px;
+    max-width: 196px;
+  }
+  .generate-button-text {
+    font-size: 16px;
+  }
+}
+
+/* Responsive CSS for screens up to 576px */
+@media (max-width: 576px) {
+  .login-banner {
+    height: 48px;
+  }
+  .banner-text {
+    font-size: 14px;
+    margin-left: 80px;
+  }
+  .logout-button {
+    width: 80px;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  .body {
+    width: 100%;
+    padding: 12px;
+  }
+  .question-label {
+    font-size: 12px;
+    height: 28px;
+  }
+  .qr-code-text {
+    font-size: 16px;
+  }
+  .generate-button {
+    width: 100%;
+    height: 40px;
+    padding: 10px 20px;
+    max-width: 160px;
+  }
+  .generate-button-text {
+    font-size: 14px;
+  }
+}
+
+/* Responsive CSS for screens up to 480px */
+@media (max-width: 480px) {
+  .login-banner {
+    height: 40px;
+  }
+  .banner-text {
+    font-size: 12px;
+    margin-left: 60px;
+  }
+  .logout-button {
+    width: 70px;
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+  .body {
+    width: 100%;
+    padding: 8px;
+  }
+  .question-label {
+    font-size: 10px;
+    height: 24px;
+  }
+  .qr-code-text {
+    font-size: 14px;
+  }
+  .generate-button {
+    width: 100%;
+    height: 36px;
+    padding: 6px 12px;
+    max-width: 140px;
+  }
+  .generate-button-text {
+    font-size: 12px;
+  }
+}
+
+/* Responsive CSS for screens up to 320px */
+@media (max-width: 320px) {
+  .login-banner {
+    height: 36px;
+  }
+  .banner-text {
+    font-size: 10px;
+    margin-left: 40px;
+  }
+  .logout-button {
+    width: 60px;
+    padding: 4px 8px;
+    font-size: 8px;
+  }
+  .body {
+    width: 100%;
+    padding: 6px;
+  }
+  .question-label {
+    font-size: 8px;
+    height: 20px;
+  }
+  .qr-code-text {
+    font-size: 12px;
+  }
+  .generate-button {
+    width: 100%;
+    height: 32px;
+    padding: 4px 8px;
+    max-width: 120px;
+  }
+  .generate-button-text {
+    font-size: 10px;
+  }
+}
+
+
 </style>

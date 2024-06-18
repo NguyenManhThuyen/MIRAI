@@ -334,6 +334,7 @@ export default {
   color: #1A1A1A;
   /* Đặt màu cho văn bản */
   margin-right: 24px;
+  margin-left: 100px;
 }
 
 /* CSS cho phần .generate */
@@ -495,12 +496,191 @@ export default {
 }
 
 .logout-button {
-  display: flex; /* Sử dụng display: flex để có thể căn giữa */
-  justify-content: center; /* Căn giữa theo chiều ngang */
-  align-items: center; /* Căn giữa theo chiều dọc */
-  cursor: pointer;
+  width: 100px;
+  display: flex; /* Sửa 'flexbox' thành 'flex' */
   color: white; /* Màu chữ trắng */
-  height: 100%; /* Chiều cao của nút */
-  width: 120px;
+  white-space: nowrap; /* Ngăn không cho văn bản ngắt dòng */
+  align-items: center; /* Căn giữa nội dung theo trục dọc nếu có các phần tử con */
+  justify-content: center; /* Căn giữa nội dung theo trục ngang nếu có các phần tử con */
+  padding: 10px 20px; /* Thêm padding cho button */
+  background-color: #E13A4B; /* Màu nền (có thể thay đổi theo nhu cầu) */
+  border: none; /* Loại bỏ đường viền */
+  border-radius: 25px; /* Tạo góc bo tròn cho button */
+  cursor: pointer; /* Hiển thị con trỏ khi hover */
+  font-family: 'Noto Sans JP', sans-serif; /* Font chữ (thay đổi theo nhu cầu) */
+  font-size: 16px; /* Kích thước chữ (thay đổi theo nhu cầu) */
+  transition: background-color 0.3s; /* Thêm hiệu ứng chuyển đổi màu nền khi hover */
 }
+
+.logout-button:hover {
+  background-color: #c12a3b; /* Màu nền khi hover (có thể thay đổi theo nhu cầu) */
+}
+/* Responsive CSS for screens up to 768px */
+@media (max-width: 768px) {
+  .login-banner {
+    height: 52px;
+  }
+  .banner-text {
+    font-size: 18px;
+    margin-left: 120px;
+  }
+  .logout-button {
+    width: 110px;
+    font-size: 16px;
+    padding: 12px 24px;
+  }
+  .body {
+    width: 100%;
+    padding: 20px;
+  }
+  .question-label {
+    font-size: 16px;
+    height: 40px;
+  }
+  .qr-code-text {
+    font-size: 22px;
+  }
+  .generate-button {
+    width: 100%;
+    height: 60px;
+    padding: 16px 28px;
+    max-width: 220px;
+  }
+  .generate-button-text {
+    font-size: 18px;
+  }
+  .body h2 {
+    font-size: 24px;
+  }
+  .error-message {
+    font-size: 16px;
+  }
+}
+
+/* Responsive CSS for screens up to 576px */
+@media (max-width: 576px) {
+  .login-banner {
+    height: 48px;
+  }
+  .banner-text {
+    font-size: 16px;
+    margin-left: 100px;
+  }
+  .logout-button {
+    width: 90px;
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+  .body {
+    width: 100%;
+    padding: 16px;
+  }
+  .question-label {
+    font-size: 14px;
+    height: 36px;
+  }
+  .qr-code-text {
+    font-size: 18px;
+  }
+  .generate-button {
+    width: 100%;
+    height: 44px;
+    padding: 14px 24px;
+    max-width: 196px;
+  }
+  .generate-button-text {
+    font-size: 16px;
+  }
+  .body h2 {
+    font-size: 20px;
+  }
+  .error-message {
+    font-size: 14px;
+  }
+}
+
+/* Responsive CSS for screens up to 480px */
+@media (max-width: 480px) {
+  .login-banner {
+    height: 40px;
+  }
+  .banner-text {
+    font-size: 14px;
+    margin-left: 80px;
+  }
+  .logout-button {
+    width: 80px;
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+  .body {
+    width: 100%;
+    padding: 12px;
+  }
+  .question-label {
+    font-size: 12px;
+    height: 32px;
+  }
+  .qr-code-text {
+    font-size: 16px;
+  }
+  .generate-button {
+    width: 100%;
+    height: 40px;
+    padding: 10px 20px;
+    max-width: 160px;
+  }
+  .generate-button-text {
+    font-size: 14px;
+  }
+  .body h2 {
+    font-size: 18px;
+  }
+  .error-message {
+    font-size: 12px;
+  }
+}
+
+/* Responsive CSS for screens up to 320px */
+@media (max-width: 320px) {
+  .login-banner {
+    height: 36px;
+  }
+  .banner-text {
+    font-size: 12px;
+    margin-left: 60px;
+  }
+  .logout-button {
+    width: 70px;
+    font-size: 10px;
+    padding: 6px 12px;
+  }
+  .body {
+    width: 100%;
+    padding: 8px;
+  }
+  .question-label {
+    font-size: 10px;
+    height: 28px;
+  }
+  .qr-code-text {
+    font-size: 14px;
+  }
+  .generate-button {
+    width: 100%;
+    height: 36px;
+    padding: 6px 12px;
+    max-width: 140px;
+  }
+  .generate-button-text {
+    font-size: 12px;
+  }
+  .body h2 {
+    font-size: 16px;
+  }
+  .error-message {
+    font-size: 10px;
+  }
+}
+
 </style>

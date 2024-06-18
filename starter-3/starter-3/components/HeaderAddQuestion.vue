@@ -117,16 +117,20 @@ export default {
 .icon-container {
   position: relative;
   background-color: #ffffff;
-  width: 819px;
+  width: 100%;
+  max-width: 819px;
   max-height: 90px;
   border-radius: 16px;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 .icon-row {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 16px;
+  flex-wrap: wrap; /* Cho phép các biểu tượng xuống dòng khi màn hình nhỏ */
+  margin-top: 4px;
   margin-bottom: auto;
 }
 
@@ -136,6 +140,7 @@ export default {
   align-items: center;
   margin-top: auto;
   margin-bottom: auto;
+  margin: 5px;
 }
 
 .icon {
@@ -165,24 +170,38 @@ export default {
   color: red;
 }
 
-@media (max-width: 1024px) {
-  .icon-container {
-    width: 600px;
-  }
-}
-
 @media (max-width: 768px) {
   .icon-container {
-    width: 400px;
+    max-width: 600px;
+    padding: 8px;
+  }
+  .icon-wrapper img {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    margin-left: 8px;
+  }
+  .icon-container img.line-icon {
+    width: 50px;
   }
 }
 
 @media (max-width: 480px) {
+  .icon-container {
+    max-width: 100%;
+    padding: 5px;
+  }
   .icon-wrapper img {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     margin-right: 6px;
     margin-left: 6px;
+  }
+  .icon-container img.line-icon {
+    width: 40px;
+  }
+  .icon-text {
+    font-size: 12px;
   }
 }
 </style>

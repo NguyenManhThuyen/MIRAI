@@ -185,249 +185,379 @@ export default {
 
 
   <style scoped>
-    /* Banner */
-    .login-banner {
-      display: flex;
-      background-color: #E13A4B; /* Màu đỏ */
-      margin-top: 0px;
-      width: 100%; /* Chiều rộng bằng 100% của trang */
-      height: 56px; /* Chiều cao 56px */
-    }
-    
-    /* Trang đăng nhập */
-    .login-page {
-      background-color: #F9EFE3; /* Màu nền */
-      background-image: url('@/assets/images/background.svg'); /* Hình nền */
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: cover;
-      flex-direction: column; /* Sắp xếp theo chiều dọc */
-      justify-content: center;
-      align-items: center;
-      height: 100vh; /* Chiều cao của toàn bộ trang */
-      margin: 0;
+/* Banner */
+.login-banner {
+  display: flex;
+  background-color: #E13A4B; /* Màu đỏ */
+  margin-top: 0px;
+  width: 100%; /* Chiều rộng bằng 100% của trang */
+  height: 56px; /* Chiều cao 56px */
+}
 
-      max-height: calc(100dvh); /* Set maximum height to 100 viewport height */
+/* Trang đăng nhập */
+.login-page {
+  background-color: #F9EFE3; /* Màu nền */
+  background-image: url('@/assets/images/background.svg'); /* Hình nền */
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  flex-direction: column; /* Sắp xếp theo chiều dọc */
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Chiều cao của toàn bộ trang */
+  margin: 0;
+
+  max-height: calc(100dvh); /* Set maximum height to 100 viewport height */
   overflow-y: auto; /* Enable vertical scrollbar */
 
-    /* Hide scrollbar for WebKit browsers */
-    scrollbar-width: none; /* Firefox */
+  /* Hide scrollbar for WebKit browsers */
+  scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
-    }
-  
-    .banner-text {
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 23.17px;
-      text-align: center;
-      color: white; /* Màu chữ trắng */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      margin-left: 100px
-    }
-  
-    .parent-component {
-      display: flex;
-      justify-content: center; /* Căn giữa theo chiều ngang */
-      align-items: center; /* Căn giữa theo chiều dọc */
-      flex-direction: column; /* Sắp xếp theo chiều dọc */
-      padding-top: 24px;
-      padding-bottom: 24px;
-    }
-    
-    /* Hiển thị questionId */
-    .question-id {
-      font-size: 18px;
-      margin-top: 20px;
-    }
-  
-    /* CSS cho phần body */
-    .body {
-    width: 819px;
-    height: auto; /* Sử dụng chiều cao tự động để nội dung có thể mở rộng */
-    padding: 24px;
-    gap: 10px;
-    border-radius: 16px;
-    opacity: 0px;
-    background: #FFFFFF;
-    margin: 0 auto; /* Canh ra giữa theo chiều ngang */
-    display: flex; /* Sử dụng flexbox để căn giữa button */
-    flex-direction: column; /* Sắp xếp theo chiều dọc */
-    justify-content: center; /* Căn giữa theo chiều dọc */
-    align-items: center; /* Căn giữa theo chiều ngang */
-  }
-  
-    /* Hiển thị "質問" với ID câu hỏi */
-    .question-label {
-      width: fit-content;
-      height: 36px;
-      padding: 8px 12px;
-      gap: 10px;
-      border-radius: 44px;
-      opacity: 1;
-      background: #000000;
-      color: white;
-      font-size: 14px;
-      font-weight: bold;
-      text-align: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 20px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-  
-    /* CSS cho QR code container */
-    .qr-code-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 20px;
-      margin-bottom: 12px;
-    }
-  
-    /* CSS cho hình ảnh QR code */
-    .qr-code-image {
-      width: 24px; /* Điều chỉnh kích thước của hình ảnh QR code */
-      height: 24px;
-      margin-right: 8px; /* Khoảng cách giữa hình ảnh và văn bản */
-    }
-  
-    /* CSS cho văn bản QR code */
-    .qr-code-text {
-      font-family: 'Noto Sans JP', sans-serif; /* Sử dụng font-family Noto Sans JP */
-      font-size: 24px; /* Đặt kích thước font cho văn bản */
-      font-weight: 500; /* Đặt độ đậm cho văn bản */
-      line-height: 36px; /* Đặt chiều cao dòng cho văn bản */
-      text-align: center; /* Căn giữa văn bản */
-      color: #E13A4B; /* Đặt màu cho văn bản */
-    }
-    .logout-button {
-      display: flex; /* Sử dụng display: flex để có thể căn giữa */
-      justify-content: center; /* Căn giữa theo chiều ngang */
-      align-items: center; /* Căn giữa theo chiều dọc */
-      cursor: pointer;
-      color: white; /* Màu chữ trắng */
-      height: 100%; /* Chiều cao của nút */
-      width: 120px;
-    }
-  
-  /* CSS cho nút button và biểu tượng */
-  .button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%; /* Đảm bảo nút button chiếm toàn bộ chiều cao của phần bao bọc */
-  }
-  
-  .center-button {
-    width: fit-content;
-    height: 40px;
-    gap: 8px;
-    border-radius: 12px;
-    border: 1px solid #1A1A1A;
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Căn giữa cả văn bản và biểu tượng */
-  }
-  
-  .icon-plus {
-    width: 20px;
-    height: 20px;
-    margin: 10px 8px 10px 16px;
-  }
-  
-  .button-text {
-    font-family: 'Noto Sans JP', sans-serif; /* Sử dụng font-family Noto Sans JP */
-    font-size: 16px; /* Đặt kích thước font cho văn bản */
-    font-weight: 500; /* Đặt độ đậm cho văn bản */
-    line-height: 20px; /* Đặt chiều cao dòng cho văn bản */
-    color: #1A1A1A; /* Đặt màu cho văn bản */
-    margin-right: 24px;
-  }
-  
-    .generate {
-        display: flex;
-        justify-content: center;
-        margin-top: auto; /* Căn giữa phần .generate xuống dưới cùng */
-        margin-bottom: 0px;
-    }
-    
-    .generate-button {
-        width: 196px;
-        height: 56px;
-        padding: 14px 24px; /* Điều chỉnh giá trị padding ở đây */
-        gap: 10px;
-        border-radius: 112px;
-        background: #E13A4B;
-        color: white;
-    }
-    
-    
-  .generate-button-text {
-    font-family: 'Noto Sans JP', sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 22.4px;
-    text-align: center;
-  }
-  
-  .answer-list {
-    display: flex;
-    flex-direction: column;
-  }
-  
-   /* Thêm border màu xám 1px giữa các オプション*/
-   .answer-item {
-    border: 1px solid #ccc;
-    border-radius: 112px; /* Sử dụng border-radius để tạo border cong */
-    margin-bottom: 8px;
-  }
-  
-  /* Thiết lập kiểu của input radio */
-  .answer-item input[type="radio"] {
-    display: none; /* Ẩn input radio mặc định */
-  }
-  
-  /* Tùy chỉnh kiểu của input radio đã chọn */
-  .answer-item input[type="radio"]:checked + span {
-    background: #31D0AA; /* Đổi màu nền khi đã chọn */
-    color: white; /* Đổi màu văn bản khi đã chọn */
-  }
-  
-  /* Thiết lập kiểu của label */
-  .answer-item span {
-    cursor: pointer;
-    display: inline-block;
-    background: white;
-    width: 771px;
-    height: 56px;
-    padding: 16.36px 24px 15.64px 24px;
-    gap: 0px;
-    border-radius: 112px;
-    opacity: 0px;
-  }
+}
+
+.banner-text {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 23.17px;
+  text-align: center;
+  color: white; /* Màu chữ trắng */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  margin-left: 100px;
+}
+
+.parent-component {
+  display: flex;
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  flex-direction: column; /* Sắp xếp theo chiều dọc */
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+/* Hiển thị questionId */
+.question-id {
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+/* CSS cho phần body */
+.body {
+  width: 819px;
+  height: auto; /* Sử dụng chiều cao tự động để nội dung có thể mở rộng */
+  padding: 24px;
+  gap: 10px;
+  border-radius: 16px;
+  opacity: 0px;
+  background: #FFFFFF;
+  margin: 0 auto; /* Canh ra giữa theo chiều ngang */
+  display: flex; /* Sử dụng flexbox để căn giữa button */
+  flex-direction: column; /* Sắp xếp theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều dọc */
+  align-items: center; /* Căn giữa theo chiều ngang */
+}
+
+/* Hiển thị "質問" với ID câu hỏi */
+.question-label {
+  width: fit-content;
+  height: 36px;
+  padding: 8px 12px;
+  gap: 10px;
+  border-radius: 44px;
+  opacity: 1;
+  background: #000000;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* CSS cho QR code container */
+.qr-code-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+/* CSS cho hình ảnh QR code */
+.qr-code-image {
+  width: 24px; /* Điều chỉnh kích thước của hình ảnh QR code */
+  height: 24px;
+  margin-right: 8px; /* Khoảng cách giữa hình ảnh và văn bản */
+}
+
+/* CSS cho văn bản QR code */
+.qr-code-text {
+  font-family: 'Noto Sans JP', sans-serif; /* Sử dụng font-family Noto Sans JP */
+  font-size: 24px; /* Đặt kích thước font cho văn bản */
+  font-weight: 500; /* Đặt độ đậm cho văn bản */
+  line-height: 36px; /* Đặt chiều cao dòng cho văn bản */
+  text-align: center; /* Căn giữa văn bản */
+  color: #E13A4B; /* Đặt màu cho văn bản */
+}
+
+.logout-button {
+  width: 100px;
+  display: flex; /* Sửa 'flexbox' thành 'flex' */
+  color: white; /* Màu chữ trắng */
+  white-space: nowrap; /* Ngăn không cho văn bản ngắt dòng */
+  align-items: center; /* Căn giữa nội dung theo trục dọc nếu có các phần tử con */
+  justify-content: center; /* Căn giữa nội dung theo trục ngang nếu có các phần tử con */
+  padding: 10px 20px; /* Thêm padding cho button */
+  background-color: #E13A4B; /* Màu nền (có thể thay đổi theo nhu cầu) */
+  border: none; /* Loại bỏ đường viền */
+  border-radius: 25px; /* Tạo góc bo tròn cho button */
+  cursor: pointer; /* Hiển thị con trỏ khi hover */
+  font-family: 'Noto Sans JP', sans-serif; /* Font chữ (thay đổi theo nhu cầu) */
+  font-size: 16px; /* Kích thước chữ (thay đổi theo nhu cầu) */
+  transition: background-color 0.3s; /* Thêm hiệu ứng chuyển đổi màu nền khi hover */
+}
+
+.logout-button:hover {
+  background-color: #c12a3b; /* Màu nền khi hover (có thể thay đổi theo nhu cầu) */
+}
+
+/* CSS cho nút button và biểu tượng */
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* Đảm bảo nút button chiếm toàn bộ chiều cao của phần bao bọc */
+}
+
+.center-button {
+  width: fit-content;
+  height: 40px;
+  gap: 8px;
+  border-radius: 12px;
+  border: 1px solid #1A1A1A;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Căn giữa cả văn bản và biểu tượng */
+}
+
+.icon-plus {
+  width: 20px;
+  height: 20px;
+  margin: 10px 8px 10px 16px;
+}
+
+.button-text {
+  font-family: 'Noto Sans JP', sans-serif; /* Sử dụng font-family Noto Sans JP */
+  font-size: 16px; /* Đặt kích thước font cho văn bản */
+  font-weight: 500; /* Đặt độ đậm cho văn bản */
+  line-height: 20px; /* Đặt chiều cao dòng cho văn bản */
+  color: #1A1A1A; /* Đặt màu cho văn bản */
+  margin-right: 24px;
+}
+
+.generate {
+  display: flex;
+  justify-content: center;
+  margin-top: auto; /* Căn giữa phần .generate xuống dưới cùng */
+  margin-bottom: 0px;
+}
+
+.generate-button {
+  width: 196px;
+  height: 56px;
+  padding: 14px 24px; /* Điều chỉnh giá trị padding ở đây */
+  gap: 10px;
+  border-radius: 112px;
+  background: #E13A4B;
+  color: white;
+}
+
+.generate-button-text {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22.4px;
+  text-align: center;
+}
+
+.answer-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Thêm border màu xám 1px giữa các オプション*/
+.answer-item {
+  border: 1px solid #ccc;
+  border-radius: 112px; /* Sử dụng border-radius để tạo border cong */
+  margin-bottom: 8px;
+}
+
+/* Thiết lập kiểu của input radio */
+.answer-item input[type="radio"] {
+  display: none; /* Ẩn input radio mặc định */
+}
+
+/* Tùy chỉnh kiểu của input radio đã chọn */
+.answer-item input[type="radio"]:checked + span {
+  background: #31D0AA; /* Đổi màu nền khi đã chọn */
+  color: white; /* Đổi màu văn bản khi đã chọn */
+}
+
+/* Thiết lập kiểu của label */
+.answer-item span {
+  cursor: pointer;
+  display: inline-block;
+  background: white;
+  width: 771px;
+  height: 56px;
+  padding: 16.36px 24px 15.64px 24px;
+  gap: 0px;
+  border-radius: 112px;
+  opacity: 0px;
+}
+
 /* Thêm dấu check từ ảnh check.svg */
 .answer-item input[type="radio"]:checked + span {
-    background: #31D0AA;
-    color: white;
-    position: relative;
-    }
+  background: #31D0AA;
+  color: white;
+  position: relative;
+}
 
-    .answer-item input[type="radio"]:checked + span::after {
-    content: url('@/assets/images/check.svg');
-    position: absolute;
-    top: 50%;
-    right: 10px; /* Điều chỉnh vị trí dấu check */
-    transform: translateY(-50%);
-    width: 20px; /* Điều chỉnh kích thước dấu check */
-    height: 20px;
-    }
+.answer-item input[type="radio"]:checked + span::after {
+  content: url('@/assets/images/check.svg');
+  position: absolute;
+  top: 50%;
+  right: 10px; /* Điều chỉnh vị trí dấu check */
+  transform: translateY(-50%);
+  width: 20px; /* Điều chỉnh kích thước dấu check */
+  height: 20px;
+}
+
+
+
+@media (max-width: 992px) {
+  .body {
+    width: 800px;
+  }
+}
+
+@media (max-width: 768px) {
+  .body {
+    width: 90%;
+    padding: 16px;
+  }
   
+  .qr-code-text {
+    font-size: 20px;
+  }
+  
+  .generate-button {
+    width: 150px;
+    height: 50px;
+  }
+  
+  .generate-button-text {
+    font-size: 14px;
+  }
+  
+  .answer-item span {
+    max-width: 520px;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .banner-text {
+    font-size: 14px;
+  }
+  
+  .qr-code-text {
+    font-size: 18px;
+  }
+  
+  .generate-button {
+    width: 130px;
+    height: 44px;
+  }
+  
+  .generate-button-text {
+    font-size: 12px;
+  }
+  
+  .answer-item span {
+    font-size: 14px;
+    padding: 12px;
+  }
+  .answer-item span {
+    max-width: 400px;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-text {
+    font-size: 12px;
+  }
+  
+  .qr-code-text {
+    font-size: 16px;
+  }
+  
+  .generate-button {
+    width: 120px;
+    height: 40px;
+  }
+  
+  .generate-button-text {
+    font-size: 10px;
+  }
+  
+  .answer-item span {
+    font-size: 12px;
+    padding: 10px;
+  }
+  .answer-item span {
+    max-width: 350px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 320px) {
+  .banner-text {
+    font-size: 10px;
+  }
+  
+  .qr-code-text {
+    font-size: 14px;
+  }
+  
+  .generate-button {
+    width: 100px;
+    height: 36px;
+  }
+  
+  .generate-button-text {
+    font-size: 8px;
+  }
+  
+  .answer-item span {
+    font-size: 10px;
+    padding: 8px;
+  }
+  .answer-item span {
+    max-width: 300px;
+    padding: 10px;
+  }
+}
+
+
   </style>
   
