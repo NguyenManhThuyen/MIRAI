@@ -250,7 +250,6 @@ export default {
   padding: 24px;
   gap: 10px;
   border-radius: 16px;
-  opacity: 0px;
   background: #FFFFFF;
   margin: 0 auto; /* Canh ra giữa theo chiều ngang */
   display: flex; /* Sử dụng flexbox để căn giữa button */
@@ -419,7 +418,6 @@ export default {
   padding: 16.36px 24px 15.64px 24px;
   gap: 0px;
   border-radius: 112px;
-  opacity: 0px;
 }
 
 /* Thêm dấu check từ ảnh check.svg */

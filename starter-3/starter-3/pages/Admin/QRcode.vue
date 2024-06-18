@@ -108,11 +108,10 @@ export default {
 
     // Gọi API tại đây để tạo QR code
     let adminQuestionIDCurrent = localStorage.getItem("adminQuestionIDCurrent");
-    let host = "192.168.11.199:3001/quiz";
+    let host = "d3plf1sez0mamd.cloudfront.net/quiz";
     let qrCodeData = `http://${host}/${time}`;
 
     let fileName = `qrcode_${time}.png`;
-    let downloadPath = `C:/Users/thuyen.nm/Downloads/${fileName}`;
 
     const fetchQuestionData = () => {
       const savedData = localStorage.getItem('dataPayload');
@@ -366,7 +365,6 @@ export default {
   padding: 24px;
   gap: 10px;
   border-radius: 16px;
-  opacity: 0px;
   background: #ffffff;
   margin: 0 auto;
   /* Canh ra giữa theo chiều ngang */
