@@ -12,7 +12,7 @@
       :floor="questionData.floor"
     />
   
-    <FooterQuestion :footerImage="footerImage" class="footer-question" />
+    <FooterQuestion v-if="footerImage" :footerImage="footerImage" class="footer-question" />
   </div>
 </template>
 
