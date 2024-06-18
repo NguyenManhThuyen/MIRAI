@@ -50,10 +50,10 @@ export default {
         if (response.status === 200) {
           this.$router.push('/Admin/MainPage');
         } else {
-          this.loginError = 'パスワードが間違っているか、このアカウントは存在しません。パスワードをリセットするか、この記事を確認してください。';
+          this.loginError = 'サーバーに接続できません。後でもう一度やり直してください。';
         }
       } catch (error) {
-        this.loginError = 'サーバーに接続できません。後でもう一度やり直してください。';
+        this.loginError = 'パスワードが間違っているか、このアカウントは存在しません。パスワードをリセットするか、この記事を確認してください。';
         console.error('Login error:', error);
       }
     },

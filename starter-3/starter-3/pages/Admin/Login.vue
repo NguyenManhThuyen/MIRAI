@@ -17,6 +17,7 @@ export default {
   },
   methods: {
     handleLoginSuccess() {
+      localStorage.setItem("loginStatus", "true");
       this.$router.push({ name: '/Admin/MainPage' });
     }
   }

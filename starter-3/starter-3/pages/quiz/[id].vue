@@ -83,21 +83,37 @@ export default {
       localStorage.setItem('totalAnswer', 0);
     }
 
-    // Kiểm tra nếu quiz id đã được trả lời
     const answeredQuestions = JSON.parse(localStorage.getItem('answeredQuestions') || '[]');
-    if (answeredQuestions.includes(this.id)) {
-      alert('この質問にはすでに回答しています。');
-      // Chuyển hướng nếu quiz đã được trả lời
-      this.redirectToHappyGiftBoxView();
+    const oneDayInMillis = 24 * 60 * 60 * 1000;
+    const now = new Date().getTime();
+
+    // Filter out questions that were answered more than 1 day (24 hours) ago
+    let updatedQuestions = answeredQuestions.filter(entry => {
+        return !(entry.timestamp && (now - entry.timestamp) > oneDayInMillis);
+    });
+
+    if (updatedQuestions.some(entry => entry.id === this.id)) {
+        // Nếu câu hỏi đã được trả lời
+        const answeredQuestion = updatedQuestions.find(entry => entry.id === this.id);
+        if (answeredQuestion && (now - answeredQuestion.timestamp) > oneDayInMillis) {
+            // Nếu câu hỏi đã được trả lời và quá 1 ngày, xoá ID này
+            updatedQuestions = updatedQuestions.filter(entry => entry.id !== this.id);
+            localStorage.setItem('answeredQuestions', JSON.stringify(updatedQuestions));
+        }
+        alert('この質問にはすでに回答しています。');
+        // Chuyển hướng nếu quiz đã được trả lời
+        this.redirectToHappyGiftBoxView();
     } else {
-      // Gọi API chỉ khi biến flag là false
-      if (hasVisited !== 'true') {
-        // Nếu chưa truy cập, chuyển hướng đến HomeUserView
-        this.redirectToHomeUserView();
-      } else if (!this.apiCalled) {
-        this.fetchQuestionData(this.id);
-      }
+        // Gọi API chỉ khi biến flag là false
+        if (hasVisited !== 'true') {
+            // Nếu chưa truy cập, chuyển hướng đến HomeUserView
+            this.redirectToHomeUserView();
+        } else if (!this.apiCalled) {
+            // Nếu chưa gọi API, gọi hàm fetchQuestionData
+            this.fetchQuestionData(this.id);
+        }
     }
+
   },
 };
 </script>

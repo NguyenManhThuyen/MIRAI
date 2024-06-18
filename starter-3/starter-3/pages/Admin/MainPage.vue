@@ -28,7 +28,7 @@ export default {
   methods: {
     logout() {
       // Perform logout actions here (if any)
-
+      localStorage.setItem("loginStatus", "false");
       // Navigate to /Admin/Login
       this.$router.push('/Admin/Login');
     }

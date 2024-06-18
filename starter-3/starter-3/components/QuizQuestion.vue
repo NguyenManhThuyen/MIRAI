@@ -89,10 +89,19 @@ export default {
       localStorage.setItem("correctAnswer", correctAnswer.toString());
     }
 
-    // Lưu id của câu hỏi đã trả lời vào mảng và lưu mảng vào local storage
-    let answeredQuestions = JSON.parse(localStorage.getItem("answeredQuestions") || "[]");
-    answeredQuestions.push(this.id);
-    localStorage.setItem("answeredQuestions", JSON.stringify(answeredQuestions));
+      // Load answered questions from local storage
+      let answeredQuestions = JSON.parse(localStorage.getItem("answeredQuestions") || "[]");
+
+      // Filter out questions that were answered more than 1 day (24 hours) ago
+      const oneDayInMillis = 24 * 60 * 60 * 1000;
+      const now = new Date().getTime();
+      answeredQuestions = answeredQuestions.filter(entry => (now - entry.timestamp) <= oneDayInMillis);
+
+      // Add the current question ID with the timestamp
+      answeredQuestions.push({ id: this.id, timestamp: now });
+
+      // Save the updated array back to local storage
+      localStorage.setItem("answeredQuestions", JSON.stringify(answeredQuestions));
 
     // Sau 5 giây, điều hướng đến trang thông báo
     setTimeout(() => {
