@@ -490,6 +490,11 @@ export default {
   border-color: #e13a4b; /* Thay đổi màu viền khi có lỗi */
 }
 
+.body_inner{
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
 .question-heading {
   display: flex;
   align-items: center;
@@ -608,8 +613,6 @@ margin-bottom: 8px;
   padding: 10px 24px 10px 16px;
   gap: 8px;
   border-radius: 12px;
-  border: 1px 0px 0px 0px;
-  opacity: 0px;
   position: absolute; /* Đặt vị trí là absolute */
 }
 

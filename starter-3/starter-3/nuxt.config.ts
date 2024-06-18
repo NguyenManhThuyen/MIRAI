@@ -29,8 +29,8 @@ export default defineNuxtConfig({
     }
   },  
   routeRules: {
-    '/users/**': { proxy: { to: "https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/**" } }
+    '/users/**': { proxy: { to: "https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/**" } },
+    '/': { redirect: '/Admin/Login' },
   },
   modules: ["@stefanobartoletti/nuxt-social-share"],
-  
 })

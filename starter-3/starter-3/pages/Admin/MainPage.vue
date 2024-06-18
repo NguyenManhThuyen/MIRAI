@@ -123,7 +123,6 @@ export default {
   width: 771px;
   height: 44px;
   gap: 16px;
-  opacity: 0px;
   position: relative; /* Set position to relative */
 }
 
@@ -141,7 +140,7 @@ export default {
 /* Content Container */
 .content-container {
   width: 817px; /* Width */
-  height: calc(auto - 100px); /* Height */
+  height: auto; /* Height */
   padding: 24px 24px 12px 24px; /* Padding */
   gap: 10px; /* Gap */
   border-radius: 16px; /* Bottom rounded corners */

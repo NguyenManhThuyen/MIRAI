@@ -367,7 +367,6 @@ export default {
   padding: 24px;
   gap: 10px;
   border-radius: 16px;
-  opacity: 0px;
   background: #ffffff;
   margin: 0 auto;
   /* Canh ra giữa theo chiều ngang */
