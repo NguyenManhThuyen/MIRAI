@@ -70,7 +70,7 @@ const togglePasswordVisibility = () => {
   border-radius: 10px;
   width: 100%;
   max-width: 400px;
-  margin: 0 auto;
+  margin-bottom: 100px;
   text-align: center;
 }
 
@@ -93,7 +93,7 @@ h2 {
 
 .input-group input {
   border: 1px solid #ccc;
-  border-radius: 25px;
+  border-radius: 12px;
   font-size: 16px;
   width: 100%;
   max-width: 437px;
@@ -160,19 +160,15 @@ button:hover {
 .error-message {
   width: 100%;
   height: auto;
-  background: #2E7CF633;
-  color: #2E7CF6;
+  color: #FF0909;
   border: none;
   padding: 12px 16px;
-  border-radius: 112px;
-  gap: 10px;
+  border-radius: 12px;
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 14px;
   font-weight: 500;
   line-height: 19.6px;
   text-align: center;
-  word-wrap: break-word;
-  white-space: normal;
-  margin-bottom: 8px;
+  margin-top: 8px;
 }
 </style>
