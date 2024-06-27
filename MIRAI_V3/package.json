@@ -1,0 +1,17 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@stefanobartoletti/nuxt-social-share": "^0.7.0",
+    "axios": "^1.7.2",
+    "nuxt": "^3.12.2"
+  }
+}
