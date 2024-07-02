@@ -1,0 +1,50 @@
+<template>
+  <div>
+    <button @click="showAlert">Show Alert</button>
+    <AlertComponent
+      :title="alertTitle"
+      :content="alertContent"
+      :actionText="alertActionText"
+      :visible="alertVisible"
+      @cancel="handleCancel"
+      @confirm="handleConfirm"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
+// Optionally, import a custom CSS file if you want to customize the progress bar
+// import '@/assets/css/nprogress-custom.css';
+
+const alertTitle = ref('Confirm Deletion');
+const alertContent = ref('Are you sure you want to delete this item?');
+const alertActionText = ref('Delete');
+const alertVisible = ref(false);
+
+const showAlert = () => {
+  NProgress.start();
+  NProgress.set(0.4) 
+  
+  setTimeout(() => {
+    alertVisible.value = true;
+    NProgress.inc();
+    NProgress.done();
+  }, 3000); // Simulate a 2-second delay before showing the alert
+};
+
+const handleCancel = () => {
+  alertVisible.value = false;
+};
+
+const handleConfirm = () => {
+  // Handle the confirm action here
+  alertVisible.value = false;
+};
+</script>
+
+<style>
+/* Add any custom styles if needed */
+</style>
