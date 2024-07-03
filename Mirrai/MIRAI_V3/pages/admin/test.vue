@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-      <HeaderQuestionUser :numberOfQuestions="10" :currentQuestion="3" />
+      <HeaderStampQuestionUser :numberOfQuestions="6" :currentQuestion="3" />
     </div>
   </template>
   

@@ -10,8 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@fontsource/noto-sans-jp": "^5.0.19",
     "@stefanobartoletti/nuxt-social-share": "^0.7.0",
     "axios": "^1.7.2",
+    "html2canvas": "^1.4.1",
     "nprogress": "^0.2.0",
     "nuxt": "^3.12.2",
     "vue-loading-indicator": "^0.0.2"

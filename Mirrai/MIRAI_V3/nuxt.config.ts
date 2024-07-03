@@ -15,6 +15,7 @@ export default defineNuxtConfig({
   },
   nitro: {
     devProxy: {
+      host: '192.168.11.199',
       "/**": {
         target: "https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com",
         headers: {

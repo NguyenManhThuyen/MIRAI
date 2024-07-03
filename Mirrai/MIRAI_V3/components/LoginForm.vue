@@ -22,7 +22,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import eyeIcon from '@/assets/images/remove-red-eye.svg'
+import eyeIcon from '@/assets/images/admin-remove-red-eye.svg'
 
 const username = ref('')
 const password = ref('')

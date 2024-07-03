@@ -2,7 +2,7 @@
   <div>
     <div class="login-page">
       <div class="branding">
-        <img src="@/assets/images/mirai_icon.svg" class="brand-icon"/>
+        <img src="@/assets/images/mirai-icon.svg" class="brand-icon"/>
         <p class="brand-text">スカイウォーキング・デジタルクイズチャレンジ Admin</p>
       </div>
       <LoginForm @login-success="handleLoginSuccess" />
