@@ -30,7 +30,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const questions = ref([
   {
@@ -47,17 +50,15 @@ const currentQuestion = computed(() => questions.value[currentQuestionIndex.valu
 const selectedAnswer = ref(null);
 
 function selectAnswer(index) {
-  if (selectedAnswer.value === index) {
-    return; // Do nothing if already selected
+  if (selectedAnswer.value !== null) {
+    return; // Prevent changing the answer if one is already selected
   }
   
-  // Clear previous selected answer after 3 seconds
-  const previousSelected = selectedAnswer.value;
   selectedAnswer.value = index;
   
-  // Reset selectedAnswer after 3 seconds
+  // Navigate to a new route after 3 seconds
   setTimeout(() => {
-    selectedAnswer.value = null;
+    router.push('/users/questionCorrect');
   }, 3000);
   
   // Animate the button scale for 3 seconds
@@ -68,17 +69,10 @@ function selectAnswer(index) {
       button.classList.remove('hover-animation');
     }, 3000);
   }
-  
-  // Reset previous selected button scale
-  if (previousSelected !== null) {
-    const prevButton = document.querySelectorAll('.answer-option button')[previousSelected];
-    if (prevButton) {
-      prevButton.classList.remove('hover-animation');
-    }
-  }
 }
-
 </script>
+
+
 
 <style scoped>
 .quiz-container {

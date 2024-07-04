@@ -22,19 +22,22 @@
         <br/>
         あなたは、App Store の利用規約への違反から生じるすべての損害および損失から Apple および第三者を補償することに同意します。
       </p>
-      <button class="back-button">
+      <button class="back-button" @click="goBack">
         <span class="button-icon"></span> 前のページに戻る
       </button>
     </div>
-
     <FooterQuestionUser />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-// Define any logic here if needed
+const router = useRouter();
+
+function goBack() {
+  router.back();
+}
 </script>
 
 <style scoped>

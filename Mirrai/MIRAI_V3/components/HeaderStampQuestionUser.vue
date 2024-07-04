@@ -89,6 +89,7 @@
       margin: 0;
       overflow-y: auto;
       overflow-x: hidden; /* Ẩn thanh cuộn ngang nếu có */
+      z-index: 999;
   
       /* Configure background image */
       background-image: url('@/assets/images/question-background.svg');

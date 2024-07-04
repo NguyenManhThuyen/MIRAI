@@ -1,7 +1,9 @@
 <template>
     <footer class="footer">
       <div class="terms">
-        <p>利用規約と条件</p>
+        <NuxtLink to="/users/questionRules">
+          <p>利用規約と条件</p>
+        </NuxtLink>
       </div>
       <div class="copyright">
         <p class="company">中部電力MIRAI TOWER</p>

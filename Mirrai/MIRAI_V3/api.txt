@@ -1,0 +1,20 @@
+https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users
+
+https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/login
+{
+    "email" : "john@example.com",
+    "password" : "thuyendeptrai"
+}
+
+https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/sendCode
+{
+    "email" : "john@example.com"
+}
+
+https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/changePassword
+{
+    "email" : "john@example.com",
+    "password" : "1720088982",
+    "newpassword" : "thuyendeptrai",
+    "confirmpassword" :"thuyendeptrai"
+}
