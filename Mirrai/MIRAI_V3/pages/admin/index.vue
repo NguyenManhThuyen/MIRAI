@@ -21,7 +21,7 @@ import 'nprogress/nprogress.css';
 
 const alertTitle = ref('Confirm Deletion');
 const alertContent = ref('Are you sure you want to delete this item?');
-const alertActionText = ref('Delete');
+const alertActionText = ref('Scucce');
 const alertVisible = ref(false);
 
 const showAlert = () => {
@@ -32,16 +32,18 @@ const showAlert = () => {
     alertVisible.value = true;
     NProgress.inc();
     NProgress.done();
-  }, 3000); // Simulate a 2-second delay before showing the alert
+  }, 1000); // Simulate a 2-second delay before showing the alert
 };
 
 const handleCancel = () => {
   alertVisible.value = false;
+  console.log("Cancelled");
 };
 
 const handleConfirm = () => {
   // Handle the confirm action here
   alertVisible.value = false;
+  console.log("Confirmed");
 };
 </script>
 

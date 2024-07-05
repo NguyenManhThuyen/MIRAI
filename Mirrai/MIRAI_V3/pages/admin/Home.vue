@@ -1,32 +1,38 @@
 <template>
-    <HeaderAdminHome />
-    <div class="admin-home">
-      <div class="spacer"></div>
-      <div class="content">
-        <div class="tabs">
-          <div class="tab" @click="selectedTab = 'question'" :class="{ 'active-tab': selectedTab === 'question' }">
-            <img v-if="selectedTab === 'question'" src="@/assets/images/admin-home-question-icon-white.svg" class="tab-icon1" />
-            <img v-else src="@/assets/images/admin-home-question-icon-black.svg" class="tab-icon" />
-            質問
-          </div>
-          <div class="tab" @click="selectedTab = 'analysis'" :class="{ 'active-tab': selectedTab === 'analysis' }">
-            <img v-if="selectedTab === 'analysis'" src="@/assets/images/admin-home-chart-icon-white.svg" class="tab-icon2" />
-            <img v-else src="@/assets/images/admin-home-chart-icon-black.svg" class="tab-icon" />
-            分析
-          </div>
+  <HeaderAdminHome />
+  <div class="admin-home">
+    <div class="spacer"></div>
+    <div class="content">
+      <div class="tabs">
+        <div class="tab" @click="selectedTab = 'question'" :class="{ 'active-tab': selectedTab === 'question' }">
+          <img v-if="selectedTab === 'question'" src="@/assets/images/admin-home-question-icon-white.svg" class="tab-icon1" />
+          <img v-else src="@/assets/images/admin-home-question-icon-black.svg" class="tab-icon" />
+          質問
         </div>
-
-        <BodyAdminHome/>
+        <div class="tab" @click="selectedTab = 'analysis'" :class="{ 'active-tab': selectedTab === 'analysis' }">
+          <img v-if="selectedTab === 'analysis'" src="@/assets/images/admin-home-chart-icon-white.svg" class="tab-icon2" />
+          <img v-else src="@/assets/images/admin-home-chart-icon-black.svg" class="tab-icon" />
+          分析
+        </div>
+        <div class="tab" @click="selectedTab = 'setting'" :class="{ 'active-tab': selectedTab === 'setting' }">
+          <img v-if="selectedTab === 'setting'" src="@/assets/images/admin-home-setting-icon-white.svg" class="tab-icon2" />
+          <img v-else src="@/assets/images/admin-home-setting-icon-black.svg" class="tab-icon" />
+          設定
+        </div>
       </div>
+
+      <BodyAdminHome v-show="selectedTab === 'question'" />
+      <BodyAdminAnalysis v-show="selectedTab === 'analysis'" />
+      <BodyAdminSetting v-show="selectedTab === 'setting'" />
     </div>
-  </template>
-  
-  <script setup>
-  import { ref } from 'vue';
+  </div>
+</template>
 
-  const selectedTab = ref('question'); // Ban đầu chọn tab '問題'
+<script setup>
+import { ref } from 'vue'
 
-  </script>
+const selectedTab = ref('question')
+</script>
   
   <style scoped>
   .admin-home {

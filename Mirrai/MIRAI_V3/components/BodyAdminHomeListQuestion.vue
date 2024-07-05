@@ -1,70 +1,132 @@
 <template>
-    <div class="question-list">
-      <div class="header">
-        <h2>トピックの質問:</h2>
-        <button @click="createNewQuestion" class="create-button">
-          <p class="icon">+</p>
-          <p class="title">新規作成</p>
-        </button>
-      </div>
-      <div class="questions">
-        <div
-          v-for="(question, index) in questions"
-          :key="question.ID"
-          :class="{ 'no-border': index === questions.length - 1 }"
-          class="question-row"
-        >
-          <div class="index">{{ index + 1 }}</div>
-          <div class="question-image">
-            <img :src="question.questionUrl" alt="Question Image" />
+  <div class="question-list">
+    <div class="header">
+      <h2>トピックの質問:</h2>
+      <button @click="showCreateModal" class="create-button">
+        <p class="icon">+</p>
+        <p class="title">新規作成</p>
+      </button>
+    </div>
+    <div class="questions">
+      <div
+        v-for="(question, index) in questions"
+        :key="question.ID"
+        :class="{ 'no-border': index === questions.length - 1 }"
+        class="question-row"
+      >
+        <div class="index">{{ index + 1 }}</div>
+        <div class="question-image">
+          <img :src="question.questionUrl" alt="Question Image" />
+        </div>
+        <div class="question-text">{{ question.questionName }}</div>
+        <div class="actions">
+          <div class="action-image">
+            <img :src="question.qrcodeUrl" alt="Action Image" />
           </div>
-          <div class="question-text">{{ question.questionName }}</div>
-          <div class="actions">
-            <div class="action-image">
-              <img :src="question.qrcodeUrl" alt="Action Image" />
-            </div>
-            <div class="divider"></div> <!-- Thêm phần này để làm thanh ngăn cách -->
-            <div class="edit">
-              <img src="@/assets/images/admin-home-edit-question-icon.svg" alt="Edit" @click="editQuestion(question.ID)" />
-            </div>
-            <div class="delete">
-              <img src="@/assets/images/admin-home-delete-question-icon.svg" alt="Delete" @click="deleteQuestion(question.ID)" />
-            </div>
+          <div class="divider"></div> <!-- Thêm phần này để làm thanh ngăn cách -->
+          <div class="edit">
+            <img src="@/assets/images/admin-home-edit-question-icon.svg" alt="Edit" @click="editQuestion(question.ID)" />
+          </div>
+          <div class="delete">
+            <img src="@/assets/images/admin-home-delete-question-icon.svg" alt="Delete" @click="confirmDelete(question.ID)" />
           </div>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup>
+    <AlertComponent
+      :title="alertTitle"
+      :content="alertContent"
+      :actionText="alertActionText"
+      :visible="alertVisible"
+      @cancel="handleCancel"
+      @confirm="handleConfirm"
+    />
+    <CreateQuestionModal
+    :visible="createModalVisible"
+    @cancel="createModalVisible = false"
+    @create="handleCreate"
+    @preview="handlePreview"
+  />
+  </div>
+</template>
+
+<script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css'; 
 
 const questions = ref([]);
+const alertTitle = ref('Confirm Deletion');
+const alertContent = ref('Are you sure you want to delete this item?');
+const alertActionText = ref('Delete');
+const alertVisible = ref(false);
+const currentQuestionId = ref(null);
+const createModalVisible = ref(false);
 
 const fetchQuestions = async () => {
   try {
+    NProgress.start();
     const response = await axios.get('http://127.0.0.1:8081/questions');
     questions.value = response.data;
+    NProgress.done();
   } catch (error) {
+    NProgress.done();
     console.error('Error fetching questions:', error);
   }
 };
 
 const createNewQuestion = () => {
-  // Logic to create a new question
+  createModalVisible.value = true;
 };
 
 const editQuestion = (id) => {
   // Logic to edit a question
 };
 
-const deleteQuestion = (id) => {
-  // Logic to delete a question
+const confirmDelete = (id) => {
+  currentQuestionId.value = id;
+  alertVisible.value = true;
+};
+
+const handleCancel = () => {
+  alertVisible.value = false;
+  console.log("Cancelled");
+};
+
+const handleCreate = (newQuestion) => {
+  // Logic to handle creating a new question
+  console.log('New question created:', newQuestion);
+  createModalVisible.value = false;
+  fetchQuestions();
+};
+
+const handlePreview = () => {
+  // Logic to handle preview
+  console.log('Preview clicked');
+};
+
+const handleConfirm = async () => {
+  try {
+    NProgress.start();
+    await axios.delete(`http://127.0.0.1:8081/questions/${currentQuestionId.value}`);
+    alertVisible.value = false;
+    console.log("Confirmed");
+    fetchQuestions(); // Load lại danh sách câu hỏi
+    NProgress.done();
+  } catch (error) {
+    NProgress.done();
+    console.error('Error deleting question:', error);
+  }
+};
+
+const showCreateModal = () => {
+  createModalVisible.value = true;
 };
 
 onMounted(fetchQuestions);
 </script>
+
 <style scoped>
 .question-list {
   margin-top: 10px;

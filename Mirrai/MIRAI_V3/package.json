@@ -16,6 +16,7 @@
     "html2canvas": "^1.4.1",
     "nprogress": "^0.2.0",
     "nuxt": "^3.12.2",
-    "vue-loading-indicator": "^0.0.2"
+    "vue-loading-indicator": "^0.0.2",
+    "vue-picture-cropper": "^0.7.0"
   }
 }
