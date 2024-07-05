@@ -23,6 +23,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import eyeIcon from '@/assets/images/admin-remove-red-eye.svg'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 
 const username = ref('')
 const password = ref('')
@@ -36,6 +38,9 @@ const handleSubmit = async () => {
     return
   }
 
+  NProgress.start()
+  NProgress.set(0.4)
+
   try {
     const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/login', {
       email: username.value,
@@ -46,16 +51,17 @@ const handleSubmit = async () => {
 
     if (response.status === 200) {
       localStorage.setItem('username', username.value)
-      router.push('/Admin/MainPage')
+      router.push('/Admin/Home')
       username.value = ''
       password.value = ''
     } else {
       loginError.value = 'サーバーに接続できません。後でもう一度やり直してください。'
     }
   } catch (error) {
-    //loginError.value = 'パスワードが間違っているか、このアカウントは存在しません。パスワードをリセットするか、この記事を確認してください。'
     loginError.value = 'コードが正しくありません'
     console.error('Login error:', error)
+  } finally {
+    NProgress.done()
   }
 }
 
@@ -180,4 +186,17 @@ button:hover {
   text-align: center;
   margin-top: 8px;
 }
+/* Custom NProgress style */
+#nprogress .bar {
+  background: #2E7CF6 !important; /* Blue color */
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px #2E7CF6, 0 0 5px #2E7CF6 !important; /* Blue color */
+}
+
+#nprogress .spinner {
+  display: none !important; /* Hide the spinner */
+}
+
 </style>

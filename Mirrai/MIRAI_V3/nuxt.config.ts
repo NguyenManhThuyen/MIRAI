@@ -8,7 +8,9 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-
+  plugins: [
+    '~/plugins/nprogress.js'
+  ],
   devServer: {
     host: '0.0.0.0',
     port: 3000,
