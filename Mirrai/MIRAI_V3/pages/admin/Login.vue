@@ -12,7 +12,7 @@
 
 <script setup>
 const handleLoginSuccess = () => {
-  router.push('/Admin/MainPage')
+  router.push('/admin/MainPage')
 }
 </script>
 

@@ -10,7 +10,7 @@
         <img @click="togglePasswordVisibility" :src="eyeIcon" alt="Toggle Password Visibility" class="eye-icon"/>
       </div>
       <div class="forgot-password">
-        <NuxtLink to="/Admin/ChangePasswordTypeEmail">パスワードを忘れましたか?</NuxtLink>
+        <NuxtLink to="/admin/ChangePasswordTypeEmail">パスワードを忘れましたか?</NuxtLink>
       </div>
       <button type="submit">ログイン</button>
       <p v-if="loginError" class="error-message">{{ loginError }}</p>
@@ -51,7 +51,7 @@ const handleSubmit = async () => {
 
     if (response.status === 200) {
       localStorage.setItem('username', username.value)
-      router.push('/Admin/Home')
+      router.push('/admin/Home')
       username.value = ''
       password.value = ''
     } else {

@@ -129,7 +129,7 @@
   }
   
   button:hover {
-    transform: scale(1.02);
+    
   }
   
   .error-message {

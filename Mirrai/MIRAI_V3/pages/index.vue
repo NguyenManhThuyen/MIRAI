@@ -7,6 +7,6 @@
   
   const router = useRouter()
   
-  router.push('/Admin/Login')
+  router.push('/admin/Login')
   </script>
   

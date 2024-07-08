@@ -10,25 +10,25 @@
     <div class="questions">
       <div
         v-for="(question, index) in questions"
-        :key="question.ID"
+        :key="question.id"
         :class="{ 'no-border': index === questions.length - 1 }"
         class="question-row"
       >
         <div class="index">{{ index + 1 }}</div>
         <div class="question-image">
-          <img :src="question.questionUrl" alt="Question Image" />
+          <img :src="getFullImageUrl(question.image_question)" alt="Question Image" />
         </div>
-        <div class="question-text">{{ question.questionName }}</div>
+        <div class="question-text">{{ question.title }}</div>
         <div class="actions">
           <div class="action-image">
-            <img :src="question.qrcodeUrl" alt="Action Image" />
+            <img :src="question.qrcode" alt="Action Image" />
           </div>
           <div class="divider"></div> <!-- Thêm phần này để làm thanh ngăn cách -->
           <div class="edit">
-            <img src="@/assets/images/admin-home-edit-question-icon.svg" alt="Edit" @click="editQuestion(question.ID)" />
+            <img src="@/assets/images/admin-home-edit-question-icon.svg" alt="Edit" @click="editQuestion(question.id)" />
           </div>
           <div class="delete">
-            <img src="@/assets/images/admin-home-delete-question-icon.svg" alt="Delete" @click="confirmDelete(question.ID)" />
+            <img src="@/assets/images/admin-home-delete-question-icon.svg" alt="Delete" @click="confirmDelete(question.id)" />
           </div>
         </div>
       </div>
@@ -47,6 +47,11 @@
     @create="handleCreate"
     @preview="handlePreview"
   />
+  <CreateQuestionSuccessModal
+  v-if="createSuccessModalVisible"
+  :newQuestion="successModalNewQuestion"
+  @close="createSuccessModalVisible = false"
+/>
   </div>
 </template>
 
@@ -54,7 +59,6 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import NProgress from 'nprogress';
-import 'nprogress/nprogress.css'; 
 
 const questions = ref([]);
 const alertTitle = ref('Confirm Deletion');
@@ -63,21 +67,20 @@ const alertActionText = ref('Delete');
 const alertVisible = ref(false);
 const currentQuestionId = ref(null);
 const createModalVisible = ref(false);
+const successModalNewQuestion = ref(null);
+const createSuccessModalVisible = ref(false); // Add this line to define createSuccessModalVisible
+
 
 const fetchQuestions = async () => {
   try {
     NProgress.start();
-    const response = await axios.get('http://127.0.0.1:8081/questions');
+    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
     questions.value = response.data;
     NProgress.done();
   } catch (error) {
     NProgress.done();
     console.error('Error fetching questions:', error);
   }
-};
-
-const createNewQuestion = () => {
-  createModalVisible.value = true;
 };
 
 const editQuestion = (id) => {
@@ -97,7 +100,10 @@ const handleCancel = () => {
 const handleCreate = (newQuestion) => {
   // Logic to handle creating a new question
   console.log('New question created:', newQuestion);
+  successModalNewQuestion.value = newQuestion;
   createModalVisible.value = false;
+  // Show success modal
+  createSuccessModalVisible.value = true;
   fetchQuestions();
 };
 
@@ -109,7 +115,7 @@ const handlePreview = () => {
 const handleConfirm = async () => {
   try {
     NProgress.start();
-    await axios.delete(`http://127.0.0.1:8081/questions/${currentQuestionId.value}`);
+    await axios.delete(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${currentQuestionId.value}`);
     alertVisible.value = false;
     console.log("Confirmed");
     fetchQuestions(); // Load lại danh sách câu hỏi
@@ -124,8 +130,27 @@ const showCreateModal = () => {
   createModalVisible.value = true;
 };
 
+const getFullImageUrl = (url) => {
+  const prefix = "https://mirai-static-website.s3.ap-southeast-1.amazonaws.com/"; // Thay bằng chuỗi bạn muốn nối thêm
+  return prefix + url;
+};
+
+// Watch effect to fetch questions initially and on data change
+watchEffect(async () => {
+  try {
+    NProgress.start();
+    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
+    questions.value = response.data;
+    NProgress.done();
+  } catch (error) {
+    NProgress.done();
+    console.error('Error fetching questions:', error);
+  }
+});
+
 onMounted(fetchQuestions);
 </script>
+
 
 <style scoped>
 .question-list {
