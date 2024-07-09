@@ -88,8 +88,7 @@
 <script setup>
 import { ref } from 'vue';
 import axios from 'axios';
-import NProgress from 'nprogress';
-import 'nprogress/nprogress.css';
+import NProgress from 'nprogress';;
 
 const props = defineProps({
   visible: Boolean,
@@ -181,16 +180,73 @@ const cancel = () => {
   });
 };
 
+// const handleCreate = async () => {
+//   if (loading.value) return;
+
+//   loading.value = true;
+//   NProgress.start();
+
+//   const id = Math.floor(Date.now() / 1000); // Lấy Unix timestamp tính bằng giây
+
+//   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${id}`;
+//   let qrCodeBase64 = '';
+
+//   try {
+//     // Fetch the QR code image and convert it to Base64 concurrently with other requests
+//     const [qrResponse, questionResponse] = await Promise.all([
+//       axios.get(qrCodeUrl, { responseType: 'blob' }),
+//       axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', {
+//         id,
+//         title: questionText.value,
+//         content: questionDescription.value,
+//         sort: parseInt(questionNo.value, 10),
+//         image_question: imageQuestion.value,
+//         image_explain: imageExplain.value,
+//         created_user: 1 // Replace with actual user ID
+//       })
+//     ]);
+
+//     const blob = qrResponse.data;
+//     qrCodeBase64 = await toBase64(blob);
+    
+//     console.log('Create question response:', questionResponse.data);
+
+//     // Prepare answers data
+//     const answersData = answers.value.map((answer, index) => ({
+//       id: index + id, // Use index as id for simplicity
+//       question_id: id,
+//       content: answer.text,
+//       is_correct: correctAnswer.value === index,
+//       created_user: 2662002, // Replace with actual user ID
+//     }));
+
+//     console.log('Answers data:', answersData);
+
+//     // Make the POST request to create answers
+//     const answersResponse = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/batchCreateItems', answersData);
+//     console.log('Create answers response:', answersResponse.data);
+
+//     // Emit event after successful creation
+//     emit('create', questionResponse.data, answersData);
+//     cancel();
+//   } catch (error) {
+//     console.error('Error creating question and answers:', error);
+//     cancel();
+//   } finally {
+//     loading.value = false;
+//     NProgress.done();
+//   }
+// };
+
 const handleCreate = async () => {
   if (loading.value) return;
 
   loading.value = true;
   NProgress.start();
 
-  // Generate the current timestamp for id
-  const id = Date.now();
+  const id = Math.floor(Date.now() / 1000); // Lấy Unix timestamp tính bằng giây
 
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${id}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/question?id=${id}`;
   let qrCodeBase64 = '';
 
   try {
@@ -225,15 +281,17 @@ const handleCreate = async () => {
   };
 
   try {
-    // Make the POST request to create question
-    const questionResponse = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', newQuestion);
-    console.log('Create question response:', questionResponse.data);
+    // Make the POST requests to create question and answers concurrently
+    const [questionResponse, answersResponse] = await Promise.all([
+      axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', newQuestion),
+      axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/batchCreateItems', answersData)
+    ]);
 
-    // Make the POST request to create answers
-    const answersResponse = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/batchCreateItems', answersData);
+    console.log('Create question response:', questionResponse.data);
     console.log('Create answers response:', answersResponse.data);
 
-    emit('create', newQuestion);
+    // Emit event after successful creation
+    emit('create', newQuestion, answersData);
     cancel();
   } catch (error) {
     console.error('Error creating question and answers:', error);
@@ -243,6 +301,9 @@ const handleCreate = async () => {
     NProgress.done();
   }
 };
+
+
+
 
 
 const handleOverlayClick = (event) => {

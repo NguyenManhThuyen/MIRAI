@@ -25,7 +25,7 @@
           </div>
           <div class="divider"></div> <!-- Thêm phần này để làm thanh ngăn cách -->
           <div class="edit">
-            <img src="@/assets/images/admin-home-edit-question-icon.svg" alt="Edit" @click="editQuestion(question.id)" />
+            <img src="@/assets/images/admin-home-edit-question-icon.svg" alt="Edit" @click="showEditModal(question.id)" />
           </div>
           <div class="delete">
             <img src="@/assets/images/admin-home-delete-question-icon.svg" alt="Delete" @click="confirmDelete(question.id)" />
@@ -42,16 +42,24 @@
       @confirm="handleConfirm"
     />
     <CreateQuestionModal
-    :visible="createModalVisible"
-    @cancel="createModalVisible = false"
-    @create="handleCreate"
+      :visible="createModalVisible"
+      @cancel="createModalVisible = false"
+      @create="handleCreate"
+      @preview="handlePreview"
+    />
+    <CreateQuestionSuccessModal
+      :visible="createSuccessModalVisible"
+      :newQuestion="successModalNewQuestion"
+      :answersResponse="successModalAnswersResponse"
+      @close="createSuccessModalVisible = false"
+    />
+    <EditQuestionModal
+    :visible="editModalVisible"
+    :questionId="editModalQuestionId"
+    @cancel="editModalVisible = false"
+    @save="handleSaveEdit"
     @preview="handlePreview"
   />
-  <CreateQuestionSuccessModal
-  v-if="createSuccessModalVisible"
-  :newQuestion="successModalNewQuestion"
-  @close="createSuccessModalVisible = false"
-/>
   </div>
 </template>
 
@@ -67,13 +75,30 @@ const alertActionText = ref('Delete');
 const alertVisible = ref(false);
 const currentQuestionId = ref(null);
 const createModalVisible = ref(false);
-const successModalNewQuestion = ref(null);
+const successModalNewQuestion = shallowRef(null);
+const successModalAnswersResponse = shallowRef(null);
 const createSuccessModalVisible = ref(false); // Add this line to define createSuccessModalVisible
 
+const editModalVisible = ref(false);
+const editModalQuestionId = ref(null);
+
+const showEditModal = (questionId) => {
+  editModalQuestionId.value = questionId;
+  editModalVisible.value = true;
+};
+
+// Xử lý khi lưu chỉnh sửa
+const handleSaveEdit  = (editedQuestion) => {
+  // Logic để lưu câu hỏi chỉnh sửa
+  console.log('Edited question:', editedQuestion);
+  editModalVisible.value = false;
+  fetchQuestions(); // Gọi lại hàm fetch để cập nhật danh sách câu hỏi
+};
 
 const fetchQuestions = async () => {
   try {
-    NProgress.start();
+    NProgress.start()
+    NProgress.set(0.4)
     const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
     questions.value = response.data;
     NProgress.done();
@@ -81,10 +106,6 @@ const fetchQuestions = async () => {
     NProgress.done();
     console.error('Error fetching questions:', error);
   }
-};
-
-const editQuestion = (id) => {
-  // Logic to edit a question
 };
 
 const confirmDelete = (id) => {
@@ -97,10 +118,13 @@ const handleCancel = () => {
   console.log("Cancelled");
 };
 
-const handleCreate = (newQuestion) => {
+const handleCreate = (newQuestion, answersResponse) => {
   // Logic to handle creating a new question
   console.log('New question created:', newQuestion);
+  console.log('New answer:', answersResponse);
   successModalNewQuestion.value = newQuestion;
+  successModalAnswersResponse.value = answersResponse;
+
   createModalVisible.value = false;
   // Show success modal
   createSuccessModalVisible.value = true;
@@ -188,6 +212,7 @@ onMounted(fetchQuestions);
   gap: 4px;
   border-radius: 8px;
   opacity: 1;
+  transition: transform 0.3s ease-in-out; /* Thêm hiệu ứng transition */
 }
 
 .create-button .icon {
@@ -208,6 +233,14 @@ onMounted(fetchQuestions);
   line-height: 23.17px;
   letter-spacing: 0.02em;
   text-align: center;
+}
+
+.create-button:hover {
+  transform: scale(1.1); /* Phóng to khi di chuột vào */
+}
+
+.create-button:active {
+  transform: scale(1); /* Thu nhỏ lại khi nhấn nút */
 }
 
 .questions {
@@ -284,5 +317,16 @@ onMounted(fetchQuestions);
   width: 40px;
   height: 40px;
   margin-left: 10px;
+  transition: transform 0.3s ease-in-out; /* Thêm hiệu ứng transition */
+}
+
+.edit img:hover,
+.delete img:hover {
+  transform: scale(1.17); /* Phóng to khi di chuột vào */
+}
+
+.edit img:active
+.delete img:active {
+  transform: scale(1); /* Phóng to khi di chuột vào */
 }
 </style>

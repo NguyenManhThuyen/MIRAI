@@ -89,8 +89,6 @@ const selectedTab = ref('question')
     height: 24px;
   }
   
-  
-
   .active-tab {
     background-color: #2E7CF6; /* Màu nền khi tab được chọn */
     color: white; /* Màu chữ khi tab được chọn */

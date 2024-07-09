@@ -6,42 +6,24 @@
       <!-- Ảnh question-correct.svg -->
       <img src="@/assets/images/question-incorrect.svg" />
 
-      <!-- Text câu trả lời của người dùng  -->
+      <!-- Text câu trả lời của người dùng với tham số từ URL -->
       <div class="user-answer">
         <span class="answer-text">あなたの回答：</span>
-        <div class="circle">A</div>
-        <span class="answer-text">箱根</span>
+        <div class="circle">{{ answer }}</div>
+        <span class="answer-text">{{ content }}</span>
       </div>
 
       <span class="correct-answer-title">正解は : </span>
 
       <!-- Text câu trả lời đúng -->
       <div class="correct-answer">
-        <div class="circle">B</div>
-        <span class="answer-text">箱根</span>
+        <div class="circle">{{ correctAnswer }}</div>
+        <span class="answer-text">{{ correctAnswerContent }}</span>
       </div>
 
       <!-- Phần giải thích -->
       <div class="explanation">
-        <div class="gray-background">
-          <div class="section-title">解説</div>
-          <img src="@/assets/images/question-correct-explain.svg" />
-          <div class="explanation-text">
-            <p>
-              名古屋テレビ塔は、2020年9月にリニューアルされ、「中部電力 MIRAI TOWER」として再オープンしました。中部電力 MIRAI TOWERは、日本で最初の集約電波塔で、名古屋市の中心部に位置し、多くの観光客や地元の人々に親しまれています。以下は、中部電力 MIRAI TOWERについての詳細な解説です。
-            </p>
-            <br />
-            <p>
-              中部電力 MIRAI TOWERは、名古屋市の象徴的な建造物として、多くの人々に愛されています。リニューアルにより、さらに魅力的な観光スポットとなり、訪れる価値が一層高まりました。名古屋を訪れる際には、ぜひ立ち寄ってみてください。
-            </p>
-          </div>
-        </div>
-        <div class="gray-background-footer">
-          <div class="next-question">
-            次の問題に到着したらカメラを立ち上げてQRを読み込んでね！
-          </div>
-          <img src="@/assets/images/question-correct-uemiya.svg" class="qr-code" />
-        </div>
+        <!-- Nội dung giải thích -->
       </div>
     </div>
     <FooterQuestionUser />
@@ -49,7 +31,23 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';;
+import { ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const id = ref('');
+
+const answer = ref(route.query.answer || '');
+const content = ref(route.query.content || '');
+const correctAnswer = ref(route.query.correctAnswer || '');
+const correctAnswerContent = ref(route.query.correctAnswerContent || '');
+
+// Các xử lý khác trong script setup
+onMounted(() => {
+  id.value = route.query.id;
+  // Fetch question when component is mounted
+  fetchQuestion(id);
+});
 </script>
 
 <style scoped>

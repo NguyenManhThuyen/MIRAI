@@ -14,8 +14,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import NProgress from 'nprogress';
-import 'nprogress/nprogress.css';
+import NProgress from 'nprogress';;
 // Optionally, import a custom CSS file if you want to customize the progress bar
 // import '@/assets/css/nprogress-custom.css';
 

@@ -1,6 +1,7 @@
 
 #nprogress .bar {
   background: #2E7CF6 !important; /* Blue color */
+  height: 5px !important; 
 }
 
 #nprogress .peg {

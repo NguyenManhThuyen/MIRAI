@@ -3,16 +3,16 @@
     <HeaderQuestionUser />
     <HeaderStampQuestionUser :numberOfQuestions="6" :currentQuestion="3" />
     <div class="quiz-body">
-      <img src="@/assets/images/question-image.svg" />
+      <img :src="getFullImageUrl(question.image_question)" />
       <div class="question-text">
-        <h2>問題1:</h2>
+        <h2>問題{{question.sort}}:</h2>
       </div>
-      <p class="question-name">{{ currentQuestion.text }}</p>
+      <p class="question-name">{{ question.title }}</p>
 
       <div class="answers">
         <div
           class="answer-option"
-          v-for="(answer, index) in currentQuestion.answers"
+          v-for="(answer, index) in answers"
           :key="index"
           @click="selectAnswer(index)"
           :class="{ 'selected': selectedAnswer === index }"
@@ -21,7 +21,7 @@
             :class="'option-' + String.fromCharCode(65 + index)"
             :style="{ transform: selectedAnswer === index ? 'scale(1.2)' : '' }"
           >{{ String.fromCharCode(65 + index) }}</button>
-          <p>{{ answer }}</p>
+          <p>{{ answer.content }}</p>
         </div>
       </div>
     </div>
@@ -30,24 +30,42 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import axios from 'axios';
+import NProgress from 'nprogress';
 
 const router = useRouter();
+const route = useRoute();
 
-const questions = ref([
-  {
-    text: '名古屋に行った際に訪れるべきおすすめの観光スポットはどこですか？',
-    answers: ['川崎', '箱根', 'これはデザインに関する長い回答の説明です', '彦根']
-  },
-  // Add more questions here
-]);
+const question = ref({});
+const answers = ref([]);
 
-const currentQuestionIndex = ref(0);
-
-const currentQuestion = computed(() => questions.value[currentQuestionIndex.value]);
+const id = ref('');
 
 const selectedAnswer = ref(null);
+
+// Fetch question data from the API endpoint based on the route parameter 'id'
+const fetchQuestion = async (id) => {
+  NProgress.start();
+  NProgress.set(0.4);
+  
+  try {
+    const [responseQuestion, responseAnswer] = await Promise.all([
+      axios.get(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${id.value}`),
+      axios.get(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/${id.value}`)
+    ]);
+
+    question.value = responseQuestion.data;
+    answers.value = responseAnswer.data;
+
+    console.log(currentQuestion.value);
+  } catch (error) {
+    console.error('Error fetching question:', error);
+  } finally {
+    NProgress.done();
+  }
+};
 
 function selectAnswer(index) {
   if (selectedAnswer.value !== null) {
@@ -56,9 +74,35 @@ function selectAnswer(index) {
   
   selectedAnswer.value = index;
   
-  // Navigate to a new route after 3 seconds
+  // Check if the selected answer is correct
+  const isCorrect = answers.value[index].is_correct;
+  const answerContent = answers.value[index].content;
+  const correctAnswerIndex = answers.value.findIndex(answer => answer.is_correct);
+  const correctAnswer = String.fromCharCode(65 + correctAnswerIndex);
+  const correctAnswerContent = answers.value[correctAnswerIndex].content;
+  
+  // Navigate to correct or incorrect route after 3 seconds
   setTimeout(() => {
-    router.push('/users/questionCorrect');
+    if (isCorrect) {
+      router.push({
+        path: '/users/questionCorrect',
+        query: {
+          answer: correctAnswer,
+          content: correctAnswerContent
+        }
+      });
+    } else {
+      router.push({
+        path: '/users/questionIncorrect',
+        query: {
+          answer: String.fromCharCode(65 + index), // Convert index to A, B, C, D
+          content: answerContent,
+          correctAnswer: correctAnswer,
+          correctAnswerContent: correctAnswerContent,
+          explain : question.value.content
+        }
+      });
+    }
   }, 3000);
   
   // Animate the button scale for 3 seconds
@@ -70,7 +114,21 @@ function selectAnswer(index) {
     }, 3000);
   }
 }
+
+const getFullImageUrl = (url) => {
+  const prefix = "https://mirai-static-website.s3.ap-southeast-1.amazonaws.com/";
+  return prefix + url;
+};
+
+
+onMounted(() => {
+  id.value = route.query.id;
+  // Fetch question when component is mounted
+  fetchQuestion(id);
+});
 </script>
+
+
 
 
 

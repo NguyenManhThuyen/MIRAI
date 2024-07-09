@@ -201,6 +201,15 @@
 .edit-icon {
     width: 24px;
     height: 24px;
+    transition: transform 0.3s ease-in-out; /* Thêm hiệu ứng transition */
+}
+
+.edit-icon:hover {
+  transform: scale(1.2); /* Phóng to khi di chuột vào */
+}
+
+.edit-icon:active {
+  transform: scale(1); /* Phóng to khi di chuột vào */
 }
 
 .content-section {

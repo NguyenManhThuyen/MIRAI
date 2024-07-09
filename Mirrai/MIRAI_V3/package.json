@@ -18,5 +18,8 @@
     "nuxt": "^3.12.2",
     "vue-loading-indicator": "^0.0.2",
     "vue-picture-cropper": "^0.7.0"
+  },
+  "devDependencies": {
+    "@types/nprogress": "^0.2.3"
   }
 }
