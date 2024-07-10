@@ -1,40 +1,40 @@
 <template>
-    <div class="alert-overlay" v-if="visible" @click="handleOverlayClick">
-      <div class="alert-box" @click.stop>
-        <h2 class="alert-title">{{ title }}</h2>
-        <p class="alert-content">{{ content }}</p>
-        <div class="alert-actions">
-          <button class="alert-button cancel" @click="cancelAction">Cancel</button>
-          <button
-            :class="['alert-button', actionText.toLowerCase() === 'delete' ? 'delete' : 'action']"
-            @click="confirmAction"
-          >
-            {{ actionText }}
-          </button>
-        </div>
+  <div class="alert-overlay" v-if="visible" @click="handleOverlayClick">
+    <div class="alert-box" @click.stop>
+      <h2 class="alert-title">{{ title }}</h2>
+      <p class="alert-content">{{ content }}</p>
+      <div class="alert-actions">
+        <button class="alert-button cancel" @click="cancelAction">キャンセル</button>
+        <button
+          :class="['alert-button', actionText.toLowerCase() === 'delete' ? 'delete' : 'action']"
+          @click="confirmAction"
+        >
+          {{ actionText === 'Delete' ? '確認する' : actionText }}
+        </button>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, watchEffect } from 'vue';
-  
-  const props = defineProps(['title', 'content', 'actionText', 'visible']);
-  const emit = defineEmits(['cancel', 'confirm']);
-  
-  const handleOverlayClick = () => {
-    emit('cancel');
-  };
-  
-  const cancelAction = () => {
-    emit('cancel');
-  };
-  
-  const confirmAction = () => {
-    emit('confirm');
-  };
-  </script>
-  
+  </div>
+</template>
+
+<script setup>
+import { defineProps, defineEmits } from 'vue';
+
+const props = defineProps(['title', 'content', 'actionText', 'visible']);
+const emit = defineEmits(['cancel', 'confirm']);
+
+const handleOverlayClick = () => {
+  emit('cancel');
+};
+
+const cancelAction = () => {
+  emit('cancel');
+};
+
+const confirmAction = () => {
+  emit('confirm');
+};
+</script>
+
   <style scoped>
   .alert-overlay {
     position: fixed;

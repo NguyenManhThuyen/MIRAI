@@ -8,7 +8,7 @@
       <div class="content-section">
         <p class="content-title">{{ title.content }}</p>
         <div class="icon-container" @click="openEdit1Modal">
-          <img src="@/assets/images/admin-home-edit-icon.svg" alt="edit icon" class="edit-icon" />
+          <img src="@/assets/images/admin-home-edit-icon.svg"  class="edit-icon" />
         </div>
       </div>
   
@@ -28,7 +28,7 @@
       <div class="content-section">
         <p class="title-text-temp">{{ notificationTitle.content }}</p>
         <div class="icon-container" @click="openEdit2Modal">
-          <img src="@/assets/images/admin-home-edit-icon.svg" alt="edit icon" class="edit-icon" />
+          <img src="@/assets/images/admin-home-edit-icon.svg"  class="edit-icon" />
         </div>
       </div>
   
@@ -42,7 +42,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <p class="modal-title">{{ modalTitle }}</p>
-            <img src="@/assets/images/admin-home-change-topic-icon-plus.svg" alt="close icon" class="close-icon" @click="closeModal" />
+            <img src="@/assets/images/admin-home-change-topic-icon-plus.svg"  class="close-icon" @click="closeModal" />
           </div>
           <div class="modal-body">
             <!-- Nội dung của modal -->
@@ -89,7 +89,8 @@
         NProgress.done();
     } catch (error) {
         console.error('Error fetching data:', error);
-        NProgress.done();
+    } finally {
+      NProgress.done();
     }
     };
     const openEdit1Modal = () => {
@@ -145,6 +146,8 @@
   
   // Function to handle slider change
   const handleSliderChange = () => {
+    NProgress.start()
+    NProgress.set(0.4)
     const apiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/${switchValue.value}`;
     axios.put(apiUrl)
       .then(response => {
@@ -155,6 +158,7 @@
         console.error('Error making PUT request:', error);
         // Handle error here
       });
+      NProgress.done();
   };
 
   const handleOverlayClick = (event) => {

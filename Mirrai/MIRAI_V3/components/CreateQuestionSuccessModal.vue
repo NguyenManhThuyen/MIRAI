@@ -3,13 +3,13 @@
     <div class="modal-content">
       <span class="modal-close" @click="close">×</span>
       <h2 class="modal-title">正常に作成できました！</h2>
-      <img :src="newQuestion?.qrcode" alt="QR Code" class="modal-qrcode"/>
+      <img :src="newQuestion?.qrcode"  class="modal-qrcode"/>
       <button class="modal-download" @click="downloadQRCode">ダウンロード</button>
       <div class="modal-input-container">
         <input type="text" :value="`http://192.168.11.199:3000/users/question?id=${newQuestion.id}`" class="modal-input" readonly ref="inputToCopy"/>
-        <img src="@/assets/images/copy-icon.svg" alt="Icon" class="modal-input-icon" @click="copyInputValue"/>
+        <img src="@/assets/images/copy-icon.svg"  class="modal-input-icon" @click="copyInputValue"/>
       </div>
-      <img :src="imageQuestionUrl" alt="Question Image" class="modal-question-image"/>
+      <img :src="imageQuestionUrl"  class="modal-question-image"/>
       <p class="modal-question-sort">問題{{ newQuestion?.sort }}:</p>
       <p class="modal-question-title">{{ newQuestion?.title }}</p>
 

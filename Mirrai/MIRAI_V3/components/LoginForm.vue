@@ -7,7 +7,7 @@
       </div>
       <div class="input-group relative">
         <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="パスワード" />
-        <img @click="togglePasswordVisibility" :src="eyeIcon" alt="Toggle Password Visibility" class="eye-icon"/>
+        <img @click="togglePasswordVisibility" :src="eyeIcon"  class="eye-icon"/>
       </div>
       <div class="forgot-password">
         <NuxtLink to="/admin/ChangePasswordTypeEmail">パスワードを忘れましたか?</NuxtLink>
@@ -24,7 +24,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import eyeIcon from '@/assets/images/admin-remove-red-eye.svg'
 import NProgress from 'nprogress'
-import 'nprogress/nprogress.css'
+import { onMounted, onUnmounted } from 'vue'
 
 const username = ref('')
 const password = ref('')
@@ -50,8 +50,15 @@ const handleSubmit = async () => {
     })
 
     if (response.status === 200) {
-      localStorage.setItem('username', username.value)
+      //localStorage.setItem('username', username.value)
       router.push('/admin/Home')
+      sessionStorage.setItem('email', response.data)
+      username.value = ''
+      password.value = ''
+    } else if (response.status === 202) {
+      router.push('/admin/ChangePassword')
+      console.log(response.data);
+      sessionStorage.setItem('email', response.data)
       username.value = ''
       password.value = ''
     } else {
@@ -67,6 +74,22 @@ const handleSubmit = async () => {
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
+}
+
+// Thêm event listener khi component được mounted
+onMounted(() => {
+  // Đóng lỗi khi click ra ngoài form hoặc các thao tác khác trên trang
+  document.addEventListener('click', closeError)
+})
+
+// Loại bỏ event listener khi component bị unmounted để tránh memory leak
+onUnmounted(() => {
+  document.removeEventListener('click', closeError)
+})
+
+// Hàm xử lý đóng lỗi
+const closeError = () => {
+  loginError.value = '' // Đặt lại giá trị lỗi thành rỗng
 }
 </script>
 
@@ -108,6 +131,7 @@ h2 {
   max-width: 437px;
   height: 56px;
   padding-left: 27px;
+  padding-right: 27px;
   color: #BBBBBB;
   outline: none;
 
@@ -154,7 +178,7 @@ button {
   background-color: #2E7CF6;
   color: #fff;
   border: none;
-  padding: 14px 114px 14px 114px;
+  padding: 14px;
   border-radius: 112px;
   gap: 10px;
   cursor: pointer;

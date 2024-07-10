@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import NProgress from 'nprogress';
@@ -42,8 +42,10 @@ const question = ref({});
 const answers = ref([]);
 
 const id = ref('');
-
 const selectedAnswer = ref(null);
+
+// Initialize or retrieve results from localStorage
+let results = JSON.parse(localStorage.getItem('results')) || [];
 
 // Fetch question data from the API endpoint based on the route parameter 'id'
 const fetchQuestion = async (id) => {
@@ -58,8 +60,6 @@ const fetchQuestion = async (id) => {
 
     question.value = responseQuestion.data;
     answers.value = responseAnswer.data;
-
-    console.log(currentQuestion.value);
   } catch (error) {
     console.error('Error fetching question:', error);
   } finally {
@@ -76,30 +76,40 @@ function selectAnswer(index) {
   
   // Check if the selected answer is correct
   const isCorrect = answers.value[index].is_correct;
-  const answerContent = answers.value[index].content;
-  const correctAnswerIndex = answers.value.findIndex(answer => answer.is_correct);
-  const correctAnswer = String.fromCharCode(65 + correctAnswerIndex);
-  const correctAnswerContent = answers.value[correctAnswerIndex].content;
+  const result = {
+    id: id.value,
+    status: isCorrect
+  };
+
+  // Add result to results array
+  results.push(result);
   
+  // Save results to localStorage
+  localStorage.setItem('results', JSON.stringify(results));
+
   // Navigate to correct or incorrect route after 3 seconds
   setTimeout(() => {
     if (isCorrect) {
       router.push({
         path: '/users/questionCorrect',
         query: {
-          answer: correctAnswer,
-          content: correctAnswerContent
+          answer: String.fromCharCode(65 + index), // Convert index to A, B, C, D
+          content: question.value.content,
+          explain: question.value.content,
+          explainImg: question.value.image_explain
         }
       });
     } else {
+      const correctAnswerIndex = answers.value.findIndex(answer => answer.is_correct);
       router.push({
         path: '/users/questionIncorrect',
         query: {
           answer: String.fromCharCode(65 + index), // Convert index to A, B, C, D
-          content: answerContent,
-          correctAnswer: correctAnswer,
-          correctAnswerContent: correctAnswerContent,
-          explain : question.value.content
+          content: answers.value[index].content,
+          correctAnswer: String.fromCharCode(65 + correctAnswerIndex),
+          correctAnswerContent: answers.value[correctAnswerIndex].content,
+          explain: question.value.content,
+          explainImg: question.value.image_explain
         }
       });
     }
@@ -120,13 +130,13 @@ const getFullImageUrl = (url) => {
   return prefix + url;
 };
 
-
 onMounted(() => {
   id.value = route.query.id;
   // Fetch question when component is mounted
   fetchQuestion(id);
 });
 </script>
+
 
 
 

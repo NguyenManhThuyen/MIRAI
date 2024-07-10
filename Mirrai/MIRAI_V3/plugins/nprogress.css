@@ -1,13 +1,20 @@
+#nprogress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999; /* Đặt z-index cao hơn để đảm bảo nó luôn hiển thị trên cùng */
+}
 
 #nprogress .bar {
-  background: #2E7CF6 !important; /* Blue color */
+  background: #2E7CF6 !important; /* Màu xanh */
   height: 5px !important; 
 }
 
 #nprogress .peg {
-  box-shadow: 0 0 10px #2E7CF6, 0 0 5px #2E7CF6 !important; /* Blue color */
+  box-shadow: 0 0 10px #2E7CF6, 0 0 5px #2E7CF6 !important; /* Màu xanh */
 }
 
 #nprogress .spinner {
-  display: none !important; /* Hide the spinner */
+  display: none !important; /* Ẩn spinner */
 }

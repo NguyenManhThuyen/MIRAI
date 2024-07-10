@@ -34,7 +34,7 @@
           <a href="https://jal-miraitower.jp/result" target="_blank" rel="noopener noreferrer">
             <span class="share-text">https://jal-miraitower.jp/result</span>
           </a>
-          <img src="@/assets/images/copy-icon.svg" alt="Image" class="share-icon">
+          <img src="@/assets/images/copy-icon.svg"  class="share-icon">
         </div>
         <div class="gray-background-footer">
           <div class="next-question">

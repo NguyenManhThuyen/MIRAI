@@ -18,28 +18,39 @@
   <script setup>
   import { ref } from 'vue'
   import axios from 'axios'
+  import { useRouter } from 'vue-router'
+  import { onMounted, onUnmounted } from 'vue'
+  import NProgress from 'nprogress'
   
   const email = ref('')
   const errorMessage = ref('')
   const successMessage = ref('')
-  
+  const router = useRouter()
   const handleSubmit = async () => {
+    NProgress.start()
+    NProgress.set(0.4)
     if (!email.value) {
       errorMessage.value = '電子メールを入力してください。'
       return
     }
   
     try {
-      const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/reset-password', {
+      const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/sendCode', {
         email: email.value,
       }, {
         headers: { "Access-Control-Allow-Origin": "*", 'Access-Control-Allow-Headers': '*' }
       })
   
       if (response.status === 200) {
-        successMessage.value = 'リセットのための電子メールが送信されました。'
+        successMessage.value = 'パスワードリセットメールを送信しました。'
         errorMessage.value = ''
         email.value = ''
+
+        // Chuyển hướng sau 3 giây
+        setTimeout(() => {
+          router.push('/admin/login')
+        }, 3000)
+
       } else {
         errorMessage.value = 'サーバーに接続できません。後でもう一度やり直してください。'
         successMessage.value = ''
@@ -48,7 +59,27 @@
       errorMessage.value = '電子メールが無効であるか、このアカウントは存在しません。'
       successMessage.value = ''
       console.error('Error:', error)
+      } finally {
+      NProgress.done()
     }
+  }
+
+
+    // Thêm event listener khi component được mounted
+  onMounted(() => {
+    // Đóng lỗi khi click ra ngoài form hoặc các thao tác khác trên trang
+    document.addEventListener('click', closeError)
+  })
+
+  // Loại bỏ event listener khi component bị unmounted để tránh memory leak
+  onUnmounted(() => {
+    document.removeEventListener('click', closeError)
+  })
+
+  // Hàm xử lý đóng lỗi
+  const closeError = () => {
+    errorMessage.value = '' // Đặt lại giá trị lỗi thành rỗng
+    successMessage.value = ''
   }
   </script>
   
@@ -89,7 +120,7 @@
     box-sizing: border-box;
     width: 100%;
     height: 56px;
-    margin-bottom: 8px;
+    margin-bottom: 24px;
     position: relative;
   }
   
@@ -99,6 +130,7 @@
     width: 100%;
     height: 56px;
     padding-left: 27px;
+    padding-right: 27px;
     color: #BBBBBB;
     outline: none;
     border: 1px solid #D9D9D9;
@@ -117,7 +149,7 @@
     color: #fff;
     border: none;
     padding: 14px;
-    border-radius: 112px;
+    border-radius: 12px;
     font-family: 'Noto Sans JP', sans-serif;
     font-size: 16px;
     font-weight: 500;

@@ -1,23 +1,23 @@
 <template>
-  <div class="modal" v-if="visible" @click.self="closeModal">
+  <div class="modal" v-if="showUpperModal" @click.self="closeModal">
     <div class="modal-content">
-      <span class="close" @click="closeModal">x</span>
+      <span class="close" @click="closeModal">×</span>
       <h2>{{ `問${sort}編集` }}</h2>
       <div class="question-details">
         <div class="left-column">
-          <img :src="qrcode" alt="QR Code Image" class="qrcode-image" />
+          <img :src="qrcode" class="qrcode-image" />
         </div>
         <div class="right-column">
           <button @click="downloadQRCode" class="download-button">ダウンロード</button>
           <div class="sub-right-column">
             <input type="text" :value="downloadUrl" class="modal-input" readonly ref="inputToCopy" />
-            <img src="@/assets/images/copy-icon.svg" alt="Icon" class="modal-input-icon" @click="copyInputValue" />
+            <img src="@/assets/images/copy-icon.svg"  class="modal-input-icon" @click="copyInputValue" />
           </div>
         </div>
       </div>
       <div class="question-content">
         <template v-if="uploadedQuestionImage">
-          <img :src="uploadedQuestionImage" alt="Uploaded Question Image" class="uploaded-image" @click="handleQuestionImageClick" />
+          <img :src="uploadedQuestionImage" class="uploaded-image" @click="handleQuestionImageClick" />
         </template>
         <div class="button-container">
           <button @click="triggerFileQuestionInput" class="change-image-button">画像変更</button>
@@ -60,7 +60,7 @@
           <template v-if="uploadedExplainImage">
             <div class="question-content">
               <template v-if="uploadedExplainImage">
-                <img :src="uploadedExplainImage" alt="Uploaded Question Image" class="uploaded-image" @click="handleExplainImageClick" />
+                <img :src="uploadedExplainImage"  class="uploaded-image" @click="handleExplainImageClick" />
               </template>
               <div class="button-container">
                 <button @click="triggerFileExplainInput" class="change-image-button">画像変更</button>
@@ -69,7 +69,7 @@
             </div>
           </template>
           <template v-else>
-            <img src="@/assets/images/admin-create-question-icon.svg" alt="Upload Icon" class="upload-icon" />
+            <img src="@/assets/images/admin-create-question-icon.svg"  class="upload-icon" />
             <p>ドラッグ&ドロップでファイルをアップロードする又はブラウザ</p>
             <label class="choose-file">
               ブラウザ
@@ -78,14 +78,43 @@
           </template>
         </div>
         <div class="form-group">
-          <textarea id="questionDescription" v-model="question.content"></textarea>
+          <textarea id="questionDescription" v-model="formattedContent"></textarea>
         </div>
       </div>
 
       <div class="actions">
         <button @click="preview">プレビュー</button>
-        <button @click="cancel">キャンセル</button>
+        <button @click="closeModal">キャンセル</button>
         <button :disabled="loading" @click="handleSave">作成</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" v-if="previewVisible" @click.self="closePreviewModal">
+    <div class="modal-content-preview">
+      <div class="quiz-container">
+        <HeaderQuestionUser />
+        <HeaderStampQuestionUser :numberOfQuestions="6" :currentQuestion="3" />
+        <div class="quiz-body">
+          <img :src="getFullImageUrl(question.image_question)" />
+          <div class="question-text">
+            <h2>問題{{question.sort}}:</h2>
+          </div>
+          <p class="question-name">{{ question.title }}</p>
+    
+          <div class="answers">
+            <div
+            class="answer-option"
+            v-for="(answer, index) in answers"
+            :key="index"
+            :class="{ 'last-answer-option': index === answers.length - 1 }"
+          >
+            <div :class="{ 'option-index': true, 'option-correct': answer.is_correct }">{{ String.fromCharCode(65 + index) }}</div>
+            <p :class="{ 'option-correct': answer.is_correct }">{{ answer.content }}</p>
+          </div>
+          </div>
+        </div>
+        <FooterQuestionUser />
       </div>
     </div>
   </div>
@@ -114,6 +143,8 @@ let activeTab = ref('answers');
 const correctAnswer = ref(null);
 const emit = defineEmits(['cancel', 'save', 'preview']);
 const loading = ref(false);
+const previewVisible = ref(false);
+const showUpperModal = ref(props.visible);
 
 const fetchQuestionData = async () => {
   try {
@@ -140,17 +171,38 @@ const fetchQuestionData = async () => {
   }
 };
 
+// Tạo một computed property để áp dụng filter cho nội dung của question
+const formattedContent = computed(() => {
+  return question.value.content.replace(/<br\s*[/]?>/gi, '\n');
+});
 
 watchEffect(() => {
   if (props.visible) {
     fetchQuestionData();
   }
+
+  showUpperModal.value = props.visible;
 });
 
 const closeModal = () => {
   emit('cancel');
   uploadedQuestionImage.value = null;
   uploadedExplainImage.value = null;
+};
+
+const hidden = () => {
+  showUpperModal.value = false; // Hide upper modal
+};
+
+const preview = () => {
+  previewVisible.value = true;
+  hidden();
+  emit('preview');
+};
+
+const closePreviewModal = () => {
+  previewVisible.value = false;
+  showUpperModal.value = true;
 };
 
 const handleFileQuestionChange = async (event) => {
@@ -234,9 +286,9 @@ const setCorrectAnswer = (index) => {
 const downloadUrl = computed(() => question.value ? `http://192.168.11.199:3000/users/question?id=${question.value.id}` : '');
 
 const handleSave = async () => {
+  NProgress.start()
+  NProgress.set(0.4)
   try {
-    NProgress.start()
-    NProgress.set(0.4)
     loading.value = true;
 
     // Parse sort to integer
@@ -247,11 +299,11 @@ const handleSave = async () => {
       id: question.value.id, // Assuming each question has an ID for identification
       sort: sortInt,
       title: question.value.title,
-      content: question.value.content,
       qrcode: question.value.qrcode,
       image_explain: question.value.image_explain,
       image_question: question.value.image_question,
-      updated_user: 123456
+      updated_user: 123456,
+      content: question.value.content.replace(/\n/g, '<br />')
     };
     console.log("thuyen",questionData);
     // Update question via API
@@ -276,10 +328,10 @@ const handleSave = async () => {
 
     // Reset loading state
     loading.value = false;
-    NProgress.done();
   } catch (error) {
     console.error('Error saving question:', error);
     loading.value = false;
+  } finally {
     NProgress.done();
   }
 };
@@ -308,7 +360,7 @@ const handleSave = async () => {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   max-width: 80%;
   width: 813px;
-
+  position: relative;
   max-height: 85vh; /* Đặt chiều cao tối đa của modal là 80% chiều cao của viewport */
   overflow-y: auto; /* Cho phép nội dung cuộn khi vượt quá chiều cao */
 
@@ -322,7 +374,9 @@ const handleSave = async () => {
     width: 0px;
     background: transparent; /* Optional: just in case it's visible in some browser */
   }
+
 }
+
 
 .close {
   position: absolute;
@@ -330,6 +384,7 @@ const handleSave = async () => {
   right: 10px;
   font-size: 24px;
   cursor: pointer;
+  color: #666;
 }
 
 .question-details {
@@ -419,6 +474,9 @@ const handleSave = async () => {
   background-color: transparent;
   max-width: 400px;
   outline: none;
+  white-space: nowrap; /* Ngăn không cho dòng bị wrap */
+  overflow: hidden; /* Ẩn nội dung bị tràn */
+  text-overflow: ellipsis; /* Hiển thị dấu ba chấm (...) khi bị cắt */
 }
 
 .modal-input-icon {
@@ -438,9 +496,6 @@ const handleSave = async () => {
   cursor: pointer;
 }
 
-.uploaded-image:hover {
-  opacity: 0.8;
-}
 
 .button-container {
   display: flex;
@@ -542,7 +597,7 @@ const handleSave = async () => {
   border: 1px solid #E3E4EC;
   padding: 10px; /* Thêm padding để tạo khoảng cách giữa các answer */
   margin-bottom: 10px;
-
+  width: 100%;
 }
 
 .answer-row {
@@ -660,6 +715,150 @@ const handleSave = async () => {
 
 .actions button:nth-child(3):hover {
   background-color: #256fb8; /* Màu nền khi hover */
+}
+
+.modal-content-preview {
+  background-color: #fefefe;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 80%;
+  width: 813px;
+
+  max-height: 85vh; /* Đặt chiều cao tối đa của modal là 80% chiều cao của viewport */
+  overflow-y: auto; /* Cho phép nội dung cuộn khi vượt quá chiều cao */
+
+  /* Hide scrollbar for WebKit browsers */
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+
+  /* Hide scrollbar for WebKit-based browsers */
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; /* Optional: just in case it's visible in some browser */
+  }
+}
+
+.quiz-container {
+  text-align: center;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  min-height: 100vh; /* Đảm bảo chiếm toàn bộ chiều cao của viewport */
+  display: flex;
+  flex-direction: column;
+
+  
+}
+
+.quiz-navigation button {
+  margin: 0.5rem;
+  background-color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.quiz-body {
+  margin-top: 8px;
+  flex-grow: 1; 
+}
+
+.quiz-body img {
+  width: 100%;
+  height: auto;
+}
+
+.question-text {
+  margin: 10px 0;
+}
+
+.question-text h2 {
+  font-family: Noto Sans JP;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 23.17px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: #626263;
+}
+
+.question-name {
+  font-family: Noto Sans JP;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28.96px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: #4B4B4D;
+  margin: 12px 16px;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.answer-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 78px;
+  border-bottom: 1px solid #E3E4EC;
+  position: relative;
+}
+
+.answer-option p {
+  padding-left: 12px;
+  margin-right: 16px;
+  flex: 1;
+  text-align: left;
+  font-family: Noto Sans JP;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 23.17px;
+  letter-spacing: 0.02em;
+  color: #4B4B4D;
+}
+
+.option-index {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #D6D6D6;
+  background-color: white;
+  color: #0082CA;
+  border-radius: 50%;
+  font-family: Noto Sans JP;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28.96px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 16px;
+}
+
+.option-index.option-correct {
+  color: red; /* Đổi màu chữ thành đỏ cho câu trả lời đúng */
+}
+
+p.option-correct {
+  color: red; /* Đổi màu chữ thành đỏ cho câu trả lời đúng */
+}
+
+/* Loại bỏ border-bottom cho phần tử cuối cùng */
+.last-answer-option {
+  border-bottom: none;
 }
 
 

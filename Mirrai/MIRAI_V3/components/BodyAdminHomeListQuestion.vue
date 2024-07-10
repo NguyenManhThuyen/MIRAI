@@ -16,19 +16,19 @@
       >
         <div class="index">{{ index + 1 }}</div>
         <div class="question-image">
-          <img :src="getFullImageUrl(question.image_question)" alt="Question Image" />
+          <img :src="getFullImageUrl(question.image_question)"  />
         </div>
         <div class="question-text">{{ question.title }}</div>
         <div class="actions">
           <div class="action-image">
-            <img :src="question.qrcode" alt="Action Image" />
+            <img :src="question.qrcode"  />
           </div>
           <div class="divider"></div> <!-- Thêm phần này để làm thanh ngăn cách -->
           <div class="edit">
-            <img src="@/assets/images/admin-home-edit-question-icon.svg" alt="Edit" @click="showEditModal(question.id)" />
+            <img src="@/assets/images/admin-home-edit-question-icon.svg"  @click="showEditModal(question.id)" />
           </div>
           <div class="delete">
-            <img src="@/assets/images/admin-home-delete-question-icon.svg" alt="Delete" @click="confirmDelete(question.id)" />
+            <img src="@/assets/images/admin-home-delete-question-icon.svg"  @click="confirmDelete(question.id, index+1)" />
           </div>
         </div>
       </div>
@@ -54,23 +54,27 @@
       @close="createSuccessModalVisible = false"
     />
     <EditQuestionModal
-    :visible="editModalVisible"
-    :questionId="editModalQuestionId"
-    @cancel="editModalVisible = false"
-    @save="handleSaveEdit"
-    @preview="handlePreview"
-  />
+      :visible="editModalVisible"
+      :questionId="editModalQuestionId"
+      @cancel="editModalVisible = false"
+      @save="handleSaveEdit"
+      @preview="handlePreview"
+    />
+    <PreviewQuestionModal
+      :visible="previewModalVisible"
+      @close="previewModalVisible = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, shallowRef, watchEffect } from 'vue';
 import axios from 'axios';
 import NProgress from 'nprogress';
 
 const questions = ref([]);
 const alertTitle = ref('Confirm Deletion');
-const alertContent = ref('Are you sure you want to delete this item?');
+const alertContent = ref('');
 const alertActionText = ref('Delete');
 const alertVisible = ref(false);
 const currentQuestionId = ref(null);
@@ -82,13 +86,15 @@ const createSuccessModalVisible = ref(false); // Add this line to define createS
 const editModalVisible = ref(false);
 const editModalQuestionId = ref(null);
 
+const previewModalVisible = ref(false); // Add this line to define previewModalVisible
+
 const showEditModal = (questionId) => {
   editModalQuestionId.value = questionId;
   editModalVisible.value = true;
 };
 
 // Xử lý khi lưu chỉnh sửa
-const handleSaveEdit  = (editedQuestion) => {
+const handleSaveEdit = (editedQuestion) => {
   // Logic để lưu câu hỏi chỉnh sửa
   console.log('Edited question:', editedQuestion);
   editModalVisible.value = false;
@@ -108,8 +114,9 @@ const fetchQuestions = async () => {
   }
 };
 
-const confirmDelete = (id) => {
+const confirmDelete = (id, index) => {
   currentQuestionId.value = id;
+  alertContent.value = `質問番号 ${index} を削除しますか?`;
   alertVisible.value = true;
 };
 
@@ -134,6 +141,9 @@ const handleCreate = (newQuestion, answersResponse) => {
 const handlePreview = () => {
   // Logic to handle preview
   console.log('Preview clicked');
+  // createModalVisible.value = false;
+  // editModalVisible.value = false;
+  previewModalVisible.value = false; // Show preview modal
 };
 
 const handleConfirm = async () => {
@@ -174,7 +184,6 @@ watchEffect(async () => {
 
 onMounted(fetchQuestions);
 </script>
-
 
 <style scoped>
 .question-list {
@@ -276,14 +285,19 @@ onMounted(fetchQuestions);
     color: #4B4B4D;
 }
 
-.question-text{
-    font-family: Noto Sans JP;
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 28.96px;
-    letter-spacing: 0.02em;
-    text-align: center;
-    color: #4B4B4D;
+.question-text {
+  font-family: Noto Sans JP;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 28.96px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: #4B4B4D;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  line-clamp: 3;
 }
 
 .question-image img {
@@ -329,4 +343,31 @@ onMounted(fetchQuestions);
 .delete img:active {
   transform: scale(1); /* Phóng to khi di chuột vào */
 }
+
+@media (max-width: 480px) {
+  .action-image,
+  .divider {
+    display: none; /* Ẩn QR và thanh xám khi màn hình nhỏ hơn 480px */
+  }
+
+  .question-text {
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 22.96px;
+    letter-spacing: 0.02em;
+    text-align: center;
+    color: #4b4b4d;
+    max-height: 150px; /* Giới hạn chiều cao của question-text */
+    overflow: hidden; /* Ẩn nội dung bị tràn */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Số dòng tối đa */
+    -webkit-box-orient: vertical;
+  }
+
+  .question-image img {
+    display: none; /* Ẩn hình ảnh trong question-image */
+  }
+
+}
+
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" class="modal-overlay" @click="handleOverlayClick($event)">
+  <div v-if="showUpperModal" class="modal-overlay" @click="handleOverlayClick($event)">
     <div class="modal-content" @click.stop>
       <span class="modal-close" @click="cancel">×</span>
       <h2>新規作成</h2>
@@ -7,10 +7,10 @@
       <!-- Image upload for question image -->
       <div class="image-upload">
         <template v-if="uploadedQuestionImage">
-          <img :src="uploadedQuestionImage" alt="Uploaded Question Image" class="uploaded-image" @click="handleQuestionImageClick" />
+          <img :src="uploadedQuestionImage"  class="uploaded-image" @click="handleQuestionImageClick" />
         </template>
         <template v-else>
-          <img src="@/assets/images/admin-create-question-icon.svg" alt="Upload Icon" class="upload-icon" />
+          <img src="@/assets/images/admin-create-question-icon.svg"  class="upload-icon" />
           <p>ドラッグ&ドロップでファイルをアップロードする又はブラウザ</p>
           <label class="choose-file">
             ブラウザ
@@ -21,7 +21,7 @@
 
       <div class="form-group">
         <label for="questionNo">問No.</label>
-        <input id="questionNo" type="text" v-model="questionNo" />
+        <input id="questionNo" type="number" v-model="questionNo" />
       </div>
       <div class="form-group">
         <label for="questionText">質問</label>
@@ -60,10 +60,10 @@
         <!-- Image upload for explain image -->
         <div class="image-upload">
           <template v-if="uploadedExplainImage">
-            <img :src="uploadedExplainImage" alt="Uploaded Explain Image" class="uploaded-image" @click="handleExplainImageClick" />
+            <img :src="uploadedExplainImage"  class="uploaded-image" @click="handleExplainImageClick" />
           </template>
           <template v-else>
-            <img src="@/assets/images/admin-create-question-icon.svg" alt="Upload Icon" class="upload-icon" />
+            <img src="@/assets/images/admin-create-question-icon.svg"  class="upload-icon" />
             <p>ドラッグ&ドロップでファイルをアップロードする又はブラウザ</p>
             <label class="choose-file">
               ブラウザ
@@ -83,12 +83,41 @@
       </div>
     </div>
   </div>
+
+  <div class="modal-overlay" v-if="previewVisible" @click.self="closePreviewModal">
+    <div class="modal-content-preview">
+      <div class="quiz-container">
+        <HeaderQuestionUser />
+        <HeaderStampQuestionUser :numberOfQuestions="6" :currentQuestion="3" />
+        <div class="quiz-body">
+          <img :src="uploadedQuestionImage" />
+          <div class="question-text">
+            <h2>問題{{questionNo}}:</h2>
+          </div>
+          <p class="question-name">{{ questionText }}</p>
+    
+          <div class="answers">
+            <div
+            class="answer-option"
+            v-for="(answer, index) in answers"
+            :key="index"
+            :class="{ 'last-answer-option': index === answers.length - 1 }"
+          >
+            <div :class="{ 'option-index': true, 'option-correct': answer.is_correct }">{{ String.fromCharCode(65 + index) }}</div>
+            <p :class="{ 'option-correct': answer.is_correct }">{{ answer.content }}</p>
+          </div>
+          </div>
+        </div>
+        <FooterQuestionUser />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, defineProps, defineEmits, watchEffect } from 'vue';
 import axios from 'axios';
-import NProgress from 'nprogress';;
+import NProgress from 'nprogress';
 
 const props = defineProps({
   visible: Boolean,
@@ -108,16 +137,18 @@ const answers = ref([
   { text: '' },
   { text: '' },
 ]);
-const correctAnswer = ref(null);
+const correctAnswer = ref(0);
 
 const uploadedQuestionImage = ref(null);
 const uploadedExplainImage = ref(null);
 const imageQuestion = ref('');
 const imageExplain = ref('');
-
+let qrCodeBase64 = ref('');
+const id = Math.floor(Date.now() / 1000); // Lấy Unix timestamp tính bằng giây
 const answerLabels = ['A', 'B', 'C', 'D'];
-
 const loading = ref(false);
+const previewVisible = ref(false);
+const showUpperModal = ref(props.visible);
 
 const toBase64 = file => new Promise((resolve, reject) => {
   const reader = new FileReader();
@@ -166,7 +197,7 @@ const cancel = () => {
   questionDescription.value = '';
   answers.value.forEach(answer => answer.text = '');
   correctAnswer.value = null;
-
+  activeTab = ref('answers');
   // Reset image upload state
   uploadedQuestionImage.value = null;
   uploadedExplainImage.value = null;
@@ -180,83 +211,27 @@ const cancel = () => {
   });
 };
 
-// const handleCreate = async () => {
-//   if (loading.value) return;
+const hidden = () => {
+  showUpperModal.value = false; // Hide upper modal
+};
 
-//   loading.value = true;
-//   NProgress.start();
+const preview = () => {
+  previewVisible.value = true;
+  hidden();
+  emit('preview');
+};
 
-//   const id = Math.floor(Date.now() / 1000); // Lấy Unix timestamp tính bằng giây
-
-//   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${id}`;
-//   let qrCodeBase64 = '';
-
-//   try {
-//     // Fetch the QR code image and convert it to Base64 concurrently with other requests
-//     const [qrResponse, questionResponse] = await Promise.all([
-//       axios.get(qrCodeUrl, { responseType: 'blob' }),
-//       axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', {
-//         id,
-//         title: questionText.value,
-//         content: questionDescription.value,
-//         sort: parseInt(questionNo.value, 10),
-//         image_question: imageQuestion.value,
-//         image_explain: imageExplain.value,
-//         created_user: 1 // Replace with actual user ID
-//       })
-//     ]);
-
-//     const blob = qrResponse.data;
-//     qrCodeBase64 = await toBase64(blob);
-    
-//     console.log('Create question response:', questionResponse.data);
-
-//     // Prepare answers data
-//     const answersData = answers.value.map((answer, index) => ({
-//       id: index + id, // Use index as id for simplicity
-//       question_id: id,
-//       content: answer.text,
-//       is_correct: correctAnswer.value === index,
-//       created_user: 2662002, // Replace with actual user ID
-//     }));
-
-//     console.log('Answers data:', answersData);
-
-//     // Make the POST request to create answers
-//     const answersResponse = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/batchCreateItems', answersData);
-//     console.log('Create answers response:', answersResponse.data);
-
-//     // Emit event after successful creation
-//     emit('create', questionResponse.data, answersData);
-//     cancel();
-//   } catch (error) {
-//     console.error('Error creating question and answers:', error);
-//     cancel();
-//   } finally {
-//     loading.value = false;
-//     NProgress.done();
-//   }
-// };
+const closePreviewModal = () => {
+  previewVisible.value = false;
+  showUpperModal.value = true;
+};
 
 const handleCreate = async () => {
   if (loading.value) return;
 
   loading.value = true;
   NProgress.start();
-
-  const id = Math.floor(Date.now() / 1000); // Lấy Unix timestamp tính bằng giây
-
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/question?id=${id}`;
-  let qrCodeBase64 = '';
-
-  try {
-    // Fetch the QR code image and convert it to Base64
-    const response = await axios.get(qrCodeUrl, { responseType: 'blob' });
-    const blob = response.data;
-    qrCodeBase64 = await toBase64(blob);
-  } catch (error) {
-    console.error('Error fetching QR code:', error);
-  }
+  NProgress.set(0.4)
 
   // Prepare answers data
   const answersData = answers.value.map((answer, index) => ({
@@ -272,8 +247,8 @@ const handleCreate = async () => {
   const newQuestion = {
     id,
     title: questionText.value,
-    content: questionDescription.value,
-    qrcode: qrCodeBase64, // Placeholder for QR code
+    content: questionDescription.value.replace(/\n/g, '<br />'),
+    qrcode: qrCodeBase64.value, // Placeholder for QR code
     sort: parseInt(questionNo.value, 10),
     image_question: imageQuestion.value,
     image_explain: imageExplain.value,
@@ -302,10 +277,6 @@ const handleCreate = async () => {
   }
 };
 
-
-
-
-
 const handleOverlayClick = (event) => {
   // Check if the click occurred outside the modal
   if (event.target === event.currentTarget) {
@@ -313,11 +284,29 @@ const handleOverlayClick = (event) => {
   }
 };
 
-const preview = () => {
-  emit('preview');
+const generateQRCode = async () => {
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://192.168.11.199:3000/users/question?id=${id}`;
+
+  try {
+    // Fetch the QR code image and convert it to Base64
+    const response = await axios.get(qrCodeUrl, { responseType: 'blob' });
+    const blob = response.data;
+    qrCodeBase64.value = await toBase64(blob);
+  } catch (error) {
+    console.error('Error fetching QR code:', error);
+    // Retry generating QR code
+    setTimeout(generateQRCode, 1000); // Retry after 1 second
+  }
 };
 
+onMounted(generateQRCode); // Gọi hàm generateQRCode khi component mounted
+
+// Watch for changes in props.visible and update showUpperModal accordingly
+watchEffect(() => {
+  showUpperModal.value = props.visible;
+});
 </script>
+
 
 
 <style scoped>
@@ -561,7 +550,7 @@ const preview = () => {
   border: 1px solid #E3E4EC;
   padding: 10px; /* Thêm padding để tạo khoảng cách giữa các answer */
   margin-bottom: 10px;
-
+  width: 100%;
 }
 
 .answer-row {
@@ -667,5 +656,150 @@ const preview = () => {
   background-color: #256fb8; /* Màu nền khi hover */
 }
 
+
+.modal-content-preview {
+  height: 100%;
+  background-color: #fefefe;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 80%;
+  width: 813px;
+
+  max-height: 90vh; /* Đặt chiều cao tối đa của modal là 80% chiều cao của viewport */
+  overflow-y: auto; /* Cho phép nội dung cuộn khi vượt quá chiều cao */
+
+  /* Hide scrollbar for WebKit browsers */
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+
+  /* Hide scrollbar for WebKit-based browsers */
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; /* Optional: just in case it's visible in some browser */
+  }
+}
+
+.quiz-container {
+  text-align: center;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  min-height: 100vh; /* Đảm bảo chiếm toàn bộ chiều cao của viewport */
+  display: flex;
+  flex-direction: column;
+
+  
+}
+
+.quiz-navigation button {
+  margin: 0.5rem;
+  background-color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.quiz-body {
+  margin-top: 8px;
+  flex-grow: 1; 
+}
+
+.quiz-body img {
+  width: 100%;
+  height: auto;
+}
+
+.question-text {
+  margin: 10px 0;
+}
+
+.question-text h2 {
+  font-family: Noto Sans JP;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 23.17px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: #626263;
+}
+
+.question-name {
+  font-family: Noto Sans JP;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28.96px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: #4B4B4D;
+  margin: 12px 16px;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.answer-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 78px;
+  border-bottom: 1px solid #E3E4EC;
+  position: relative;
+}
+
+.answer-option p {
+  padding-left: 12px;
+  margin-right: 16px;
+  flex: 1;
+  text-align: left;
+  font-family: Noto Sans JP;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 23.17px;
+  letter-spacing: 0.02em;
+  color: #4B4B4D;
+}
+
+.option-index {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #D6D6D6;
+  background-color: white;
+  color: #0082CA;
+  border-radius: 50%;
+  font-family: Noto Sans JP;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28.96px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 16px;
+}
+
+.option-index.option-correct {
+  color: red; /* Đổi màu chữ thành đỏ cho câu trả lời đúng */
+}
+
+p.option-correct {
+  color: red; /* Đổi màu chữ thành đỏ cho câu trả lời đúng */
+}
+
+/* Loại bỏ border-bottom cho phần tử cuối cùng */
+.last-answer-option {
+  border-bottom: none;
+}
 
 </style>

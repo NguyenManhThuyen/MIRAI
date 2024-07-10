@@ -20,13 +20,20 @@
   <script setup>
   import { ref } from 'vue'
   import axios from 'axios'
-  
+  import NProgress from 'nprogress'
+  import { useRoute,useRouter } from 'vue-router';
+
   const currentPassword = ref('')
   const newPassword = ref('')
   const confirmPassword = ref('')
   const errorMessage = ref('')
-  
+  const route = useRoute();
+  const router = useRouter()
+  const code = ref('');
+
   const handleSubmit = async () => {
+    NProgress.start()
+    NProgress.set(0.4)
     if (!currentPassword.value || !newPassword.value || !confirmPassword.value) {
       errorMessage.value = 'すべてのフィールドを入力してください。'
       return
@@ -38,9 +45,11 @@
     }
   
     try {
-      const response = await axios.post('https://example.com/api/change-password', {
-        currentPassword: currentPassword.value,
-        newPassword: newPassword.value,
+      const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/changePassword', {
+        email: sessionStorage.getItem('email'),
+        password : currentPassword.value,
+        newpassword: newPassword.value,
+        confirmpassword: confirmPassword.value,
       }, {
         headers: { "Access-Control-Allow-Origin": "*", 'Access-Control-Allow-Headers': '*' }
       })
@@ -48,15 +57,20 @@
       if (response.status === 200) {
         // Handle success
         errorMessage.value = ''
-        alert('パスワードが変更されました。')
+        router.push('/admin/login')
       } else {
         errorMessage.value = 'サーバーに接続できません。後でもう一度やり直してください。'
       }
     } catch (error) {
       errorMessage.value = 'パスワードの変更に失敗しました。'
       console.error('Change password error:', error)
+    } finally {
+      NProgress.done()
     }
   }
+  onMounted(() => {
+    code.value = route.query.code;
+  });
   </script>
   
   <style scoped>
@@ -110,6 +124,7 @@
   }
   
   button {
+    margin-top: 12px;
     width: 100%;
     max-width: 360px;
     height: 56px;
@@ -128,9 +143,6 @@
     text-align: center;
   }
   
-  button:hover {
-    
-  }
   
   .error-message {
     width: 100%;

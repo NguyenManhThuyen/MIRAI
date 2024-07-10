@@ -18,6 +18,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const logout = () => {
+  sessionStorage.removeItem("email");
   router.push('/admin/login')
 }
 </script>

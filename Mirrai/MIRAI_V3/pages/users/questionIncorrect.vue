@@ -21,9 +21,20 @@
         <span class="answer-text">{{ correctAnswerContent }}</span>
       </div>
 
-      <!-- Phần giải thích -->
       <div class="explanation">
-        <!-- Nội dung giải thích -->
+        <div class="gray-background">
+          <div class="section-title">解説</div>
+          <img v-if="explainImg" :src="getFullImageUrl(explainImg)"  />
+          <div class="explanation-text">
+            <p v-html="explain"></p>
+          </div>
+        </div>
+        <div class="gray-background-footer" v-if="shouldShowFooter">
+          <div class="next-question">
+            {{ subtitle }}
+          </div>
+          <img src="@/assets/images/question-correct-uemiya.svg" class="qr-code" />
+        </div>
       </div>
     </div>
     <FooterQuestionUser />
@@ -31,7 +42,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
+import axios from 'axios';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -41,12 +53,30 @@ const answer = ref(route.query.answer || '');
 const content = ref(route.query.content || '');
 const correctAnswer = ref(route.query.correctAnswer || '');
 const correctAnswerContent = ref(route.query.correctAnswerContent || '');
+const explain = ref(route.query.explain || '');
+const explainImg = ref(route.query.explainImg || '');
+const subtitle = ref('');
+const shouldShowFooter = ref(true); // Default to true
 
-// Các xử lý khác trong script setup
-onMounted(() => {
-  id.value = route.query.id;
-  // Fetch question when component is mounted
-  fetchQuestion(id);
+const getFullImageUrl = (url) => {
+  const prefix = "https://mirai-static-website.s3.ap-southeast-1.amazonaws.com/";
+  return prefix + url;
+};
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/2');
+    console.log(response.data);
+    if (response.data.noti === null || !response.data.content) {
+      shouldShowFooter.value = false; // Hide footer
+    } else {
+      subtitle.value = response.data.content;
+    }
+  } catch (error) {
+    console.error('Error fetching subtitle:', error);
+    // Handle error or set default subtitle
+    shouldShowFooter.value = false; // Hide footer
+  }
 });
 </script>
 
@@ -74,7 +104,8 @@ onMounted(() => {
 .user-answer {
   display: flex;
   align-items: center;
-  height: 64px;
+  min-height: 64px;
+  height: fit-content;
   padding: 8px 12px;
   border-radius: 15.32px;
   margin: 0px 16px;
@@ -86,6 +117,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 40px;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -111,6 +143,8 @@ onMounted(() => {
   line-height: 23.17px;
   letter-spacing: 0.02em;
   text-align: left;
+  margin-right: 4px;
+  min-width: 70px;
 }
 
 .correct-answer-title {
@@ -191,6 +225,14 @@ onMounted(() => {
   border-radius: 23px;
 }
 
+.gray-background img {
+  display: flex; /* Đảm bảo img là block để dùng margin auto */
+  margin: 0 auto; /* Căn giữa theo chiều ngang */
+  height: auto; /* Đảm bảo ảnh không bị co dãn lệch */
+  border-radius: 12px;
+  max-height: 500px;
+}
+
 .section-title {
   font-size: 18px;
   font-weight: bold;
@@ -202,6 +244,7 @@ onMounted(() => {
   width: 100%; /* Đảm bảo ảnh chiếm toàn bộ chiều rộng của phần tử chứa */
   height: auto; /* Đảm bảo ảnh duy trì tỷ lệ khung hình */
   object-fit: contain; /* Đảm bảo ảnh vừa với phần tử chứa mà không bị cắt */
+
 }
 
 .explanation-text {

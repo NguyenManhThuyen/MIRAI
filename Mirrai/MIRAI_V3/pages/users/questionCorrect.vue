@@ -8,28 +8,23 @@
 
       <!-- Text câu trả lời đúng -->
       <div class="correct-answer">
-        <div class="circle">B</div>
-        <span class="answer-text">箱根</span>
+        <div class="circle">{{ answer }}</div>
+        <span class="answer-text">{{ content }}</span>
       </div>
 
       <!-- Phần giải thích -->
       <div class="explanation">
         <div class="gray-background">
           <div class="section-title">解説</div>
-          <img src="@/assets/images/question-correct-explain.svg" />
+          <img v-if="explainImg" :src="getFullImageUrl(explainImg)"  />
+          <img v-else src="@/assets/images/question-correct-explain.svg" />
           <div class="explanation-text">
-            <p>
-              名古屋テレビ塔は、2020年9月にリニューアルされ、「中部電力 MIRAI TOWER」として再オープンしました。中部電力 MIRAI TOWERは、日本で最初の集約電波塔で、名古屋市の中心部に位置し、多くの観光客や地元の人々に親しまれています。以下は、中部電力 MIRAI TOWERについての詳細な解説です。
-            </p>
-            <br />
-            <p>
-              中部電力 MIRAI TOWERは、名古屋市の象徴的な建造物として、多くの人々に愛されています。リニューアルにより、さらに魅力的な観光スポットとなり、訪れる価値が一層高まりました。名古屋を訪れる際には、ぜひ立ち寄ってみてください。
-            </p>
+            <p v-html="explain"></p>
           </div>
         </div>
-        <div class="gray-background-footer">
+        <div class="gray-background-footer" v-if="shouldShowFooter">
           <div class="next-question">
-            次の問題に到着したらカメラを立ち上げてQRを読み込んでね！
+            {{ subtitle }}
           </div>
           <img src="@/assets/images/question-correct-uemiya.svg" class="qr-code" />
         </div>
@@ -40,7 +35,39 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';;
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+
+const answer = ref(route.query.answer || '');
+const content = ref(route.query.content || '');
+const explain = ref(route.query.explain || '');
+const explainImg = ref(route.query.explainImg || '');
+const subtitle = ref('');
+const shouldShowFooter = ref(true); // Default to true
+
+const getFullImageUrl = (url) => {
+  const prefix = "https://mirai-static-website.s3.ap-southeast-1.amazonaws.com/";
+  return prefix + url;
+};
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/2');
+    console.log(response.data);
+    if (response.data.noti === null || !response.data.content) {
+      shouldShowFooter.value = false; // Hide footer
+    } else {
+      subtitle.value = response.data.content;
+    }
+  } catch (error) {
+    console.error('Error fetching subtitle:', error);
+    // Handle error or set default subtitle
+    shouldShowFooter.value = false; // Hide footer
+  }
+});
 </script>
 
 <style scoped>
@@ -65,11 +92,15 @@ import { ref, computed } from 'vue';;
 .quiz-body {
   margin-top: 8px;
   flex-grow: 1;
+  overflow: hidden; /* Đảm bảo ảnh không vượt quá kích thước của div cha */
 }
 
 .quiz-body img {
-  width: 100%;
   max-height: 300px;
+  max-width: 100%; /* Đảm bảo ảnh không vượt quá chiều rộng của phần tử cha */
+  height: auto; /* Đảm bảo tỷ lệ khung hình */
+  object-fit: contain; /* Đảm bảo ảnh vừa với phần tử chứa mà không bị cắt */
+  border-radius: 12px;
 }
 .correct-answer {
   display: flex;
@@ -136,6 +167,7 @@ import { ref, computed } from 'vue';;
   padding: 16px;
   gap: 12px;
   border-radius: 23px;
+  overflow: hidden; /* Đảm bảo ảnh không vượt quá kích thước của div cha */
 }
 
 .section-title {
@@ -150,6 +182,12 @@ import { ref, computed } from 'vue';;
   height: auto; /* Đảm bảo ảnh duy trì tỷ lệ khung hình */
   object-fit: contain; /* Đảm bảo ảnh vừa với phần tử chứa mà không bị cắt */
 }
+.explanation-image {
+  max-width: 100%; /* Đảm bảo ảnh không vượt quá chiều rộng của phần tử cha */
+  height: auto; /* Đảm bảo tỷ lệ khung hình */
+  object-fit: contain; /* Đảm bảo ảnh vừa với phần tử chứa mà không bị cắt */
+}
+
 
 .explanation-text {
   text-align: left;
