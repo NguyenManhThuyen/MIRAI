@@ -1,7 +1,7 @@
 <template>
   <div class="quiz-container">
     <HeaderQuestionUser />
-    <HeaderStampQuestionUser :numberOfQuestions="6" :currentQuestion="3" />
+    <HeaderStampQuestionUser />
     <div class="quiz-body">
       <!-- Ảnh question-correct.svg -->
       <img src="@/assets/images/question-correct.svg" />
@@ -14,19 +14,22 @@
 
       <!-- Phần giải thích -->
       <div class="explanation">
-        <div class="gray-background">
+        <div v-if="shouldShowExplanation" class="gray-background">
           <div class="section-title">解説</div>
-          <img v-if="explainImg" :src="getFullImageUrl(explainImg)"  />
+          <img v-if="explainImg" :src="getFullImageUrl(explainImg)" />
           <img v-else src="@/assets/images/question-correct-explain.svg" />
           <div class="explanation-text">
             <p v-html="explain"></p>
           </div>
         </div>
-        <div class="gray-background-footer" v-if="shouldShowFooter">
+        <div v-if="shouldShowFooter" class="gray-background-footer">
           <div class="next-question">
-            {{ subtitle }}
+            次の問題に到着したらカメラを立ち上げてQRを読み込んでね！
           </div>
           <img src="@/assets/images/question-correct-uemiya.svg" class="qr-code" />
+        </div>
+        <div v-else class="button-container">
+          <button class="download-button" @click="goToResults">最後の結果へ</button>
         </div>
       </div>
     </div>
@@ -37,15 +40,16 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useRoute } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 
 const answer = ref(route.query.answer || '');
 const content = ref(route.query.content || '');
 const explain = ref(route.query.explain || '');
 const explainImg = ref(route.query.explainImg || '');
-const subtitle = ref('');
+const shouldShowExplanation = ref(true); // Default to true
 const shouldShowFooter = ref(true); // Default to true
 
 const getFullImageUrl = (url) => {
@@ -53,19 +57,24 @@ const getFullImageUrl = (url) => {
   return prefix + url;
 };
 
+const goToResults = () => {
+  router.push('/users/questionResult');
+};
+
 onMounted(async () => {
-  try {
-    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/2');
-    console.log(response.data);
-    if (response.data.noti === null || !response.data.content) {
-      shouldShowFooter.value = false; // Hide footer
-    } else {
-      subtitle.value = response.data.content;
+  if (!explain.value && !explainImg.value) {
+    shouldShowExplanation.value = false;
+  }
+
+  const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
+  const questionsCount = response.data.length;
+
+  const storedResults = localStorage.getItem('results');
+  if (storedResults) {
+    const results = JSON.parse(storedResults);
+    if (results.length === questionsCount) {
+      shouldShowFooter.value = false;
     }
-  } catch (error) {
-    console.error('Error fetching subtitle:', error);
-    // Handle error or set default subtitle
-    shouldShowFooter.value = false; // Hide footer
   }
 });
 </script>
@@ -102,6 +111,7 @@ onMounted(async () => {
   object-fit: contain; /* Đảm bảo ảnh vừa với phần tử chứa mà không bị cắt */
   border-radius: 12px;
 }
+
 .correct-answer {
   display: flex;
   align-items: center;
@@ -111,7 +121,6 @@ onMounted(async () => {
   border-radius: 15.32px;
   margin: 0px 16px;
 }
-
 
 .circle {
   display: flex;
@@ -161,7 +170,6 @@ onMounted(async () => {
   }
 }
 
-
 .gray-background {
   background-color: #f0f0f0;
   padding: 16px;
@@ -182,12 +190,12 @@ onMounted(async () => {
   height: auto; /* Đảm bảo ảnh duy trì tỷ lệ khung hình */
   object-fit: contain; /* Đảm bảo ảnh vừa với phần tử chứa mà không bị cắt */
 }
+
 .explanation-image {
   max-width: 100%; /* Đảm bảo ảnh không vượt quá chiều rộng của phần tử cha */
   height: auto; /* Đảm bảo tỷ lệ khung hình */
   object-fit: contain; /* Đảm bảo ảnh vừa với phần tử chứa mà không bị cắt */
 }
-
 
 .explanation-text {
   text-align: left;
@@ -200,7 +208,7 @@ onMounted(async () => {
   display: flex;
   background-color: #f0f0f0;
   padding: 16px;
-  margin: 8px 16px 48px 16px ;
+  margin: 8px 16px 48px 16px;
   gap: 12px;
   border-radius: 23px;
   align-items: center;
@@ -225,5 +233,26 @@ onMounted(async () => {
 .qr-code {
   max-width: 100%;
   height: auto;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.download-button {
+  padding: 17px 38px;
+  gap: 10px;
+  border-radius: 49px;
+  background-color: #31D0AA;
+  font-family: Noto Sans JP;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  letter-spacing: 0.02em;
+  color: #FFFFFF;
+  border: none;
+  transition: transform 0.5s ease-in-out; /* Thêm hiệu ứng transition */
 }
 </style>

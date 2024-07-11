@@ -118,6 +118,7 @@
 import { ref, onMounted, defineProps, defineEmits, watchEffect } from 'vue';
 import axios from 'axios';
 import NProgress from 'nprogress';
+import pica from 'pica';
 
 const props = defineProps({
   visible: Boolean,
@@ -160,10 +161,40 @@ const toBase64 = file => new Promise((resolve, reject) => {
 const onQuestionFileChange = async (event) => {
   const file = event.target.files?.[0];
   if (file) {
-    uploadedQuestionImage.value = URL.createObjectURL(file);
-    imageQuestion.value = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
+    // Kiểm tra kích thước file
+    if (file.size > 1024 * 1024) {
+      // Tạo một đối tượng ảnh từ file
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+
+      img.onload = async () => {
+        // Tạo canvas để resize ảnh
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Đặt kích thước mới cho canvas
+        const scaleFactor = Math.sqrt((1024 * 1024) / file.size);
+        canvas.width = img.width * scaleFactor;
+        canvas.height = img.height * scaleFactor;
+
+        // Resize ảnh bằng pica
+        const picaInstance = pica();
+        await picaInstance.resize(img, canvas);
+        
+        // Chuyển đổi canvas thành base64
+        canvas.toBlob(async (blob) => {
+          const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
+          imageQuestion.value = base64String;
+          uploadedQuestionImage.value = URL.createObjectURL(blob);
+        }, 'image/jpeg', 0.8); // Giảm chất lượng ảnh để giảm kích thước
+      };
+    } else {
+      uploadedQuestionImage.value = URL.createObjectURL(file);
+      imageQuestion.value = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
+    }
   }
 };
+
 
 const onExplainFileChange = async (event) => {
   const file = event.target.files?.[0];

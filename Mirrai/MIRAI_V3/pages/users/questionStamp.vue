@@ -2,14 +2,42 @@
   <div class="quiz-container">
     <HeaderQuestionUser />
     <div class="quiz-body">
-      <img src="@/assets/images/question-stamp.svg" class="qr-code" />
-      <button class="download-button">
-        <span class="button-icon"></span> 結果ページに戻る
-      </button>
+      <img :src="questionStampImage" class="qr-code" @mousedown="startDownloadTimer" @mouseup="cancelDownloadTimer" @mouseleave="cancelDownloadTimer" />
+      <div class="button-container">
+        <button class="download-button" @click="goToResults">
+          <span class="button-icon"></span> 結果ページに戻る
+        </button>
+      </div>
     </div>
     <FooterQuestionUser />
   </div>
 </template>
+
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import questionStampImage from '@/assets/images/question-stamp.png';
+import { saveAs } from 'file-saver'; // Đảm bảo bạn đã cài đặt thư viện file-saver
+
+const router = useRouter();
+const downloadTimer = ref(null);
+
+const goToResults = () => {
+  router.push('/users/questionResult');
+};
+
+const startDownloadTimer = () => {
+  downloadTimer.value = setTimeout(() => {
+    saveAs(questionStampImage, 'question-stamp.png');
+  }, 1000); // 1 giây = 1000 milliseconds
+};
+
+const cancelDownloadTimer = () => {
+  clearTimeout(downloadTimer.value);
+  downloadTimer.value = null;
+};
+</script>
+
 
 <style scoped>
 .quiz-container {
@@ -26,6 +54,26 @@
 .quiz-body {
   margin-top: 8px;
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Căn giữa các phần tử theo chiều ngang */
+  justify-content: center; /* Căn giữa các phần tử theo chiều dọc */
+}
+
+.quiz-body img {
+  width: 100%
+}
+
+.qr-code {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20px; /* Khoảng cách dưới của ảnh */
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  width: 100%; /* Đảm bảo container chiếm toàn bộ chiều rộng */
 }
 
 .download-button {

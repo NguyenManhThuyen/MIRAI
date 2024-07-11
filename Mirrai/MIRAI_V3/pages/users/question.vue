@@ -1,7 +1,7 @@
 <template>
   <div class="quiz-container">
     <HeaderQuestionUser />
-    <HeaderStampQuestionUser :numberOfQuestions="6" :currentQuestion="3" />
+    <HeaderStampQuestionUser />
     <div class="quiz-body">
       <img :src="getFullImageUrl(question.image_question)" />
       <div class="question-text">
@@ -83,9 +83,6 @@ function selectAnswer(index) {
 
   // Add result to results array
   results.push(result);
-  
-  // Save results to localStorage
-  localStorage.setItem('results', JSON.stringify(results));
 
   // Navigate to correct or incorrect route after 3 seconds
   setTimeout(() => {
@@ -94,7 +91,7 @@ function selectAnswer(index) {
         path: '/users/questionCorrect',
         query: {
           answer: String.fromCharCode(65 + index), // Convert index to A, B, C, D
-          content: question.value.content,
+          content: answers.value[index].content,
           explain: question.value.content,
           explainImg: question.value.image_explain
         }
@@ -113,6 +110,8 @@ function selectAnswer(index) {
         }
       });
     }
+    // Save results to localStorage
+    localStorage.setItem('results', JSON.stringify(results));
   }, 3000);
   
   // Animate the button scale for 3 seconds
@@ -132,8 +131,17 @@ const getFullImageUrl = (url) => {
 
 onMounted(() => {
   id.value = route.query.id;
-  // Fetch question when component is mounted
-  fetchQuestion(id);
+  
+  // Check if the question ID is already answered
+  const isAnswered = results.some(result => result.id === id.value);
+  
+  if (isAnswered) {
+    alert('Bạn đã trả lời câu hỏi này rồi.');
+    router.push('/users/questionResult');
+  } else {
+    // Fetch question when component is mounted if it's not answered yet
+    fetchQuestion(id);
+  }
 });
 </script>
 
