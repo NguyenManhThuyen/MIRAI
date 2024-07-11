@@ -21,12 +21,10 @@
           <img src="@/assets/images/email-icon.svg" alt="Icon 4" class="social-icon">
         </div>
 
-        <div class="flex flex-wrap justify-between gap-2">
           <div v-for="network in ['facebook', 'twitter', 'line', 'email']" :key="network" class="social-share-item">
             <SocialShare :network="network" :styled="true" :label="false" :title="'Title of your share'"
                          :url="imageUrl" class="social-share-icon gray-icon" />
           </div>
-        </div>
         
 
         <div class="share-link">
@@ -201,12 +199,13 @@ watchEffect(async () => {
   gap: 10px; /* Khoảng cách giữa các icon */
   filter: grayscale(100%); /* Thay đổi màu icon thành màu xám */
   background-color: transparent !important; /* Bỏ màu nền */
-  color: #000;
+  color: #4B4B4D;
 }
 .quiz-body {
   margin-top: 12px;
   flex-grow: 1; 
 }
+
 
 .count-right-answer {
   font-family: Noto Sans JP;
