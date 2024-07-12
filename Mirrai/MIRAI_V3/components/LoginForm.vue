@@ -3,11 +3,11 @@
     <h2>ログイン</h2>
     <form @submit.prevent="handleSubmit">
       <div class="input-group">
-        <input type="text" v-model="username" placeholder="ユーザー名または電子メール" />
+        <input type="text" v-model="username" @input="clearErrorMessage" placeholder="ユーザー名または電子メール" />
       </div>
       <div class="input-group relative">
-        <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="パスワード" />
-        <img @click="togglePasswordVisibility" :src="eyeIcon"  class="eye-icon"/>
+        <input :type="showPassword ? 'text' : 'password'" v-model="password" @input="clearErrorMessage" placeholder="パスワード" />
+        <img @click="togglePasswordVisibility" :src="eyeIcon" class="eye-icon" />
       </div>
       <div class="forgot-password">
         <NuxtLink to="/admin/ChangePasswordTypeEmail">パスワードを忘れましたか?</NuxtLink>
@@ -24,7 +24,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import eyeIcon from '@/assets/images/admin-remove-red-eye.svg'
 import NProgress from 'nprogress'
-import { onMounted, onUnmounted } from 'vue'
+import { onUnmounted } from 'vue'
 
 const username = ref('')
 const password = ref('')
@@ -76,19 +76,16 @@ const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
 }
 
-// Thêm event listener khi component được mounted
-onMounted(() => {
-  // Đóng lỗi khi click ra ngoài form hoặc các thao tác khác trên trang
-  document.addEventListener('click', closeError)
-})
 
-// Loại bỏ event listener khi component bị unmounted để tránh memory leak
 onUnmounted(() => {
-  document.removeEventListener('click', closeError)
+  // Đóng lỗi khi click ra ngoài form hoặc các thao tác khác trên trang
+  document.addEventListener('click', clearErrorMessage)
+  // Loại bỏ event listener khi component bị unmounted để tránh memory leak
+  document.removeEventListener('click', clearErrorMessage)
 })
 
 // Hàm xử lý đóng lỗi
-const closeError = () => {
+const clearErrorMessage = () => {
   loginError.value = '' // Đặt lại giá trị lỗi thành rỗng
 }
 </script>
@@ -200,7 +197,7 @@ button:hover {
   height: auto;
   color: #FF0909;
   border: none;
-  padding: 12px 16px;
+  padding: 12px 16px 0 16px;
   border-radius: 12px;
   font-family: 'Noto Sans JP';
   font-size: 14px;

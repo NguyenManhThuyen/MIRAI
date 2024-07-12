@@ -18,6 +18,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import { toast } from 'vue3-toastify';
 
 const props = defineProps(['title', 'content', 'actionText', 'visible']);
 const emit = defineEmits(['cancel', 'confirm']);
@@ -31,6 +32,7 @@ const cancelAction = () => {
 };
 
 const confirmAction = () => {
+  toast.success("質問は正常に削除されました");
   emit('confirm');
 };
 </script>

@@ -11,7 +11,7 @@
              correct: isQuestionCorrect(index + 1),
              incorrect: isQuestionIncorrect(index + 1)
            }">
-        <span>Q.{{ index + 1 }}</span>
+        <span>Q.{{ question.sort }}</span>
       </div>
       <img class="question-arrow" src="@/assets/images/question-arrow-yellow.svg">
     </div>
@@ -24,6 +24,7 @@ import axios from 'axios';
 
 const props = defineProps({
   color: Boolean,
+  admin: Boolean,
 });
 
 const questionHeader = ref(null);
@@ -105,14 +106,15 @@ onMounted(async () => {
 
 });
 
+
 const isQuestionCorrect = (index) => {
   const questionId = questions.value[index - 1]?.id;
-  return results.value.some(result => parseInt(result.id)=== questionId && result.status === true);
+  return results.value.some(result => parseInt(result.id)=== questionId && result.status === true && props.admin);
 };
 
 const isQuestionIncorrect = (index) => {
   const questionId = questions.value[index - 1]?.id;
-  return results.value.some(result => parseInt(result.id) === questionId && result.status === false);
+  return results.value.some(result => parseInt(result.id) === questionId && result.status === false && props.admin);
 };
 </script>
 

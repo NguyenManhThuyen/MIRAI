@@ -61,7 +61,8 @@
   import { ref, onMounted } from 'vue';
   import axios from 'axios';
   import NProgress from 'nprogress';
-  
+  import { toast } from 'vue3-toastify';
+
   const showComponent = ref(false); // Biến để điều khiển hiển thị component
   const title = ref(null); // Khai báo biến title là một ref
   const notificationTitle = ref(null); // Khai báo biến notificationTitle là một ref
@@ -133,14 +134,15 @@
     })
         .then(response => {
         console.log('Save successful:', response.data);
+        NProgress.done();
         closeModal(); // Close modal after successful save
+        toast.success("質更新に成功");
         })
         .catch(error => {
         console.error('Error saving content:', error);
+        toast.error("アップデートに失敗しました");
         // Handle error here
         });
-
-        NProgress.done();
     };
 
   
@@ -151,12 +153,12 @@
     const apiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/${switchValue.value}`;
     axios.put(apiUrl)
       .then(response => {
-        console.log('PUT request successful:', response.data);
-        // Optionally handle response if needed
+        toast.success("質更新に成功");
       })
       .catch(error => {
         console.error('Error making PUT request:', error);
         // Handle error here
+        toast.error("アップデートに失敗しました");
       });
       NProgress.done();
   };

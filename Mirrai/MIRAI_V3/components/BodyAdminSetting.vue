@@ -3,7 +3,7 @@
     <h1 class="password-title">パスワード</h1>
     <div class="change-password" @click="openModal">
       <span>パスワードを変更する</span>
-      <img src="@/assets/images/arrow-right-icon.svg"  class="arrow-icon">
+      <img src="@/assets/images/arrow-right-icon.svg" class="arrow-icon">
     </div>
     <div class="gray-line"></div>
 
@@ -17,21 +17,23 @@
         </div>
         <div class="input-group">
           <input :type="showNewPassword ? 'text' : 'password'" placeholder="新しいパスワード" v-model="newPassword">
-          <img @click="toggleNewPasswordVisibility" src="@/assets/images/admin-remove-red-eye.svg" >
+          <img @click="toggleNewPasswordVisibility" src="@/assets/images/admin-remove-red-eye.svg">
         </div>
         <div class="input-group">
           <input :type="showConfirmPassword ? 'text' : 'password'" placeholder="パスワードの確認" v-model="confirmPassword">
-          <img @click="toggleConfirmPasswordVisibility" src="@/assets/images/admin-remove-red-eye.svg" >
+          <img @click="toggleConfirmPasswordVisibility" src="@/assets/images/admin-remove-red-eye.svg">
         </div>
+        <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
         <button class="modal-button" @click="changePassword">パスワードを変更する</button>
       </div>
     </div>
   </div>
 </template>
 
+
 <script>
 import axios from 'axios';
-
+import { toast } from 'vue3-toastify';
 export default {
   data() {
     return {
@@ -40,15 +42,21 @@ export default {
       newPassword: '',
       confirmPassword: '',
       showNewPassword: false,
-      showConfirmPassword: false
+      showConfirmPassword: false,
+      errorMessage: '',
     };
   },
   methods: {
     openModal() {
       this.showModal = true;
+      this.errorMessage = '';
     },
     closeModal() {
       this.showModal = false;
+      this.currentPassword = '';
+      this.newPassword = '';
+      this.confirmPassword = '';
+      this.errorMessage = '';
     },
     toggleNewPasswordVisibility() {
       this.showNewPassword = !this.showNewPassword;
@@ -56,7 +64,23 @@ export default {
     toggleConfirmPasswordVisibility() {
       this.showConfirmPassword = !this.showConfirmPassword;
     },
+    validateInputs() {
+      if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
+        this.errorMessage = 'すべてのフィールドに入力してください';
+        return false;
+      }
+      if (this.newPassword !== this.confirmPassword) {
+        this.errorMessage = '新しいパスワードと確認パスワードが一致しません';
+        return false;
+      }
+      this.errorMessage = '';
+      return true;
+    },
     async changePassword() {
+      if (!this.validateInputs()) {
+        return;
+      }
+
       try {
         const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/changePassword', {
           email: sessionStorage.getItem('email'),
@@ -65,21 +89,31 @@ export default {
           confirmpassword: this.confirmPassword,
         });
 
-        console.log(response.data);
-        // Xử lý sau khi đổi mật khẩu thành công, ví dụ:
-        // Hiển thị thông báo, xóa dữ liệu nhập vào, đóng modal, vv.
-        this.currentPassword = '';
-        this.newPassword = '';
-        this.confirmPassword = '';
-        this.closeModal();
+        if (response.status === 200) {
+          this.currentPassword = '';
+          this.newPassword = '';
+          this.confirmPassword = '';
+          this.errorMessage = '';
+          toast.success("パスワードが正常に変更されました");
+          this.showModal = false;
+        }
       } catch (error) {
-        console.error(error);
-        // Xử lý lỗi khi gọi API, ví dụ:
-        // Hiển thị thông báo lỗi, vv.
+        if (error.response) {
+          // Các lỗi từ server
+          if (error.response.status >= 400 && error.response.status < 500) {
+            this.errorMessage = 'クライアントエラーが発生しました。';
+          } else if (error.response.status >= 500) {
+            this.errorMessage = 'システムエラーが発生しました。';
+          }
+        } else {
+          // Các lỗi khác
+          this.errorMessage = 'エラーが発生しました。';
+        }
       }
     }
   }
 };
+
 </script>
 
 <style scoped>
@@ -221,4 +255,13 @@ export default {
   min-height: 48px;
   height: fit-content;
 }
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  text-align: center;
+}
+
+
+
 </style>

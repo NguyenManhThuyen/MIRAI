@@ -27,10 +27,12 @@
       <div class="form-group">
         <label for="questionNo">問No.</label>
         <input id="questionNo" type="text" v-model="question.sort" />
+        <p v-if="errors.questionNo" class="error-message">{{ errors.questionNo }}</p>
       </div>
       <div class="form-group">
         <label for="questionText">質問</label>
         <textarea id="questionText" v-model="question.title"></textarea>
+        <p v-if="errors.questionText" class="error-message">{{ errors.questionText }}</p>
       </div>
 
       <div class="tab-buttons">
@@ -46,9 +48,12 @@
             </div>
             <input type="text" v-model="answers[index].content" :class="{'correct': answer.is_correct}" />
           </div>
-          <div class="answer-row-temp">
-            <input type="radio" :value="index" v-model="correctAnswer" @change="setCorrectAnswer(index)" />
-            <label :class="{'label-answer': true, 'correct': answer.is_correct}">正答に設定</label>
+          <div class="answer-row-temp" :style="{ justifyContent: errors.answers[index] ? 'space-between' : 'flex-end' }">
+            <p v-if="errors.answers[index]" class="error-message">{{ errors.answers[index] }}</p>
+            <div>
+              <input type="radio" :value="index" v-model="correctAnswer" @change="setCorrectAnswer(index)" />
+              <label :class="{'label-answer': true, 'correct': answer.is_correct}">正答に設定</label>
+            </div>
           </div>
         </div>        
       </div>
@@ -94,9 +99,9 @@
     <div class="modal-content-preview">
       <div class="quiz-container">
         <HeaderQuestionUser />
-        <HeaderStampQuestionUser :numberOfQuestions="6" :currentQuestion="3" />
+        <HeaderStampQuestionUser :admin="true" />
         <div class="quiz-body">
-          <img :src="getFullImageUrl(question.image_question)" />
+          <img :src="uploadedQuestionImage" />
           <div class="question-text">
             <h2>問題{{question.sort}}:</h2>
           </div>
@@ -132,6 +137,14 @@ const props = defineProps({
   visible: Boolean,
   questionId: Number,
 });
+
+// Add errors state
+const errors = ref({
+  questionNo: null,
+  questionText: null,
+  answers: {}
+});
+
 
 const answerLabels = ['A', 'B', 'C', 'D'];
 const question = ref({});
@@ -177,15 +190,36 @@ const formattedContent = computed(() => {
   return question.value.content.replace(/<br\s*[/]?>/gi, '\n');
 });
 
-watchEffect(() => {
-  if (props.visible) {
-    fetchQuestionData();
-  }
+const resetErrors = () => {
+  errors.value = {
+    questionNo: null,
+    questionText: null,
+    answers: {}
+  };
+};
 
-  showUpperModal.value = props.visible;
+watch(() => props.visible, async (newValue, oldValue) => {
+  if (newValue) {
+    // Only fetch data if modal becomes visible
+    await fetchQuestionData();
+  } else {
+    // Reset errors and clear data when modal is hidden
+    resetErrors();
+    question.value = {};
+    answers.value = [];
+    uploadedQuestionImage.value = '';
+    uploadedExplainImage.value = '';
+    sort.value = null;
+    qrcode.value = '';
+    activeTab.value = 'answers'; // Reset activeTab to 'answers'
+    correctAnswer.value = null; // Reset correctAnswer
+  }
+  showUpperModal.value = newValue;
 });
 
+
 const closeModal = () => {
+  resetErrors();
   emit('cancel');
   uploadedQuestionImage.value = null;
   uploadedExplainImage.value = null;
@@ -342,9 +376,40 @@ const setCorrectAnswer = (index) => {
   });
 };
 
-const downloadUrl = computed(() => question.value ? `http://192.168.11.199:3000/users/question?id=${question.value.id}` : '');
+const downloadUrl = computed(() => question.value ? `https://d3plf1sez0mamd.cloudfront.net/users/question?id=${question.value.id}` : '');
+
+const validateForm = () => {
+  let isValid = true;
+  
+  if (!question.value.sort) {
+    errors.value.questionNo = '問No.が必要です';
+    isValid = false;
+  } else {
+    errors.value.questionNo = null;
+  }
+
+  if (!question.value.title) {
+    errors.value.questionText = '質問が必要です';
+    isValid = false;
+  } else {
+    errors.value.questionText = null;
+  }
+
+  answers.value.forEach((answer, index) => {
+    if (!answer.content) { // Change from answer.text to answer.content
+      errors.value.answers[index] = `回答 ${answerLabels[index]} が必要です`;
+      isValid = false;
+    } else {
+      errors.value.answers[index] = null;
+    }
+  });
+  return isValid;
+};
 
 const handleSave = async () => {
+  if (!validateForm()) {
+    return;
+  }
   NProgress.start()
   NProgress.set(0.4)
   try {
@@ -394,6 +459,22 @@ const handleSave = async () => {
     NProgress.done();
   }
 };
+
+
+watchEffect(() => {
+  // Watch for changes in questionNo and questionText inputs
+  if (errors.value.questionNo && question.value.sort) {
+    errors.value.questionNo = null;
+  }
+  if (errors.value.questionText && question.value.title) {
+    errors.value.questionText = null;
+  }
+  answers.value.forEach((answer, index) => {
+    if (errors.value.answers[index] && answer.content) {
+      errors.value.answers[index] = null;
+    }
+  })
+});
 
 </script>
 
@@ -686,6 +767,7 @@ const handleSave = async () => {
 
 .answer-row input[type="text"] {
   flex: 1; /* Phần input text sẽ mở rộng theo chiều ngang */
+  width: 100%;
   height: fit-content;
   min-height: 48px;
   padding: 9px 16px 9px 16px;
@@ -706,16 +788,16 @@ const handleSave = async () => {
   color: #FF6347; /* Màu chữ đỏ */
 }
 .answer-row-temp {
-  display: flex; /* Sử dụng flexbox để các phần tử con nằm cùng 1 hàng */
-  align-items: center; /* Căn giữa các phần tử theo chiều dọc */
-  justify-content: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Khi không có lỗi */
   margin: 2px 8px 0 8px;
 }
 
-.answer-row input[type="radio"] {
-  margin-right: 10px;
+.answer-row-temp input {
+  scale: 1.5;
+  margin-right: 4px;
 }
-
 
 .label-answer {
   margin-left: 4px;
@@ -738,7 +820,8 @@ const handleSave = async () => {
 
 .actions button {
   width: 105px; /* Độ rộng 105px */
-  height: 39px; /* Chiều cao 39px */
+  height: fit-content; /* Chiều cao 39px */
+  min-height: 43px;
   border: none;
   gap: 10px;
   font-family: 'Noto Sans JP';
@@ -920,5 +1003,8 @@ p.option-correct {
   border-bottom: none;
 }
 
-
+.error-message {
+  color: red;
+  font-size: 12px;
+}
 </style>

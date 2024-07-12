@@ -22,10 +22,12 @@
       <div class="form-group">
         <label for="questionNo">問No.</label>
         <input id="questionNo" type="number" v-model="questionNo" />
+        <p v-if="errors.questionNo" class="error-message">{{ errors.questionNo }}</p>
       </div>
       <div class="form-group">
         <label for="questionText">質問</label>
         <textarea id="questionText" v-model="questionText"></textarea>
+        <p v-if="errors.questionText" class="error-message">{{ errors.questionText }}</p>
       </div>
 
       <div class="tab-buttons">
@@ -49,9 +51,12 @@
             <div class="label-index">{{ answerLabels[index] }}</div>
             <input type="text" v-model="answer.text" />
           </div>
-          <div class="answer-row-temp">
-            <input type="radio" :value="index" v-model="correctAnswer" />
-            <label class="label-answer">正答に設定</label>
+          <div class="answer-row-temp" :style="{ justifyContent: errors.answers[index] ? 'space-between' : 'flex-end' }">
+            <p v-if="errors.answers[index]" class="error-message">{{ errors.answers[index] }}</p>
+            <div>
+              <input type="radio" :value="index" v-model="correctAnswer" />
+              <label class="label-answer">正答に設定</label>
+            </div>
           </div>
         </div>
       </div>
@@ -88,9 +93,9 @@
     <div class="modal-content-preview">
       <div class="quiz-container">
         <HeaderQuestionUser />
-        <HeaderStampQuestionUser :numberOfQuestions="6" :currentQuestion="3" />
+        <HeaderStampQuestionUser :admin="true" />
         <div class="quiz-body">
-          <img :src="uploadedQuestionImage" />
+          <img :src="imageQuestion" />
           <div class="question-text">
             <h2>問題{{questionNo}}:</h2>
           </div>
@@ -120,8 +125,16 @@ import axios from 'axios';
 import NProgress from 'nprogress';
 import pica from 'pica';
 
+
 const props = defineProps({
   visible: Boolean,
+});
+
+// Add errors state
+const errors = ref({
+  questionNo: null,
+  questionText: null,
+  answers: {}
 });
 
 // Track active tab
@@ -139,13 +152,12 @@ const answers = ref([
   { text: '' },
 ]);
 const correctAnswer = ref(0);
-
 const uploadedQuestionImage = ref(null);
 const uploadedExplainImage = ref(null);
 const imageQuestion = ref('');
 const imageExplain = ref('');
 let qrCodeBase64 = ref('');
-const id = Math.floor(Date.now() / 1000); // Lấy Unix timestamp tính bằng giây
+let id = Math.floor(Date.now() / 1000); // Lấy Unix timestamp tính bằng giây
 const answerLabels = ['A', 'B', 'C', 'D'];
 const loading = ref(false);
 const previewVisible = ref(false);
@@ -221,7 +233,7 @@ const handleExplainImageClick = () => {
 const cancel = () => {
   // Emit event to cancel modal
   emit('cancel');
-
+  resetErrors();
   // Reset all form fields
   questionNo.value = '';
   questionText.value = '';
@@ -257,12 +269,51 @@ const closePreviewModal = () => {
   showUpperModal.value = true;
 };
 
+const validateForm = () => {
+  let isValid = true;
+  
+  if (!questionNo.value) {
+    errors.value.questionNo = '問No.が必要です';
+    isValid = false;
+  } else {
+    errors.value.questionNo = null;
+  }
+
+  if (!questionText.value) {
+    errors.value.questionText = '質問が必要です';
+    isValid = false;
+  } else {
+    errors.value.questionText = null;
+  }
+
+  answers.value.forEach((answer, index) => {
+    if (!answer.text) {
+      errors.value.answers[index] = `回答 ${answerLabels[index]} が必要です`;
+      isValid = false;
+    } else {
+      errors.value.answers[index] = null;
+    }
+  });
+
+  return isValid;
+};
+const resetErrors = () => {
+  errors.value = {
+    questionNo: null,
+    questionText: null,
+    answers: {}
+  };
+};
+
 const handleCreate = async () => {
+  if (!validateForm()) {
+    return;
+  }
+  NProgress.start();
+  NProgress.set(0.4)
   if (loading.value) return;
 
   loading.value = true;
-  NProgress.start();
-  NProgress.set(0.4)
 
   // Prepare answers data
   const answersData = answers.value.map((answer, index) => ({
@@ -272,8 +323,6 @@ const handleCreate = async () => {
     is_correct: correctAnswer.value === index,
     created_user: 2662002, // Replace with actual user ID
   }));
-
-  console.log(answersData);
 
   const newQuestion = {
     id,
@@ -286,6 +335,8 @@ const handleCreate = async () => {
     created_user: 1 // Replace with actual user ID
   };
 
+  id = Math.floor(Date.now() / 1000);
+  
   try {
     // Make the POST requests to create question and answers concurrently
     const [questionResponse, answersResponse] = await Promise.all([
@@ -316,7 +367,7 @@ const handleOverlayClick = (event) => {
 };
 
 const generateQRCode = async () => {
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://192.168.11.199:3000/users/question?id=${id}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://d3plf1sez0mamd.cloudfront.net/users/question?id=${id}`;
 
   try {
     // Fetch the QR code image and convert it to Base64
@@ -335,7 +386,20 @@ onMounted(generateQRCode); // Gọi hàm generateQRCode khi component mounted
 // Watch for changes in props.visible and update showUpperModal accordingly
 watchEffect(() => {
   showUpperModal.value = props.visible;
+  if (questionNo.value && errors.value.questionNo !== null) {
+    errors.value.questionNo = null;
+  }
+  if (questionText.value && errors.value.questionText !== null) {
+    errors.value.questionText = null;
+  }
+  answers.value.forEach((answer, index) => {
+    if (answer.text && errors.value.answers[index] !== null) {
+      errors.value.answers[index] = null;
+    }
+  });
 });
+
+
 </script>
 
 
@@ -606,6 +670,7 @@ watchEffect(() => {
 
 .answer-row input[type="text"] {
   flex: 1; /* Phần input text sẽ mở rộng theo chiều ngang */
+  width: 100%;
   height: fit-content;
   min-height: 48px;
   padding: 9px 16px 9px 16px;
@@ -622,14 +687,15 @@ watchEffect(() => {
   color: #8F8F96;
 }
 .answer-row-temp {
-  display: flex; /* Sử dụng flexbox để các phần tử con nằm cùng 1 hàng */
-  align-items: center; /* Căn giữa các phần tử theo chiều dọc */
-  justify-content: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Khi không có lỗi */
   margin: 2px 8px 0 8px;
 }
 
-.answer-row input[type="radio"] {
-  margin-right: 10px; /* Khoảng cách giữa input radio và label */
+.answer-row-temp input {
+  scale: 1.5;
+  margin-right: 4px;
 }
 
 .label-answer {
@@ -649,7 +715,8 @@ watchEffect(() => {
 
 .actions button {
   width: 105px; /* Độ rộng 105px */
-  height: 39px; /* Chiều cao 39px */
+  height: fit-content; /* Chiều cao 39px */
+  min-height: 43px;
   border: none;
   gap: 10px;
   font-family: 'Noto Sans JP';
@@ -831,6 +898,11 @@ p.option-correct {
 /* Loại bỏ border-bottom cho phần tử cuối cùng */
 .last-answer-option {
   border-bottom: none;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
 }
 
 </style>

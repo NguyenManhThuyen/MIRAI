@@ -14,17 +14,12 @@
       <div class="share-section">
         <div class="share-text">結果をみんなにシェアしよう！</div>
 
-        <div class="social-icons">
-          <img src="@/assets/images/facebook-icon.svg" alt="Icon 1" class="social-icon" @click="shareFacebook">
-          <img src="@/assets/images/x-icon.svg" alt="Icon 2" class="social-icon">
-          <img src="@/assets/images/line-icon.svg" alt="Icon 3" class="social-icon">
-          <img src="@/assets/images/email-icon.svg" alt="Icon 4" class="social-icon">
-        </div>
-
+        <div class="social-share-container">
           <div v-for="network in ['facebook', 'twitter', 'line', 'email']" :key="network" class="social-share-item">
             <SocialShare :network="network" :styled="true" :label="false" :title="'Title of your share'"
                          :url="imageUrl" class="social-share-icon gray-icon" />
           </div>
+        </div>
         
 
         <div class="share-link">
@@ -72,17 +67,6 @@ totalQuestions.value = results.value.length;
 
 // Tính toán số câu trả lời đúng
 correctAnswers.value = results.value.filter(result => result.status === true).length;
-
-
-// All possible options
-const shareFacebook = useSocialShare({
-  network: 'facebook', // Required!
-  url: 'https://www.example.com', // Optional, defaults to current page URL if not provided
-  title: 'My Custom Title', // Optional, see the "Supported Networks" table below
-  user: 'twitter_user', // Optional, see the "Supported Networks" table below
-  hashtags: 'list,of,hashtags', // Optional, see the "Supported Networks" table below
-  image: 'https://www.example.com/path/to/image.jpg', // Optional, see the "Supported Networks" table below
-})
 
 const share = async () => {
   try {
@@ -275,6 +259,23 @@ watchEffect(async () => {
 .share-section {
   padding: 17px 0px 17px 0px;
   gap: 20px;
+}
+
+.social-share-container {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+}
+
+.social-share-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  transform: scale(1.33); /* Tăng kích thước của icon */
 }
 
 .share-link {

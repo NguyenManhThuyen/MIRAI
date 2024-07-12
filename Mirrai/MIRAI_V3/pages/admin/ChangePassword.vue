@@ -11,9 +11,9 @@
   </template>
   
   <script setup>
-  const handleLoginSuccess = () => {
-    router.push('/admin/MainPage')
-  }
+  useHead({
+        title: 'Change Password | MIRAI',
+    });
   </script>
   
   <style scoped>

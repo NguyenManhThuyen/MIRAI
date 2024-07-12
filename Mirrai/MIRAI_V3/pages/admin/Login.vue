@@ -12,8 +12,11 @@
 
 <script setup>
 const handleLoginSuccess = () => {
-  router.push('/admin/MainPage')
+  router.push('/admin/home')
 }
+useHead({
+        title: 'Login | MIRAI',
+    });
 </script>
 
 <style scoped>

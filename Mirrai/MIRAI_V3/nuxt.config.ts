@@ -9,7 +9,8 @@ export default defineNuxtConfig({
     },
   },
   plugins: [
-    '~/plugins/nprogress.js'
+    '~/plugins/nprogress.js',
+    '~/plugins/vue3-toastify.ts'
   ],
   devServer: {
     host: '0.0.0.0',

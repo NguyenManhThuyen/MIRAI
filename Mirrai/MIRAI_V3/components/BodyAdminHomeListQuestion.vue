@@ -71,6 +71,7 @@
 import { ref, onMounted, shallowRef, watchEffect } from 'vue';
 import axios from 'axios';
 import NProgress from 'nprogress';
+import { toast } from 'vue3-toastify';
 
 const questions = ref([]);
 const alertTitle = ref('Confirm Deletion');
@@ -98,6 +99,7 @@ const handleSaveEdit = (editedQuestion) => {
   // Logic để lưu câu hỏi chỉnh sửa
   console.log('Edited question:', editedQuestion);
   editModalVisible.value = false;
+  toast.success("質問は正常に編集されました");
   fetchQuestions(); // Gọi lại hàm fetch để cập nhật danh sách câu hỏi
 };
 
@@ -133,6 +135,7 @@ const handleCreate = (newQuestion, answersResponse) => {
   successModalAnswersResponse.value = answersResponse;
 
   createModalVisible.value = false;
+  toast.success("質問が正常に作成されました");
   // Show success modal
   createSuccessModalVisible.value = true;
   fetchQuestions();
@@ -156,6 +159,7 @@ const handleConfirm = async () => {
     NProgress.done();
   } catch (error) {
     NProgress.done();
+    toast.success("質問は正常に削除されました");
     console.error('Error deleting question:', error);
   }
 };

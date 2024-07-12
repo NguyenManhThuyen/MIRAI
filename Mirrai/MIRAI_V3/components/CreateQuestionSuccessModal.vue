@@ -6,7 +6,7 @@
       <img :src="newQuestion?.qrcode"  class="modal-qrcode"/>
       <button class="modal-download" @click="downloadQRCode">ダウンロード</button>
       <div class="modal-input-container">
-        <input type="text" :value="`http://192.168.11.199:3000/users/question?id=${newQuestion.id}`" class="modal-input" readonly ref="inputToCopy"/>
+        <input type="text" :value="`https://d3plf1sez0mamd.cloudfront.net/users/question?id=${newQuestion.id}`" class="modal-input" readonly ref="inputToCopy"/>
         <img src="@/assets/images/copy-icon.svg"  class="modal-input-icon" @click="copyInputValue"/>
       </div>
       <img :src="imageQuestionUrl"  class="modal-question-image"/>

@@ -14,13 +14,28 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-
+import { toast } from 'vue3-toastify';
 const router = useRouter()
 
 const logout = () => {
   sessionStorage.removeItem("email");
-  router.push('/admin/login')
-}
+
+  toast.promise(
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1); // delay 2 giây để đảm bảo toast có thời gian hiển thị
+    }),
+    {
+      pending: 'ログアウト中...',
+      success: 'ログアウトに成功しました',
+      error: 'ログアウトに失敗しました'
+    }
+  ).then(() => {
+    router.push('/admin/login');
+  });
+};
+
 </script>
 
 <style scoped>

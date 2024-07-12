@@ -21,7 +21,8 @@
   import { useRouter } from 'vue-router'
   import { onMounted, onUnmounted } from 'vue'
   import NProgress from 'nprogress'
-  
+  import { toast } from 'vue3-toastify';
+
   const email = ref('')
   const errorMessage = ref('')
   const successMessage = ref('')
@@ -46,10 +47,20 @@
         errorMessage.value = ''
         email.value = ''
 
-        // Chuyển hướng sau 3 giây
-        setTimeout(() => {
-          router.push('/admin/login')
-        }, 3000)
+        toast.promise(
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolve();
+            }, 1); // delay 2 giây để đảm bảo toast có thời gian hiển thị
+          }),
+          {
+            pending: 'メールを送信しています..',
+            success: 'メールの送信に成功しました',
+            error: 'メールの送信に失敗しました'
+          }
+        ).then(() => {
+          router.push('/admin/login');
+        });
 
       } else {
         errorMessage.value = 'サーバーに接続できません。後でもう一度やり直してください。'

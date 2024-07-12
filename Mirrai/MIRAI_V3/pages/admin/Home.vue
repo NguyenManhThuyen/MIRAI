@@ -41,6 +41,10 @@ onMounted(() => {
     router.push('/admin/login')
   }
 })
+
+useHead({
+        title: 'Home | MIRAI',
+    });
 </script>
   
 <style scoped>

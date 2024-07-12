@@ -136,7 +136,7 @@ onMounted(() => {
   const isAnswered = results.some(result => result.id === id.value);
   
   if (isAnswered) {
-    alert('Bạn đã trả lời câu hỏi này rồi.');
+    alert('この質問にはすでに回答しました。');
     router.push('/users/questionResult');
   } else {
     // Fetch question when component is mounted if it's not answered yet
