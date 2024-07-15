@@ -16,12 +16,12 @@
       >
         <div class="index">{{ index + 1 }}</div>
         <div class="question-image">
-          <img :src="getFullImageUrl(question.image_question)"  />
+          <img  v-if="question.image_question" :src="getFullImageUrl(question.image_question)"  />
         </div>
         <div class="question-text">{{ question.title }}</div>
         <div class="actions">
           <div class="action-image">
-            <img :src="question.qrcode"  />
+            <img  v-if="question.qrcode" :src="question.qrcode"  />
           </div>
           <div class="divider"></div> <!-- Thêm phần này để làm thanh ngăn cách -->
           <div class="edit">
@@ -45,7 +45,6 @@
       :visible="createModalVisible"
       @cancel="createModalVisible = false"
       @create="handleCreate"
-      @preview="handlePreview"
     />
     <CreateQuestionSuccessModal
       :visible="createSuccessModalVisible"
@@ -58,12 +57,8 @@
       :questionId="editModalQuestionId"
       @cancel="editModalVisible = false"
       @save="handleSaveEdit"
-      @preview="handlePreview"
     />
-    <PreviewQuestionModal
-      :visible="previewModalVisible"
-      @close="previewModalVisible = false"
-    />
+
   </div>
 </template>
 
@@ -74,7 +69,7 @@ import NProgress from 'nprogress';
 import { toast } from 'vue3-toastify';
 
 const questions = ref([]);
-const alertTitle = ref('Confirm Deletion');
+const alertTitle = ref('削除の確認');
 const alertContent = ref('');
 const alertActionText = ref('Delete');
 const alertVisible = ref(false);
@@ -86,8 +81,6 @@ const createSuccessModalVisible = ref(false); // Add this line to define createS
 
 const editModalVisible = ref(false);
 const editModalQuestionId = ref(null);
-
-const previewModalVisible = ref(false); // Add this line to define previewModalVisible
 
 const showEditModal = (questionId) => {
   editModalQuestionId.value = questionId;
@@ -141,13 +134,6 @@ const handleCreate = (newQuestion, answersResponse) => {
   fetchQuestions();
 };
 
-const handlePreview = () => {
-  // Logic to handle preview
-  console.log('Preview clicked');
-  // createModalVisible.value = false;
-  // editModalVisible.value = false;
-  previewModalVisible.value = false; // Show preview modal
-};
 
 const handleConfirm = async () => {
   try {
@@ -157,6 +143,7 @@ const handleConfirm = async () => {
     console.log("Confirmed");
     fetchQuestions(); // Load lại danh sách câu hỏi
     NProgress.done();
+    await axios.delete(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/${currentQuestionId.value}`);
   } catch (error) {
     NProgress.done();
     toast.success("質問は正常に削除されました");

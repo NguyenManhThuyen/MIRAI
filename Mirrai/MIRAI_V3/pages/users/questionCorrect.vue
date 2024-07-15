@@ -1,7 +1,7 @@
 <template>
   <div class="quiz-container">
     <HeaderQuestionUser />
-    <HeaderStampQuestionUser />
+    <HeaderStampQuestionUser :admin="true"/>
     <div class="quiz-body">
       <!-- Ảnh question-correct.svg -->
       <img src="@/assets/images/question-correct.svg" />

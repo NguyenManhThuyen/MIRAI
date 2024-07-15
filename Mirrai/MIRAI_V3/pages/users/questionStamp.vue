@@ -2,7 +2,7 @@
   <div class="quiz-container">
     <HeaderQuestionUser />
     <div class="quiz-body">
-      <img :src="questionStampImage" class="qr-code" @mousedown="startDownloadTimer" @mouseup="cancelDownloadTimer" @mouseleave="cancelDownloadTimer" />
+      <img  v-if="questionStampImage" :src="questionStampImage" class="qr-code" @mousedown="startDownloadTimer" @mouseup="cancelDownloadTimer" @mouseleave="cancelDownloadTimer" />
       <div class="button-container">
         <button class="download-button" @click="goToResults">
           <span class="button-icon"></span> 結果ページに戻る

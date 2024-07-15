@@ -93,9 +93,9 @@
     <div class="modal-content-preview">
       <div class="quiz-container">
         <HeaderQuestionUser />
-        <HeaderStampQuestionUser :admin="true" />
+        <HeaderStampQuestionUser />
         <div class="quiz-body">
-          <img :src="imageQuestion" />
+          <img v-if="imageQuestion" :src="getFullImageUrl(imageQuestion)" alt="Question Image" />
           <div class="question-text">
             <h2>問題{{questionNo}}:</h2>
           </div>
@@ -109,7 +109,7 @@
             :class="{ 'last-answer-option': index === answers.length - 1 }"
           >
             <div :class="{ 'option-index': true, 'option-correct': answer.is_correct }">{{ String.fromCharCode(65 + index) }}</div>
-            <p :class="{ 'option-correct': answer.is_correct }">{{ answer.content }}</p>
+            <p :class="{ 'option-correct': answer.is_correct }">{{ answer.text }}</p>
           </div>
           </div>
         </div>
@@ -117,6 +117,23 @@
       </div>
     </div>
   </div>
+
+  <div v-if="showCropModalQuestion" class="modal-overlay">
+    <div class="modal-content">
+      <h2>クロップ画像</h2>
+      <span class="modal-close" @click="closeCropModal('question')">×</span>
+      <CropperComponent :imageUrl="uploadedQuestionImage" @cropped="handleCroppedImage('question',$event)" />
+    </div>
+  </div>
+  
+  <div v-if="showCropModalExplain" class="modal-overlay">
+    <div class="modal-content">
+      <h2>クロップ画像</h2>
+      <span class="modal-close" @click="closeCropModal('explain')">×</span>
+      <CropperComponent :imageUrl="uploadedExplainImage" @cropped="handleCroppedImage('explain',$event)" />
+    </div>
+  </div>
+  
 </template>
 
 <script setup>
@@ -163,6 +180,41 @@ const loading = ref(false);
 const previewVisible = ref(false);
 const showUpperModal = ref(props.visible);
 
+const showCropModalQuestion = ref(false);
+const showCropModalExplain = ref(false);
+// Methods
+const handleCroppedImage = async (type, croppedImage) => {
+  console.log(type, croppedImage);
+  
+  // Chuyển đổi croppedImage thành base64
+  const blob = await fetch(croppedImage).then(res => res.blob());
+  const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
+  
+  if (type === 'question') {
+    // Lưu base64 vào uploadedQuestionImage.value
+    uploadedQuestionImage.value = croppedImage;
+    // Lưu base64 vào imageQuestion.value
+    imageQuestion.value = base64String;
+    showCropModalQuestion.value = false;
+  } else if (type === 'explain') {
+    // Lưu base64 vào uploadedExplainImage.value
+    uploadedExplainImage.value = croppedImage;
+    // Lưu base64 vào imageExplain.value
+    imageExplain.value = base64String;
+    showCropModalExplain.value = false;
+  }
+};
+
+
+const closeCropModal = (type) => {
+  if (type === 'question') {
+    showCropModalQuestion.value = false;
+  } else if (type === 'explain') {
+    showCropModalExplain.value = false;
+  }
+};
+
+
 const toBase64 = file => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.readAsDataURL(file);
@@ -188,7 +240,6 @@ const onQuestionFileChange = async (event) => {
         const scaleFactor = Math.sqrt((1024 * 1024) / file.size);
         canvas.width = img.width * scaleFactor;
         canvas.height = img.height * scaleFactor;
-
         // Resize ảnh bằng pica
         const picaInstance = pica();
         await picaInstance.resize(img, canvas);
@@ -198,11 +249,13 @@ const onQuestionFileChange = async (event) => {
           const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
           imageQuestion.value = base64String;
           uploadedQuestionImage.value = URL.createObjectURL(blob);
+          showCropModalQuestion.value = true;
         }, 'image/jpeg', 0.8); // Giảm chất lượng ảnh để giảm kích thước
       };
     } else {
       uploadedQuestionImage.value = URL.createObjectURL(file);
       imageQuestion.value = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
+      showCropModalQuestion.value = true;
     }
   }
 };
@@ -211,8 +264,39 @@ const onQuestionFileChange = async (event) => {
 const onExplainFileChange = async (event) => {
   const file = event.target.files?.[0];
   if (file) {
-    uploadedExplainImage.value = URL.createObjectURL(file);
-    imageExplain.value = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
+    // Kiểm tra kích thước file
+    if (file.size > 1024 * 1024) {
+      // Tạo một đối tượng ảnh từ file
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+
+      img.onload = async () => {
+        // Tạo canvas để resize ảnh
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Đặt kích thước mới cho canvas
+        const scaleFactor = Math.sqrt((1024 * 1024) / file.size);
+        canvas.width = img.width * scaleFactor;
+        canvas.height = img.height * scaleFactor;
+
+        // Resize ảnh bằng pica
+        const picaInstance = pica();
+        await picaInstance.resize(img, canvas);
+        
+        // Chuyển đổi canvas thành base64
+        canvas.toBlob(async (blob) => {
+          const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
+          imageExplain.value = base64String;
+          uploadedExplainImage.value = URL.createObjectURL(blob);
+          showCropModalExplain.value = true;
+        }, 'image/jpeg', 0.8); // Giảm chất lượng ảnh để giảm kích thước
+      };
+    } else {
+      uploadedExplainImage.value = URL.createObjectURL(file);
+      imageExplain.value = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
+      showCropModalExplain.value = true;
+    }
   }
 };
 
@@ -259,9 +343,9 @@ const hidden = () => {
 };
 
 const preview = () => {
+  console.log(answers.value);
   previewVisible.value = true;
   hidden();
-  emit('preview');
 };
 
 const closePreviewModal = () => {
@@ -365,7 +449,10 @@ const handleOverlayClick = (event) => {
     cancel(); // Call cancel method when clicked outside the modal
   }
 };
-
+const getFullImageUrl = (url) => {
+  const prefix = "data:image/png;base64,";
+  return prefix + url;
+};
 const generateQRCode = async () => {
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://d3plf1sez0mamd.cloudfront.net/users/question?id=${id}`;
 
@@ -556,8 +643,9 @@ watchEffect(() => {
 .uploaded-image {
   display: flex;
   width: 100%;
-  height: auto;
-  max-height: 100%;
+  height: 100%;
+  min-height: 300px;
+  max-height: 600px;
   object-fit: contain;
   cursor: pointer;
   justify-content: center; /* căn giữa theo chiều ngang */

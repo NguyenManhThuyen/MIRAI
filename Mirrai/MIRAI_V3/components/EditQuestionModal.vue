@@ -5,7 +5,7 @@
       <h2>{{ `問${sort}編集` }}</h2>
       <div class="question-details">
         <div class="left-column">
-          <img :src="qrcode" class="qrcode-image" />
+          <img  v-if="qrcode" :src="qrcode" class="qrcode-image" />
         </div>
         <div class="right-column">
           <button @click="downloadQRCode" class="download-button">ダウンロード</button>
@@ -99,9 +99,9 @@
     <div class="modal-content-preview">
       <div class="quiz-container">
         <HeaderQuestionUser />
-        <HeaderStampQuestionUser :admin="true" />
+        <HeaderStampQuestionUser />
         <div class="quiz-body">
-          <img :src="uploadedQuestionImage" />
+          <img v-if="uploadedQuestionImage" :src="uploadedQuestionImage" alt="Question Image" />
           <div class="question-text">
             <h2>問題{{question.sort}}:</h2>
           </div>
@@ -123,6 +123,23 @@
       </div>
     </div>
   </div>
+
+  <div v-if="showCropModalQuestion" class="modal-overlay">
+    <div class="modal-content">
+      <h2>クロップ画像</h2>
+      <span class="close" @click="closeCropModal('question')">×</span>
+      <CropperComponent :imageUrl="uploadedQuestionImage" @cropped="handleCroppedImage('question',$event)" />
+    </div>
+  </div>
+  
+  <div v-if="showCropModalExplain" class="modal-overlay">
+    <div class="modal-content">
+      <h2>クロップ画像</h2>
+      <span class="close" @click="closeCropModal('explain')">×</span>
+      <CropperComponent :imageUrl="uploadedExplainImage" @cropped="handleCroppedImage('explain',$event)" />
+    </div>
+  </div>
+  
 </template>
 
 
@@ -160,6 +177,39 @@ const loading = ref(false);
 const previewVisible = ref(false);
 const showUpperModal = ref(props.visible);
 
+const showCropModalQuestion = ref(false);
+const showCropModalExplain = ref(false);
+// Methods
+const handleCroppedImage = async (type, croppedImage) => {
+  console.log(type, croppedImage);
+  
+  // Chuyển đổi croppedImage thành base64
+  const blob = await fetch(croppedImage).then(res => res.blob());
+  const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
+  
+  if (type === 'question') {
+    // Lưu base64 vào uploadedQuestionImage.value
+    uploadedQuestionImage.value = croppedImage;
+    // Lưu base64 vào imageQuestion.value
+    question.value.image_question = base64String;    
+    showCropModalQuestion.value = false;
+  } else if (type === 'explain') {
+    // Lưu base64 vào uploadedExplainImage.value
+    uploadedExplainImage.value = croppedImage;
+    // Lưu base64 vào imageExplain.value
+    question.value.image_explain = base64String;
+    showCropModalExplain.value = false;
+  }
+};
+
+const closeCropModal = (type) => {
+  if (type === 'question') {
+    showCropModalQuestion.value = false;
+  } else if (type === 'explain') {
+    showCropModalExplain.value = false;
+  }
+};
+
 const fetchQuestionData = async () => {
   try {
     const [questionResponse, answersResponse] = await Promise.all([
@@ -174,7 +224,7 @@ const fetchQuestionData = async () => {
     qrcode.value = question.value.qrcode;
 
     answers.value = answersResponse.data;
-
+    console.log(answers.value);
     // Find the index of the correct answer
     const correctIndex = answers.value.findIndex(answer => answer.is_correct);
     if (correctIndex !== -1) {
@@ -230,9 +280,9 @@ const hidden = () => {
 };
 
 const preview = () => {
+  console.log(answers.value);
   previewVisible.value = true;
   hidden();
-  emit('preview');
 };
 
 const closePreviewModal = () => {
@@ -268,11 +318,13 @@ const handleFileQuestionChange = async (event) => {
           const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
           question.value.image_question = base64String;
           uploadedQuestionImage.value = URL.createObjectURL(blob);
+          showCropModalQuestion.value = true;
         }, 'image/jpeg', 0.8); // Giảm chất lượng ảnh để giảm kích thước
       };
     } else {
       uploadedQuestionImage.value = URL.createObjectURL(file);
       question.value.image_question = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
+      showCropModalQuestion.value = true;
     }
   }
 };
@@ -305,11 +357,13 @@ const handleFileExplainChange = async (event) => {
           const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
           question.value.image_explain = base64String;
           uploadedExplainImage.value = URL.createObjectURL(blob);
+          showCropModalExplain.value = true;
         }, 'image/jpeg', 0.8); // Giảm chất lượng ảnh để giảm kích thước
       };
     } else {
       uploadedExplainImage.value = URL.createObjectURL(file);
       question.value.image_explain = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
+      showCropModalExplain.value = true;
     }
   }
 };
@@ -492,15 +546,26 @@ watchEffect(() => {
   justify-content: center;
   align-items: center;
 }
-
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .modal-content {
-  background-color: #fefefe;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-width: 80%;
-  width: 813px;
-  position: relative;
+  background: #fff;
+  max-width: 882px;
+  width: 100%;
+  position: relative; /* Để có thể định vị "x" ở góc phải của modal */
+  padding: 32px;
+  gap: 20px;
+  border-radius: 16px;
+
   max-height: 85vh; /* Đặt chiều cao tối đa của modal là 80% chiều cao của viewport */
   overflow-y: auto; /* Cho phép nội dung cuộn khi vượt quá chiều cao */
 
@@ -514,9 +579,7 @@ watchEffect(() => {
     width: 0px;
     background: transparent; /* Optional: just in case it's visible in some browser */
   }
-
 }
-
 
 .close {
   position: absolute;
@@ -629,8 +692,9 @@ watchEffect(() => {
 
 .uploaded-image {
   width: 100%;
-  height: auto;
-  max-height: 500px;
+  height: 100%;
+  min-height: 300px;
+  max-height: 600px;
   object-fit: contain;
   border-radius: 12px;
   cursor: pointer;

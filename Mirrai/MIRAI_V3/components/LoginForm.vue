@@ -50,13 +50,12 @@ const handleSubmit = async () => {
     })
 
     if (response.status === 200) {
-      //localStorage.setItem('username', username.value)
-      router.push('/admin/Home')
+      await router.push('/admin/Home')
       sessionStorage.setItem('email', response.data)
       username.value = ''
       password.value = ''
     } else if (response.status === 202) {
-      router.push('/admin/ChangePassword')
+      await router.push('/admin/ChangePassword')
       console.log(response.data);
       sessionStorage.setItem('email', response.data)
       username.value = ''
@@ -71,6 +70,7 @@ const handleSubmit = async () => {
     NProgress.done()
   }
 }
+
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value

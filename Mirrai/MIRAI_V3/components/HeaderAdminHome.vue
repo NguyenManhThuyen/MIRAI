@@ -115,4 +115,24 @@ const logout = () => {
 .logout-button:active {
   transform: scale(1); /* Thu nhỏ lại khi nhấn nút */
 }
+
+@media screen and (max-width: 480px) {
+  .admin-header {
+    padding: 0 8px; /* Giảm padding khi màn hình nhỏ hơn */
+  }
+
+  .admin-icon-container p {
+    font-size: 16px; /* Giảm kích thước font chữ */
+    margin-left: 4px;
+  }
+
+  .logout-button {
+    padding: 4px 8px; /* Giảm padding cho nút logout */
+    font-size: 14px; /* Giảm kích thước font chữ cho nút logout */
+  }
+
+  .admin-logout-button {
+    margin-right: 4px;
+  }
+}
 </style>

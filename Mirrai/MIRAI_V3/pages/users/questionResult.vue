@@ -1,7 +1,7 @@
 <template>
   <div class="quiz-container">
     <HeaderQuestionUser />
-    <HeaderStampQuestionUser :color="true" />
+    <HeaderStampQuestionUser :color="true" :admin="true"/>
     <div class="quiz-body">
       <div class="result-section">
         <div class="result-text">結果</div>

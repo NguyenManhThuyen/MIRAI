@@ -1,9 +1,10 @@
 <template>
   <div class="quiz-container">
-    <HeaderQuestionUser />
-    <HeaderStampQuestionUser />
+    <HeaderQuestionUser/>
+
+    <HeaderStampQuestionUser  :admin="true" />
     <div class="quiz-body">
-      <img :src="getFullImageUrl(question.image_question)" />
+      <img  v-if="question.image_question" :src="getFullImageUrl(question.image_question)" />
       <div class="question-text">
         <h2>問題{{question.sort}}:</h2>
       </div>

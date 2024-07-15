@@ -86,6 +86,7 @@ const confirmAction = () => {
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    transition: transform 0.3s ease-in-out; /* Thêm hiệu ứng transition */
   }
   
   .alert-button.cancel {
@@ -117,5 +118,14 @@ const confirmAction = () => {
     gap: 10px;
     border-radius: 8px;
   }
+
+  .alert-button:hover {
+    transform: scale(1.05); /* Phóng to khi di chuột vào */
+  }
+
+  .alert-button:active {
+    transform: scale(1); /* Phóng to khi di chuột vào */
+  }
+
   </style>
   

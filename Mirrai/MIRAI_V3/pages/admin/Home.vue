@@ -106,4 +106,22 @@ useHead({
   background-color: #2E7CF6; /* Màu nền khi tab được chọn */
   color: white; /* Màu chữ khi tab được chọn */
 }
+
+@media screen and (max-width: 480px) {
+  .content {
+    padding: 16px 4px 4px; /* Adjusted padding for smaller screens */
+  }
+
+  .tab {
+    width: auto; /* Auto width for tabs */
+    padding: 8px; /* Smaller padding for tabs */
+    font-size: 14px; /* Smaller font size for tabs */
+    gap: 5px; /* Reduced gap between icon and text */
+  }
+
+  .tab-icon1, .tab-icon2 {
+    width: 20px;
+    height: 20px;
+  }
+}
 </style>
