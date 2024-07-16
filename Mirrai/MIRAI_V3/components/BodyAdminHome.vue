@@ -46,7 +46,7 @@
           </div>
           <div class="modal-body">
             <!-- Nội dung của modal -->
-            <textarea v-model="modalContent" class="modal-textarea"></textarea>
+            <textarea v-model="modalContent" class="modal-textarea" style="resize: none;"></textarea>
           </div>
           <div class="modal-footer">
             <button class="cancel-button" @click="closeModal">キャンセル</button>

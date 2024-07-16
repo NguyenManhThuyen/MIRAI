@@ -317,6 +317,7 @@ onMounted(fetchQuestions);
     height: 48px;
     margin-left: 10px;
 }
+
 .edit img,
 .delete img {
   width: 40px;
@@ -325,12 +326,13 @@ onMounted(fetchQuestions);
   transition: transform 0.3s ease-in-out; /* Thêm hiệu ứng transition */
 }
 
+
 .edit img:hover,
 .delete img:hover {
   transform: scale(1.17); /* Phóng to khi di chuột vào */
 }
 
-.edit img:active
+.edit img:active,
 .delete img:active {
   transform: scale(1); /* Phóng to khi di chuột vào */
 }
@@ -352,13 +354,14 @@ onMounted(fetchQuestions);
     overflow: hidden; /* Ẩn nội dung bị tràn */
     display: -webkit-box;
     -webkit-line-clamp: 3; /* Số dòng tối đa */
+            line-clamp: 3; /* Số dòng tối đa */
     -webkit-box-orient: vertical;
   }
 
   .question-image img {
     display: none; /* Ẩn hình ảnh trong question-image */
   }
-
+  
 }
 
 </style>

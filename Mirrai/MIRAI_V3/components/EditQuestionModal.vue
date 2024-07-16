@@ -31,7 +31,7 @@
       </div>
       <div class="form-group">
         <label for="questionText">質問</label>
-        <textarea id="questionText" v-model="question.title"></textarea>
+        <textarea id="questionText" v-model="question.title" style="resize: none;"></textarea>
         <p v-if="errors.questionText" class="error-message">{{ errors.questionText }}</p>
       </div>
 
@@ -83,7 +83,7 @@
           </template>
         </div>
         <div class="form-group">
-          <textarea id="questionDescription" v-model="formattedContent"></textarea>
+          <textarea id="questionDescription" v-model="formattedContent" style="resize: none;"></textarea>
         </div>
       </div>
 
@@ -429,8 +429,8 @@ const setCorrectAnswer = (index) => {
     }
   });
 };
-
-const downloadUrl = computed(() => question.value ? `https://d3plf1sez0mamd.cloudfront.net/users/question?id=${question.value.id}` : '');
+const domain = window.location.host;
+const downloadUrl = computed(() => question.value ? `https://${domain}/users/question?id=${question.value.id}` : '');
 
 const validateForm = () => {
   let isValid = true;

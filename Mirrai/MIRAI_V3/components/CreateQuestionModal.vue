@@ -26,7 +26,8 @@
       </div>
       <div class="form-group">
         <label for="questionText">質問</label>
-        <textarea id="questionText" v-model="questionText"></textarea>
+        <textarea id="questionText" v-model="questionText" style="resize: none;"></textarea>
+
         <p v-if="errors.questionText" class="error-message">{{ errors.questionText }}</p>
       </div>
 
@@ -77,7 +78,7 @@
           </template>
         </div>
         <div class="form-group">
-          <textarea id="questionDescription" v-model="questionDescription"></textarea>
+          <textarea id="questionDescription" v-model="questionDescription" style="resize: none;"></textarea>
         </div>
       </div>
 
@@ -108,8 +109,10 @@
             :key="index"
             :class="{ 'last-answer-option': index === answers.length - 1 }"
           >
-            <div :class="{ 'option-index': true, 'option-correct': answer.is_correct }">{{ String.fromCharCode(65 + index) }}</div>
-            <p :class="{ 'option-correct': answer.is_correct }">{{ answer.text }}</p>
+          <div :class="{ 'option-index': true, 'option-correct': correctAnswer === index }">
+            {{ String.fromCharCode(65 + index) }}
+          </div>
+          <p :class="{ 'option-correct': correctAnswer === index }">{{ answer.text }}</p>
           </div>
           </div>
         </div>
@@ -141,7 +144,7 @@ import { ref, onMounted, defineProps, defineEmits, watchEffect } from 'vue';
 import axios from 'axios';
 import NProgress from 'nprogress';
 import pica from 'pica';
-
+import QRCode from 'qrcode';
 
 const props = defineProps({
   visible: Boolean,
@@ -163,10 +166,10 @@ const questionNo = ref('');
 const questionText = ref('');
 const questionDescription = ref('');
 const answers = ref([
-  { text: '' },
-  { text: '' },
-  { text: '' },
-  { text: '' },
+  { text: '' , is_correct: true},
+  { text: '' ,is_correct: false},
+  { text: '' , is_correct: false},
+  { text: '' , is_correct: false},
 ]);
 const correctAnswer = ref(0);
 const uploadedQuestionImage = ref(null);
@@ -398,7 +401,7 @@ const handleCreate = async () => {
   if (loading.value) return;
 
   loading.value = true;
-
+  await generateQRCode();
   // Prepare answers data
   const answersData = answers.value.map((answer, index) => ({
     id: index + id, // Use index as id for simplicity
@@ -453,22 +456,75 @@ const getFullImageUrl = (url) => {
   const prefix = "data:image/png;base64,";
   return prefix + url;
 };
-const generateQRCode = async () => {
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://d3plf1sez0mamd.cloudfront.net/users/question?id=${id}`;
 
-  try {
-    // Fetch the QR code image and convert it to Base64
-    const response = await axios.get(qrCodeUrl, { responseType: 'blob' });
-    const blob = response.data;
-    qrCodeBase64.value = await toBase64(blob);
-  } catch (error) {
-    console.error('Error fetching QR code:', error);
-    // Retry generating QR code
-    setTimeout(generateQRCode, 1000); // Retry after 1 second
-  }
+// Hàm chuyển đổi base64
+const tobase64 = async (dataURL) => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        resolve(reader.result);
+      };
+      reader.readAsDataURL(xhr.response);
+    };
+    xhr.onerror = function () {
+      reject(new Error('Failed to convert to base64'));
+    };
+    xhr.responseType = 'blob';
+    xhr.open('GET', dataURL);
+    xhr.send();
+  });
 };
 
-onMounted(generateQRCode); // Gọi hàm generateQRCode khi component mounted
+// Hàm tạo QR code
+const generateQRCode = async () => {
+  const domain = window.location.host;
+  const qrCodeData = `https://${domain}/users/question?id=${id}`;
+  try {
+    // Tạo mã QR và chuyển đổi thành canvas
+    const canvas = document.createElement('canvas');
+    await QRCode.toCanvas(canvas, qrCodeData, { width: 230, height: 230, margin: 1 });
+
+    // Thêm vòng tròn và văn bản vào giữa của canvas
+    const ctx = canvas.getContext('2d');
+    const circleRadius = 30; // Bán kính vòng tròn
+    const circleX = canvas.width / 2;
+    const circleY = canvas.height / 2;
+
+    // Vẽ vòng tròn với màu gradient và viền
+    const gradient = ctx.createRadialGradient(circleX, circleY, circleRadius / 2, circleX, circleY, circleRadius);
+    gradient.addColorStop(0, 'white');
+    gradient.addColorStop(1, 'white');
+
+    ctx.beginPath();
+    ctx.arc(circleX, circleY, circleRadius, 0, 2 * Math.PI);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'blue';
+    ctx.stroke();
+
+    // Thêm văn bản vào giữa vòng tròn, căn chỉnh chính giữa
+    ctx.font = 'bold 22px Verdana';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'black';
+    ctx.fillText('Q.' +questionNo.value, circleX, circleY + 2); // Điều chỉnh vị trí văn bản
+
+    // Làm cho các thanh đen QR trông mịn màng và bo góc
+    ctx.imageSmoothingEnabled = true;
+
+    // Chuyển đổi canvas thành base64
+    const base64 = canvas.toDataURL();
+    qrCodeBase64.value = (await tobase64(base64));
+    console.log(qrCodeBase64.value);
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    // Retry generating QR code
+    setTimeout(() => generateQRCode(), 1000); // Retry after 1 second
+  }
+};
 
 // Watch for changes in props.visible and update showUpperModal accordingly
 watchEffect(() => {
@@ -486,7 +542,10 @@ watchEffect(() => {
   });
 });
 
-
+onMounted(() => {
+  // Set default value for correctAnswer when modal opens
+  correctAnswer.value = 0; // Set the default correct answer index here
+});
 </script>
 
 

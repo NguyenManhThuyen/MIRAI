@@ -1,7 +1,7 @@
 <template>
   <HeaderAdminHome />
+  <div class="spacer"></div>
   <div class="admin-home">
-    <div class="spacer"></div>
     <div class="content">
       <div class="tabs">
         <div class="tab" @click="selectedTab = 'question'" :class="{ 'active-tab': selectedTab === 'question' }">
@@ -52,7 +52,10 @@ useHead({
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-width: 1200px; /* Ví dụ, bạn có thể thay đổi giá trị này */
+  margin: 0 auto; /* Để căn giữa nội dung theo chiều ngang */
 }
+
 
 .spacer {
   height: 16px;
@@ -64,6 +67,7 @@ useHead({
   width: 100%;
   padding: 16px;
 }
+
 
 .tabs {
   display: flex;

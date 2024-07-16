@@ -50,14 +50,13 @@ const handleSubmit = async () => {
     })
 
     if (response.status === 200) {
-      await router.push('/admin/Home')
       sessionStorage.setItem('email', response.data)
+      await router.push('/admin/Home')
       username.value = ''
       password.value = ''
     } else if (response.status === 202) {
-      await router.push('/admin/ChangePassword')
-      console.log(response.data);
       sessionStorage.setItem('email', response.data)
+      await router.push('/admin/ChangePassword')
       username.value = ''
       password.value = ''
     } else {

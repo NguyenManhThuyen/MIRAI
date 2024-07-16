@@ -139,8 +139,8 @@ const copyInputValue = () => {
 
 onMounted(async () => {
   const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/2');
-    console.log(response.data);
-    if (response.data.noti === null || !response.data.content) {
+    console.log(response.data.noti);
+    if (response.data.noti === null || !response.data.noti) {
       shouldShowFooter.value = false; // Hide footer
     } else {
       subtitle.value = response.data.content;
