@@ -13,7 +13,7 @@
           <img src="@/assets/images/admin-create-question-icon.svg"  class="upload-icon" />
           <p>ドラッグ&ドロップでファイルをアップロードする又はブラウザ</p>
           <label class="choose-file">
-            ブラウザ
+            データから選択
             <input type="file" @change="onQuestionFileChange" style="display: none;" />
           </label>
         </template>
@@ -25,7 +25,7 @@
         <p v-if="errors.questionNo" class="error-message">{{ errors.questionNo }}</p>
       </div>
       <div class="form-group">
-        <label for="questionText">質問</label>
+        <label for="questionText">問題</label>
         <textarea id="questionText" v-model="questionText" style="resize: none;"></textarea>
 
         <p v-if="errors.questionText" class="error-message">{{ errors.questionText }}</p>
@@ -72,7 +72,7 @@
             <img src="@/assets/images/admin-create-question-icon.svg"  class="upload-icon" />
             <p>ドラッグ&ドロップでファイルをアップロードする又はブラウザ</p>
             <label class="choose-file">
-              ブラウザ
+              データから選択
               <input type="file" @change="onExplainFileChange" style="display: none;" />
             </label>
           </template>
@@ -187,8 +187,6 @@ const showCropModalQuestion = ref(false);
 const showCropModalExplain = ref(false);
 // Methods
 const handleCroppedImage = async (type, croppedImage) => {
-  console.log(type, croppedImage);
-  
   // Chuyển đổi croppedImage thành base64
   const blob = await fetch(croppedImage).then(res => res.blob());
   const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
@@ -346,7 +344,6 @@ const hidden = () => {
 };
 
 const preview = () => {
-  console.log(answers.value);
   previewVisible.value = true;
   hidden();
 };
@@ -367,7 +364,7 @@ const validateForm = () => {
   }
 
   if (!questionText.value) {
-    errors.value.questionText = '質問が必要です';
+    errors.value.questionText = '問題が必要です';
     isValid = false;
   } else {
     errors.value.questionText = null;
@@ -430,10 +427,6 @@ const handleCreate = async () => {
       axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions', newQuestion),
       axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/batchCreateItems', answersData)
     ]);
-
-    console.log('Create question response:', questionResponse.data);
-    console.log('Create answers response:', answersResponse.data);
-
     // Emit event after successful creation
     emit('create', newQuestion, answersData);
     cancel();

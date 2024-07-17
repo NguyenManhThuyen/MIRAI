@@ -39,7 +39,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -49,6 +48,7 @@ const answer = ref(route.query.answer || '');
 const content = ref(route.query.content || '');
 const explain = ref(route.query.explain || '');
 const explainImg = ref(route.query.explainImg || '');
+const questionsCount = ref(route.query.questionsCount || 0 );
 const shouldShowExplanation = ref(true); // Default to true
 const shouldShowFooter = ref(true); // Default to true
 
@@ -65,10 +65,6 @@ onMounted(async () => {
   if (!explain.value && !explainImg.value) {
     shouldShowExplanation.value = false;
   }
-
-  const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
-  const questionsCount = response.data.length;
-
   const storedResults = localStorage.getItem('results');
   if (storedResults) {
     const results = JSON.parse(storedResults);

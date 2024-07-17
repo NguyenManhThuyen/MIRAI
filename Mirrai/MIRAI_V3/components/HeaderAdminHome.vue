@@ -2,7 +2,7 @@
   <header class="admin-header">
     <div class="admin-icon-container">
       <img src="@/assets/images/mirai-icon.svg" class="admin-header-icon" />
-      <p class="admin-main-text">JAL Admin</p>
+      <p class="admin-main-text">Admin</p>
     </div>
     <div class="admin-logout-button">
       <button class="logout-button" @click="logout">
@@ -100,7 +100,7 @@ const logout = () => {
   color: white;
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 23.17px;
   letter-spacing: 0.02em;
   cursor: pointer;

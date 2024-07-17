@@ -114,10 +114,6 @@ const captureComponentAsImage = async () => {
         'Content-Type': 'multipart/form-data'
       }
     });
-
-    console.log('Upload successful');
-    console.log(response.data);
-
     // Lấy URL hình ảnh từ response và gán vào biến imageUrl
     imageUrl.value = response.data.data.url;
 
@@ -139,20 +135,17 @@ const copyInputValue = () => {
 
 onMounted(async () => {
   const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/2');
-    console.log(response.data.noti);
     if (response.data.noti === null || !response.data.noti) {
       shouldShowFooter.value = false; // Hide footer
     } else {
       subtitle.value = response.data.content;
     }
   await captureComponentAsImage(); // Chờ cho quá trình chụp và tải lên hoàn thành
-  console.log(imageUrl.value);
 });
 
 watchEffect(async () => {
   try {
     const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/2');
-    console.log(response.data);
     if (response.data.noti === null || !response.data.content) {
       shouldShowFooter.value = false; // Ẩn footer
     } else {

@@ -126,20 +126,17 @@
 
     // Determine which data object to update based on modalType
     let dataToUpdate = modalType.value === 'title' ? title.value : notificationTitle.value;
-    console.log(dataToUpdate);
     
     // Call your API to save modalContent
     axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda', { 
         ...dataToUpdate
     })
         .then(response => {
-        console.log('Save successful:', response.data);
         NProgress.done();
         closeModal(); // Close modal after successful save
         toast.success("質更新に成功");
         })
         .catch(error => {
-        console.error('Error saving content:', error);
         toast.error("アップデートに失敗しました");
         // Handle error here
         });
@@ -156,8 +153,6 @@
         toast.success("質更新に成功");
       })
       .catch(error => {
-        console.error('Error making PUT request:', error);
-        // Handle error here
         toast.error("アップデートに失敗しました");
       });
       NProgress.done();
@@ -176,7 +171,6 @@
 
 <style scoped>
 .custom-component {
-    margin: 16px;
     border-radius: 8px;
     background-color: #FFFFFF;
 }

@@ -69,7 +69,6 @@
     } catch (error) {
       errorMessage.value = '電子メールが無効であるか、このアカウントは存在しません。'
       successMessage.value = ''
-      console.error('Error:', error)
       } finally {
       NProgress.done()
     }

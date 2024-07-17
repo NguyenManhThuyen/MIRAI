@@ -6,7 +6,7 @@
         </NuxtLink>
       </div>
       <div class="copyright">
-        <p class="company">中部電力MIRAI TOWER</p>
+        <p class="company">中部電力 MIRAI TOWER</p>
         <p class="notice">© 2020 Nagoya TV Tower Corporation.</p>
       </div>
     </footer>

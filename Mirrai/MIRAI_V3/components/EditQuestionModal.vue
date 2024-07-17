@@ -30,7 +30,7 @@
         <p v-if="errors.questionNo" class="error-message">{{ errors.questionNo }}</p>
       </div>
       <div class="form-group">
-        <label for="questionText">質問</label>
+        <label for="questionText">問題</label>
         <textarea id="questionText" v-model="question.title" style="resize: none;"></textarea>
         <p v-if="errors.questionText" class="error-message">{{ errors.questionText }}</p>
       </div>
@@ -77,7 +77,7 @@
             <img src="@/assets/images/admin-create-question-icon.svg"  class="upload-icon" />
             <p>ドラッグ&ドロップでファイルをアップロードする又はブラウザ</p>
             <label class="choose-file">
-              ブラウザ
+              データから選択
               <input type="file" @change="onExplainFileChange" style="display: none;" />
             </label>
           </template>
@@ -181,8 +181,6 @@ const showCropModalQuestion = ref(false);
 const showCropModalExplain = ref(false);
 // Methods
 const handleCroppedImage = async (type, croppedImage) => {
-  console.log(type, croppedImage);
-  
   // Chuyển đổi croppedImage thành base64
   const blob = await fetch(croppedImage).then(res => res.blob());
   const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
@@ -224,7 +222,6 @@ const fetchQuestionData = async () => {
     qrcode.value = question.value.qrcode;
 
     answers.value = answersResponse.data;
-    console.log(answers.value);
     // Find the index of the correct answer
     const correctIndex = answers.value.findIndex(answer => answer.is_correct);
     if (correctIndex !== -1) {
@@ -235,9 +232,18 @@ const fetchQuestionData = async () => {
   }
 };
 
-// Tạo một computed property để áp dụng filter cho nội dung của question
-const formattedContent = computed(() => {
-  return question.value.content.replace(/<br\s*[/]?>/gi, '\n');
+const formattedContent = computed({
+  get() {
+    return question.value.content ? question.value.content.replace(/<br\s*[/]?>/gi, '\n') : '';
+  },
+  set(newValue) {
+    question.value.content = newValue.replace(/\n/g, '<br>');
+  }
+});
+
+// Watch để cập nhật `question.value.content` mỗi khi `formattedContent` thay đổi
+watch(formattedContent, (newVal, oldVal) => {
+  question.value.content = newVal.replace(/\n/g, '<br>');
 });
 
 const resetErrors = () => {
@@ -280,7 +286,6 @@ const hidden = () => {
 };
 
 const preview = () => {
-  console.log(answers.value);
   previewVisible.value = true;
   hidden();
 };
@@ -443,7 +448,7 @@ const validateForm = () => {
   }
 
   if (!question.value.title) {
-    errors.value.questionText = '質問が必要です';
+    errors.value.questionText = '問題が必要です';
     isValid = false;
   } else {
     errors.value.questionText = null;
@@ -483,7 +488,6 @@ const handleSave = async () => {
       updated_user: 123456,
       content: question.value.content.replace(/\n/g, '<br />')
     };
-    console.log("thuyen",questionData);
     // Update question via API
     await axios.put(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions`, questionData);
 
@@ -495,9 +499,6 @@ const handleSave = async () => {
       is_correct: index === correctAnswer.value,
       created_user: 123456
     }));
-
-    console.log("thuyen1", answersData);
-
     // Update answers via API
     await axios.put(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/batchUpdateItems`, answersData);
 

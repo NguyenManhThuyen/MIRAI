@@ -3,17 +3,17 @@
     <div class="icon-container">
       <img src="@/assets/images/mirai-icon.svg" class="header-icon" />
     </div>
-    <div class="header-text">
+    <div :class="['header-text', { 'no-subtitle': !subtitle }]">
       <p class="main-text">スカイウォーキング・デジタルクイズチャレンジ</p>
     </div>
-    <div class="sub-text">
+    <div class="sub-text" v-if="subtitle">
       <p>{{ subtitle }}</p>
     </div>
   </header>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 
 const subtitle = ref('');
@@ -25,9 +25,11 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error fetching subtitle:', error);
     // Handle error or set default subtitle
-    subtitle.value = 'Default subtitle';
+    subtitle.value = '';
   }
 });
+
+const hasSubtitle = computed(() => !!subtitle.value);
 </script>
 
 <style scoped>
@@ -58,10 +60,14 @@ onMounted(async () => {
 }
 
 .main-text {
-  border-bottom: 1px solid #CDCDCD;
   display: inline-block;
   padding-top: 8px;
   padding-bottom: 11px;
+  border-bottom: 1px solid #CDCDCD;
+}
+
+.no-subtitle .main-text {
+  border-bottom: none;
 }
 
 .sub-text {

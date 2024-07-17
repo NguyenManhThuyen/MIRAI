@@ -32,7 +32,7 @@ const cancelAction = () => {
 };
 
 const confirmAction = () => {
-  toast.success("質問は正常に削除されました");
+  toast.success("問題は正常に削除されました");
   emit('confirm');
 };
 </script>

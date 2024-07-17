@@ -7,7 +7,7 @@
         <div class="tab" @click="selectedTab = 'question'" :class="{ 'active-tab': selectedTab === 'question' }">
           <img v-if="selectedTab === 'question'" src="@/assets/images/admin-home-question-icon-white.svg" class="tab-icon1" />
           <img v-else src="@/assets/images/admin-home-question-icon-black.svg" class="tab-icon" />
-          質問
+          問題
         </div>
         <div class="tab" @click="selectedTab = 'analysis'" :class="{ 'active-tab': selectedTab === 'analysis' }">
           <img v-if="selectedTab === 'analysis'" src="@/assets/images/admin-home-chart-icon-white.svg" class="tab-icon2" />
@@ -52,7 +52,7 @@ useHead({
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 1200px; /* Ví dụ, bạn có thể thay đổi giá trị này */
+  max-width: 1262px; /* Ví dụ, bạn có thể thay đổi giá trị này */
   margin: 0 auto; /* Để căn giữa nội dung theo chiều ngang */
 }
 

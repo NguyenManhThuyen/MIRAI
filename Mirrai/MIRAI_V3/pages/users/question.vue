@@ -35,32 +35,35 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import NProgress from 'nprogress';
+import { v4 as uuidv4 } from 'uuid';
 
 const router = useRouter();
 const route = useRoute();
 
 const question = ref({});
 const answers = ref([]);
-
 const id = ref('');
 const selectedAnswer = ref(null);
+const questionsCount = ref(0);
 
-// Initialize or retrieve results from localStorage
 let results = JSON.parse(localStorage.getItem('results')) || [];
+let userId = localStorage.getItem('user_id') || uuidv4();
+localStorage.setItem('user_id', userId);
 
-// Fetch question data from the API endpoint based on the route parameter 'id'
 const fetchQuestion = async (id) => {
   NProgress.start();
   NProgress.set(0.4);
   
   try {
-    const [responseQuestion, responseAnswer] = await Promise.all([
+    const [response, responseQuestion, responseAnswer] = await Promise.all([
+      axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions'),
       axios.get(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${id.value}`),
       axios.get(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/${id.value}`)
     ]);
 
     question.value = responseQuestion.data;
     answers.value = responseAnswer.data;
+    questionsCount.value = response.data.length;
   } catch (error) {
     console.error('Error fetching question:', error);
   } finally {
@@ -75,26 +78,41 @@ function selectAnswer(index) {
   
   selectedAnswer.value = index;
   
-  // Check if the selected answer is correct
   const isCorrect = answers.value[index].is_correct;
   const result = {
     id: id.value,
     status: isCorrect
   };
 
-  // Add result to results array
   results.push(result);
 
-  // Navigate to correct or incorrect route after 3 seconds
-  setTimeout(() => {
+  setTimeout(async () => {
+    const logAnswer = results.reduce((acc, curr) => {
+      acc[curr.id] = curr.status;
+      return acc;
+    }, {});
+
+    const analysisData = {
+      id: userId,
+      max_question_count: questionsCount.value,
+      log_answer: logAnswer
+    };
+
+    try {
+      await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda', analysisData);
+    } catch (error) {
+      console.error('Error posting analysis data:', error);
+    }
+
     if (isCorrect) {
       router.push({
         path: '/users/questionCorrect',
         query: {
-          answer: String.fromCharCode(65 + index), // Convert index to A, B, C, D
+          answer: String.fromCharCode(65 + index),
           content: answers.value[index].content,
           explain: question.value.content,
-          explainImg: question.value.image_explain
+          explainImg: question.value.image_explain,
+          questionsCount: questionsCount.value
         }
       });
     } else {
@@ -102,20 +120,20 @@ function selectAnswer(index) {
       router.push({
         path: '/users/questionIncorrect',
         query: {
-          answer: String.fromCharCode(65 + index), // Convert index to A, B, C, D
+          answer: String.fromCharCode(65 + index),
           content: answers.value[index].content,
           correctAnswer: String.fromCharCode(65 + correctAnswerIndex),
           correctAnswerContent: answers.value[correctAnswerIndex].content,
           explain: question.value.content,
-          explainImg: question.value.image_explain
+          explainImg: question.value.image_explain,
+          questionsCount: questionsCount.value
         }
       });
     }
-    // Save results to localStorage
+
     localStorage.setItem('results', JSON.stringify(results));
   }, 3000);
-  
-  // Animate the button scale for 3 seconds
+
   const button = document.querySelectorAll('.answer-option button')[index];
   if (button) {
     button.classList.add('hover-animation');
@@ -130,21 +148,37 @@ const getFullImageUrl = (url) => {
   return prefix + url;
 };
 
+const getCurrentDate = () => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+};
+
 onMounted(() => {
   id.value = route.query.id;
   
-  // Check if the question ID is already answered
   const isAnswered = results.some(result => result.id === id.value);
   
   if (isAnswered) {
-    alert('この質問にはすでに回答しました。');
+    alert('この問題にはすでに回答しました。');
     router.push('/users/questionResult');
   } else {
-    // Fetch question when component is mounted if it's not answered yet
     fetchQuestion(id);
+  }
+
+  const currentDate = getCurrentDate();
+  const isFirstLogin = localStorage.getItem('is_first_login');
+  
+  if (!isFirstLogin) {
+    localStorage.setItem('is_first_login', currentDate);
+  } else if (isFirstLogin !== currentDate) {
+    localStorage.setItem('is_first_login', currentDate);
+    localStorage.removeItem('results');ư
+    localStorage.removeItem('user_id');
+    results = [];
   }
 });
 </script>
+
 
 
 

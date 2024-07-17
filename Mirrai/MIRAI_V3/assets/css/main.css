@@ -1,8 +1,15 @@
+/* main.css */
 
+/* Import font Noto Sans JP từ Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap');
 
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* Áp dụng font cho toàn bộ trang */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Noto Sans JP', sans-serif;
 }
 
+/* Các quy tắc CSS khác */
+/* ... */

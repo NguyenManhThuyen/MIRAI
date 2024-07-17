@@ -90,9 +90,8 @@ const showEditModal = (questionId) => {
 // Xử lý khi lưu chỉnh sửa
 const handleSaveEdit = (editedQuestion) => {
   // Logic để lưu câu hỏi chỉnh sửa
-  console.log('Edited question:', editedQuestion);
   editModalVisible.value = false;
-  toast.success("質問は正常に編集されました");
+  toast.success("問題は正常に編集されました");
   fetchQuestions(); // Gọi lại hàm fetch để cập nhật danh sách câu hỏi
 };
 
@@ -105,30 +104,26 @@ const fetchQuestions = async () => {
     NProgress.done();
   } catch (error) {
     NProgress.done();
-    console.error('Error fetching questions:', error);
   }
 };
 
 const confirmDelete = (id, index) => {
   currentQuestionId.value = id;
-  alertContent.value = `質問番号 ${index} を削除しますか?`;
+  alertContent.value = `問題番号 ${index} を削除しますか?`;
   alertVisible.value = true;
 };
 
 const handleCancel = () => {
   alertVisible.value = false;
-  console.log("Cancelled");
 };
 
 const handleCreate = (newQuestion, answersResponse) => {
   // Logic to handle creating a new question
-  console.log('New question created:', newQuestion);
-  console.log('New answer:', answersResponse);
   successModalNewQuestion.value = newQuestion;
   successModalAnswersResponse.value = answersResponse;
 
   createModalVisible.value = false;
-  toast.success("質問が正常に作成されました");
+  toast.success("問題が正常に作成されました");
   // Show success modal
   createSuccessModalVisible.value = true;
   fetchQuestions();
@@ -140,14 +135,12 @@ const handleConfirm = async () => {
     NProgress.start();
     await axios.delete(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${currentQuestionId.value}`);
     alertVisible.value = false;
-    console.log("Confirmed");
     fetchQuestions(); // Load lại danh sách câu hỏi
     NProgress.done();
     await axios.delete(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/${currentQuestionId.value}`);
   } catch (error) {
     NProgress.done();
-    toast.success("質問は正常に削除されました");
-    console.error('Error deleting question:', error);
+    toast.success("問題は正常に削除されました");
   }
 };
 

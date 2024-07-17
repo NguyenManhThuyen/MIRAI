@@ -159,22 +159,30 @@ const isQuestionIncorrect = (index) => {
 
 .circle {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; /* Sử dụng flexbox để căn giữa theo chiều dọc */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều ngang */
   width: 42px;
   height: 42px;
   border-radius: 50%;
   background-color: transparent;
   color: #fff;
   border: 1.75px solid #ffffff8a;
-  font-family: Noto Sans JP;
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 14.7px;
   font-weight: 700;
   line-height: 21.29px;
   letter-spacing: 0.02em;
   text-align: center;
 }
+
+.circle span {
+  display: flex; /* Sử dụng flexbox để căn giữa theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  height: fit-content;
+  margin-bottom: 3px;
+}
+
 
 .circle.incorrect {
   background-color: white;
@@ -188,8 +196,8 @@ const isQuestionIncorrect = (index) => {
   top: 50%;
   left: 50%;
   width: 28px;
-  height: 2px;
-  background-color: #007BFF; /* Màu xanh dương */
+  height: 3px;
+  background-color: #2E7CF6; /* Màu xanh dương */
   transform: translate(-50%, -50%) rotate(45deg);
   border-radius: 2px; /* Đặt border radius tại đây */
 }
