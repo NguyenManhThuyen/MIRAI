@@ -94,19 +94,20 @@
       NProgress.done();
     }
     };
-    const openEdit1Modal = () => {
-        showModal.value = true;
-        modalType.value = 'title'; // Đánh dấu là đang chỉnh sửa title
-        modalTitle.value = title.value.title; // Set appropriate title
-        modalContent.value = title.value.content; // Set appropriate content
-    };
+    
+const openEdit1Modal = () => {
+    showModal.value = true;
+    modalType.value = 'title'; // Đánh dấu là đang chỉnh sửa title
+    modalTitle.value = title.value.title; // Set appropriate title
+    modalContent.value = title.value.content; // Set appropriate content
+};
 
-    const openEdit2Modal = () => {
-        showModal.value = true;
-        modalType.value = 'noti'; // Đánh dấu là đang chỉnh sửa notificationTitle
-        modalTitle.value = notificationTitle.value.title; // Set appropriate title
-        modalContent.value = notificationTitle.value.content; // Set appropriate content
-    };
+const openEdit2Modal = () => {
+    showModal.value = true;
+    modalType.value = 'noti'; // Đánh dấu là đang chỉnh sửa notificationTitle
+    modalTitle.value = notificationTitle.value.title; // Set appropriate title
+    modalContent.value = notificationTitle.value.content; // Set appropriate content
+};
   
   const closeModal = () => {
     showModal.value = false;

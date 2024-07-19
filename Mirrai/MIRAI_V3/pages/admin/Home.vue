@@ -21,9 +21,9 @@
         </div>
       </div>
 
-      <BodyAdminHome v-show="selectedTab === 'question'" />
-      <BodyAdminAnalysis v-show="selectedTab === 'analysis'" />
-      <BodyAdminSetting v-show="selectedTab === 'setting'" />
+      <BodyAdminHome v-if="selectedTab === 'question'" />
+      <BodyAdminAnalysis v-if="selectedTab === 'analysis'" />
+      <BodyAdminSetting v-if="selectedTab === 'setting'" />
     </div>
   </div>
 </template>
@@ -43,9 +43,10 @@ onMounted(() => {
 })
 
 useHead({
-        title: 'Home | MIRAI',
-    });
+  title: 'Home | MIRAI',
+})
 </script>
+
   
 <style scoped>
 .admin-home {

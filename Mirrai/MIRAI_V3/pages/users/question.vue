@@ -92,11 +92,11 @@ function selectAnswer(index) {
       return acc;
     }, {});
 
-    const analysisData = {
+    const analysisData = [{
       id: userId,
       max_question_count: questionsCount.value,
       log_answer: logAnswer
-    };
+    }];
 
     try {
       await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda', analysisData);
