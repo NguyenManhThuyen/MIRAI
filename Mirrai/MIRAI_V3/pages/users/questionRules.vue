@@ -1,6 +1,5 @@
 <template>
   <div class="quiz-container">
-    <HeaderQuestionUser />
     <div class="quiz-body">
       <div class="terms-title">利用規約と条件</div>
       <p class="terms-text">
@@ -26,12 +25,15 @@
         <span class="button-icon"></span> 前のページに戻る
       </button>
     </div>
-    <FooterQuestionUser />
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router';
+
+definePageMeta({
+  layout: "users",
+});
 
 const router = useRouter();
 

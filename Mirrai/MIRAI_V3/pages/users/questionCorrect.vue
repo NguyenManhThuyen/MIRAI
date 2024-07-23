@@ -1,6 +1,5 @@
 <template>
   <div class="quiz-container">
-    <HeaderQuestionUser />
     <HeaderStampQuestionUser :admin="true"/>
     <div class="quiz-body">
       <!-- Ảnh question-correct.svg -->
@@ -33,13 +32,17 @@
         </div>
       </div>
     </div>
-    <FooterQuestionUser />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+
+definePageMeta({
+  layout: "users",
+});
+
 
 const route = useRoute();
 const router = useRouter();
@@ -112,7 +115,8 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   background-color: #F1F4F9;
-  height: 64px;
+  min-height: 64px;
+  height: fit-content;
   padding: 8px 12px;
   border-radius: 15.32px;
   margin: 0px 16px;
@@ -122,7 +126,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
+  min-width: 48px;
   height: 48px;
   border-radius: 50%;
   background: #FFFFFF;

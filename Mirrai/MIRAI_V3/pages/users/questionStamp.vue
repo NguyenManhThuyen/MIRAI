@@ -1,6 +1,5 @@
 <template>
   <div class="quiz-container">
-    <HeaderQuestionUser />
     <div class="quiz-body">
       <img  v-if="questionStampImage" :src="questionStampImage" class="qr-code" @mousedown="startDownloadTimer" @mouseup="cancelDownloadTimer" @mouseleave="cancelDownloadTimer" />
       <div class="button-container">
@@ -9,7 +8,6 @@
         </button>
       </div>
     </div>
-    <FooterQuestionUser />
   </div>
 </template>
 
@@ -18,6 +16,11 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import questionStampImage from '@/assets/images/question-stamp.png';
 import { saveAs } from 'file-saver'; // Đảm bảo bạn đã cài đặt thư viện file-saver
+
+definePageMeta({
+  layout: "users",
+});
+
 
 const router = useRouter();
 const downloadTimer = ref(null);

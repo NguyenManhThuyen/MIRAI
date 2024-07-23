@@ -4,6 +4,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import moment from 'moment';
 import axios from 'axios';
+import NProgress from 'nprogress';
 
 const series = ref([
   {
@@ -83,21 +84,11 @@ const activeFilter = ref('week');
 const exportChart = ref([]);
 const currentPage = ref(1);
 const rowsPerPage = ref(10);
+const totalPages = ref(10);
 
-const paginatedQuestionData = computed(() => {
-  const start = (currentPage.value - 1) * rowsPerPage.value;
-  const end = start + rowsPerPage.value;
-  return questionData.value.slice(start, end);
-});
 
-const totalPages = computed(() => {
-  return Math.ceil(questionData.value.length / rowsPerPage.value);
-});
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
+const goToPage = (page) => {
+  currentPage.value = page;
 };
 
 const prevPage = () => {
@@ -106,9 +97,9 @@ const prevPage = () => {
   }
 };
 
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
   }
 };
 
@@ -200,9 +191,21 @@ const exportSeriesData = () => {
   document.body.removeChild(link);
 };
 
-const fetchData = async (startDate, endDate) => {
+function formatDate(dateStr) {
+  const [day, month, year] = dateStr.split('/');
+  return `${year}-${month}-${day}`;
+}
+
+const fetchData = async (startDateOriginal, endDateOriginal) => {
+  NProgress.start();
+  NProgress.set(0.4);
   try {
-    const apiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda/totalUser?startdate=${startDate}&enddate=${endDate}`;
+    // Chuyển đổi định dạng ngày tháng cho API URL
+    const startDate = formatDate(startDateOriginal);
+    const endDate = formatDate(endDateOriginal);
+
+    const apiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-statistic-lambda?start_date=${startDate}&end_date=${endDate}`;
+
     const response = await axios.get(apiUrl);
     const apiData = response.data;
 
@@ -212,55 +215,83 @@ const fetchData = async (startDate, endDate) => {
     const dates = [];
 
     // Duyệt qua các phần tử của apiData và lấy dữ liệu
-    for (const key in apiData) {
-      if (Object.hasOwnProperty.call(apiData, key)) {
-        const element = apiData[key];
-        const trueCount = element.true || 0;
-        const totalCount = (element.true || 0) + (element.false || 0);
-
-        trueCounts.push(trueCount);
-        totalCounts.push(totalCount);
-        dates.push(key);
-      }
+    for (const item of apiData) {
+      const { created_at, join_count, done_count } = item;
+      dates.push(created_at);
+      totalCounts.push(join_count);
+      trueCounts.push(done_count);
     }
 
-    // Sắp xếp lại các mảng theo thứ tự ngày tháng
-    const sortedDates = dates.slice().sort((a, b) => moment(a, 'DD/MM/YYYY').valueOf() - moment(b, 'DD/MM/YYYY').valueOf());
-
-    // Tạo một mảng chỉ số dựa trên sortedDates
-    const indexMap = sortedDates.map(date => dates.indexOf(date));
-
-    // Sử dụng mảng chỉ số để lấy dữ liệu từ trueCounts và totalCounts
-    const sortedTrueCounts = indexMap.map(index => trueCounts[index]);
-    const sortedTotalCounts = indexMap.map(index => totalCounts[index]);
+    // Sắp xếp dates theo định dạng ngày và đảm bảo totalCounts và trueCounts tương ứng
+    const sortedDates = [...dates].sort((a, b) => moment(a, 'YYYY-MM-DD').diff(moment(b, 'YYYY-MM-DD')));
+    const sortedTotalCounts = sortedDates.map(date => totalCounts[dates.indexOf(date)]);
+    const sortedTrueCounts = sortedDates.map(date => trueCounts[dates.indexOf(date)]);
 
     // Cập nhật dữ liệu cho biểu đồ
     series.value[0].data = sortedTotalCounts;
     series.value[1].data = sortedTrueCounts;
-    chartOptions.value.xaxis.categories = sortedDates.map(date => moment(date, 'DD/MM/YYYY').format('DD/MM'));
-    exportChart.value = sortedDates.map(date => moment(date, 'DD/MM/YYYY').format('DD/MM/YYYY'));
+    chartOptions.value.xaxis.categories = sortedDates.map(date => moment(date, 'YYYY-MM-DD').format('DD/MM'));
+    exportChart.value = sortedDates.map(date => moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY'));
 
     chartKey.value++; // Buộc render lại biểu đồ
   } catch (error) {
     console.error('Error fetching API data:', error);
   }
+  NProgress.done();
+};
+
+
+
+const fetchPageData = async () => {
+  NProgress.start();
+  NProgress.set(0.4);
+  try {
+    // Gửi yêu cầu lấy tổng số trang
+    const apiUrlPage = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda/totalUserPerQuestion?limit=${rowsPerPage.value}`;
+    const responsePage = await axios.get(apiUrlPage);
+    
+    // Kiểm tra cấu trúc dữ liệu và tính toán số trang
+    if (responsePage.data && responsePage.data.totalPages) {
+      totalPages.value = Math.ceil(responsePage.data.totalPages);
+    } else {
+      console.error('Dữ liệu không hợp lệ từ API tổng số trang.');
+      return;
+    }
+  } catch (error) {
+    console.error('Lỗi khi lấy dữ liệu câu hỏi:', error);
+  }
+  NProgress.done();
 };
 
 const fetchQuestionData = async () => {
+  NProgress.start();
+  NProgress.set(0.4);
   try {
-    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda/totalUserPerQuestion');
-    questionData.value = response.data.sort((a, b) => moment(b.date, 'DD/MM/YYYY') - moment(a.date, 'DD/MM/YYYY'));
+    // Gửi yêu cầu lấy dữ liệu phân trang
+    const apiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda/totalUserPerQuestion?page=${currentPage.value}&limit=${rowsPerPage.value}`;
+    const response = await axios.get(apiUrl);
+
+    // Kiểm tra cấu trúc dữ liệu trả về
+    if (response.data) {
+      questionData.value = [...response.data];
+    } else {
+      console.error('Dữ liệu không hợp lệ từ API dữ liệu câu hỏi.');
+    }
   } catch (error) {
-    console.error('Error fetching question data:', error);
+    console.error('Lỗi khi lấy dữ liệu câu hỏi:', error);
   }
+  NProgress.done();
 };
+
+
 
 // Lấy dữ liệu từ API khi component được mount
 onMounted(() => {
   filterMonth();
-  
+  fetchPageData();
   // Fetch question data
   fetchQuestionData();
+  NProgress.done();
 });
 
 watchEffect(() => {
@@ -269,7 +300,7 @@ watchEffect(() => {
     const endDate = moment(selectedDate.value[1]).format('DD/MM/yyyy');
     console.log('Start Date:', startDate);
     console.log('End Date:', endDate);
-
+    activeFilter.value = "year";
     // Gọi API với startDate và endDate
     fetchData(startDate, endDate);
   }
@@ -277,6 +308,11 @@ watchEffect(() => {
 
 watch(rowsPerPage, () => {
   currentPage.value = 1; // Reset to the first page when rowsPerPage changes
+  fetchQuestionData();
+});
+
+watch(currentPage, () => {
+  fetchQuestionData();
 });
 </script>
 
@@ -347,41 +383,41 @@ watch(rowsPerPage, () => {
     </div>
 
     <div class="table-container">
-        <table>
-      <thead>
-        <tr>
-          <th class="date-cell">日付</th>
-          <th v-for="question in (questionData[0]?.questions || [])" :key="question.sort">
-            Q.{{ question.sort }}
-            <table class="inner-table">
-              <thead>
-                <tr>
-                  <th>間違い</th>
-                  <th>正しい</th>
-                  <th>合計</th>
-                </tr>
-              </thead>
-            </table>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="data in paginatedQuestionData" :key="data.date">
-          <td class="date-cell">{{ data.date }}</td>
-          <td v-for="question in data.questions" :key="question.sort">
-            <table>
-              <tbody>
-                <tr>
-                  <td>{{ question.statsPerDay.answered - question.statsPerDay.correct }}</td>
-                  <td>{{ question.statsPerDay.correct }}</td>
-                  <td>{{ question.statsPerDay.answered }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-      </tbody>
-    </table>  
+      <table>
+        <thead>
+          <tr>
+            <th class="date-cell">日付</th>
+            <th v-for="question in (questionData[0]?.questions || [])" :key="question.sort">
+              Q.{{ question.sort }}
+              <table class="inner-table">
+                <thead>
+                  <tr>
+                    <th>間違い</th>
+                    <th>正しい</th>
+                    <th>合計</th>
+                  </tr>
+                </thead>
+              </table>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="data in questionData" :key="data.date">
+            <td class="date-cell">{{ data.date }}</td>
+            <td v-for="question in data.questions" :key="question.sort">
+              <table>
+                <tbody>
+                  <tr>
+                    <td>{{ question.statsPerDay.answered - question.statsPerDay.correct }}</td>
+                    <td>{{ question.statsPerDay.correct }}</td>
+                    <td>{{ question.statsPerDay.answered }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>        
+      </table>  
     </div>
     <div class="pagination">
       <div class="rows-per-page">
@@ -441,10 +477,6 @@ watch(rowsPerPage, () => {
   display: flex;
 }
 
-.date-picker {
-  margin-right: 16px;
-}
-
 /* Chỉnh CSS cho input bên trong vue-date-picker */
 .date-picker :deep(input) {
   display: flex;
@@ -469,6 +501,9 @@ watch(rowsPerPage, () => {
   display: none;
 }
 
+.date-picker :deep(.dp--tp-wrap) {
+  display: none;
+}
 
 .filter-week,
 .filter-month,
@@ -490,6 +525,7 @@ watch(rowsPerPage, () => {
   line-height: 23.17px;
   text-align: center;
   transition: transform 0.3s ease-in-out; /* Thêm hiệu ứng transition */
+  margin-left: 16px;
 }
 
 .filter-week:hover,
@@ -508,13 +544,11 @@ watch(rowsPerPage, () => {
 .filter-week.active {
   background: #2E7CF6;
   color: white;
-  margin-right: 16px;
 }
 
 .filter-month.active {
   background: #2E7CF6;
   color: white;
-  margin-left: 16px;
 }
 
 .export-csv {
@@ -530,9 +564,10 @@ watch(rowsPerPage, () => {
 }
 
 .vertical-separator {
-  height: 24px;
+  margin-top: 8.5px;
+  height: 31px;
   border-left: 1px solid #E6E8EC;
-  margin: 0 12px;
+  margin-left: 16px;
 }
 
 .footer-container {
@@ -684,11 +719,13 @@ th > table th, td > table th, th > table td, td > table td {
 }
 
 .rows-per-page select {
+  font-family: Noto Sans JP;
   padding: 5px;
   border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
+  border-radius: 12px;
+  background-color: #f1f4f9;
   cursor: pointer;
+  outline: none;
 }
 
 /* Responsive từ 768px trở lên */

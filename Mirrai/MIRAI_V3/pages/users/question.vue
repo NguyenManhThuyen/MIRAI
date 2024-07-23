@@ -1,7 +1,5 @@
 <template>
   <div class="quiz-container">
-    <HeaderQuestionUser/>
-
     <HeaderStampQuestionUser  :admin="true" />
     <div class="quiz-body">
       <img  v-if="question.image_question" :src="getFullImageUrl(question.image_question)" />
@@ -26,7 +24,6 @@
         </div>
       </div>
     </div>
-    <FooterQuestionUser />
   </div>
 </template>
 
@@ -36,6 +33,10 @@ import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import NProgress from 'nprogress';
 import { v4 as uuidv4 } from 'uuid';
+
+definePageMeta({
+  layout: "users",
+});
 
 const router = useRouter();
 const route = useRoute();
@@ -94,7 +95,6 @@ function selectAnswer(index) {
 
     const analysisData = [{
       id: userId,
-      max_question_count: questionsCount.value,
       log_answer: logAnswer
     }];
 
@@ -104,6 +104,27 @@ function selectAnswer(index) {
       console.error('Error posting analysis data:', error);
     }
 
+    // Check the length of results and make additional API calls if needed
+    const resultsLength = results.length;
+
+    let apiUrl = 'https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-statistic-lambda';
+    let requestBody = {};
+
+    if (resultsLength === 1) {
+      requestBody = { status: 0 };
+    } else if (resultsLength === questionsCount.value) {
+      requestBody = { status: 1 };
+    }
+
+    if (Object.keys(requestBody).length > 0) {
+      try {
+        await axios.post(apiUrl, requestBody);
+      } catch (error) {
+        console.error('Error posting statistic data:', error);
+      }
+    }
+
+    // Navigate to the appropriate route based on whether the answer is correct or not
     if (isCorrect) {
       router.push({
         path: '/users/questionCorrect',
@@ -134,6 +155,7 @@ function selectAnswer(index) {
     localStorage.setItem('results', JSON.stringify(results));
   }, 3000);
 
+  // Animate the button
   const button = document.querySelectorAll('.answer-option button')[index];
   if (button) {
     button.classList.add('hover-animation');

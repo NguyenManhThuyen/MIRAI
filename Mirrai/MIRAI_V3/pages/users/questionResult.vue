@@ -1,6 +1,5 @@
 <template>
   <div class="quiz-container">
-    <HeaderQuestionUser />
     <HeaderStampQuestionUser :color="true" :admin="true"/>
     <div class="quiz-body">
       <div class="result-section">
@@ -39,9 +38,6 @@
         
       </div>
     </div>
-    <FooterQuestionUser />
-
-
   </div>
 </template>
 
@@ -50,6 +46,12 @@ import { ref,watchEffect  } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import html2canvas from 'html2canvas';
+
+definePageMeta({
+  layout: "users",
+});
+
+
 const router = useRouter();
 const showShareModal = ref(false);
 const totalQuestions = ref(0);

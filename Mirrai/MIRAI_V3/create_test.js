@@ -1,54 +1,61 @@
+import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+// Tạo một ngày ngẫu nhiên trong khoảng thời gian
+function getRandomDate(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
+// Tạo giá trị boolean ngẫu nhiên
 function getRandomBoolean() {
-    return Math.random() < 0.5;
+    return Math.random() > 0.5;
 }
 
-function createRandomObject() {
-    const fixedKeys = ["1721122131", "1721122220", "1721122359", "1721122471", "1721122532", "1721122603"];
-    
+// Tạo đối tượng log_answer ngẫu nhiên
+function generateLogAnswer() {
+    const ids = ["1721122131", "1721122220", "1721122359", "1721122471", "1721122532", "1721122603"];
+    const numberOfEntries = Math.floor(Math.random() * 6) + 1; // Số lượng mục ngẫu nhiên giữa 1 và 6
+    const logAnswer = {};
+    const selectedIds = new Set();
+
+    while (selectedIds.size < numberOfEntries) {
+        selectedIds.add(ids[Math.floor(Math.random() * ids.length)]);
+    }
+
+    selectedIds.forEach(id => {
+        logAnswer[id] = getRandomBoolean();
+    });
+
+    return logAnswer;
+}
+
+// Tạo một record ngẫu nhiên
+function generateRecord() {
     return {
-        id: generateUUID(),
-        question_id: fixedKeys[getRandomInt(0, fixedKeys.length - 1)],
-        question_status: getRandomBoolean()
+        id: uuidv4(),
+        log_answer: generateLogAnswer(),
+        created_at: getRandomDate('2020-01-01', '2024-07-23').toISOString().split('T')[0] // Định dạng ngày thành YYYY-MM-DD
     };
 }
 
-function generateUUID() { // Public Domain/MIT
-    var d = new Date().getTime();//Timestamp
-    var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16;//random number between 0 and 16
-        if(d > 0){//Use timestamp until depleted
-            r = (d + r)%16 | 0;
-            d = Math.floor(d/16);
-        } else {//Use microseconds since page-load if supported
-            r = (d2 + r)%16 | 0;
-            d2 = Math.floor(d2/16);
-        }
-        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
+// Tạo nhiều record
+function generateRecords(count) {
+    const records = [];
+    for (let i = 0; i < count; i++) {
+        records.push(generateRecord());
+    }
+    return records;
 }
 
-function createArrayOfObjects(length) {
-    const array = [];
-    for (let i = 0; i < length; i++) {
-        array.push(createRandomObject());
-    }
-    return array;
+// Xuất dữ liệu ra file JSON
+function exportToJsonFile(filename, data) {
+    fs.writeFileSync(filename, JSON.stringify(data, null, 2), 'utf8');
 }
 
-const arrayOfObjects = createArrayOfObjects(1000);
-const jsonData = JSON.stringify(arrayOfObjects, null, 2);
+// Tạo 10,000 record và xuất ra tệp
+const records = generateRecords(2500);
+exportToJsonFile('records.json', records);
 
-fs.writeFile('output.json', jsonData, (err) => {
-    if (err) {
-        console.error('Error writing file', err);
-    } else {
-        console.log('Successfully wrote file');
-    }
-});
+console.log('File records.json đã được tạo thành công.');
