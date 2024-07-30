@@ -8,6 +8,7 @@
       </button>
     </div>
     <div class="questions">
+      <SkeletonLoader v-if="loading" /> 
       <div
         v-for="(question, index) in questions"
         :key="question.id"
@@ -16,19 +17,37 @@
       >
         <div class="index">{{ index + 1 }}</div>
         <div class="question-image">
-          <img  v-if="question.image_question" :src="getFullImageUrl(question.image_question)"  />
+          <img
+            v-if="question.image_question"
+            :src="getFullImageUrl(question.image_question)"
+            loading="lazy" 
+            alt="Question Image"
+          />
         </div>
         <div class="question-text">{{ question.title }}</div>
         <div class="actions">
           <div class="action-image">
-            <img  v-if="question.qrcode" :src="question.qrcode"  />
+            <img
+              v-if="question.qrcode"
+              :src="question.qrcode"
+              loading="lazy"
+              alt="QR Code" 
+            />
           </div>
           <div class="divider"></div> <!-- Thêm phần này để làm thanh ngăn cách -->
           <div class="edit">
-            <img src="@/assets/images/admin-home-edit-question-icon.svg"  @click="showEditModal(question.id)" />
+            <img
+              src="@/assets/images/admin-home-edit-question-icon.svg"
+              @click="showEditModal(question.id)"
+              alt="Edit Question"
+            />
           </div>
           <div class="delete">
-            <img src="@/assets/images/admin-home-delete-question-icon.svg"  @click="confirmDelete(question.id, index+1)" />
+            <img
+              src="@/assets/images/admin-home-delete-question-icon.svg"
+              @click="confirmDelete(question.id, index+1)"
+              alt="Delete Question" 
+            />
           </div>
         </div>
       </div>
@@ -38,6 +57,7 @@
       :content="alertContent"
       :actionText="alertActionText"
       :visible="alertVisible"
+      alertText="問題は正常に削除されました"
       @cancel="handleCancel"
       @confirm="handleConfirm"
     />
@@ -58,7 +78,6 @@
       @cancel="editModalVisible = false"
       @save="handleSaveEdit"
     />
-
   </div>
 </template>
 
@@ -67,8 +86,10 @@ import { ref, onMounted, shallowRef, watchEffect } from 'vue';
 import axios from 'axios';
 import NProgress from 'nprogress';
 import { toast } from 'vue3-toastify';
+import SkeletonLoader from '@/components/SkeletonLoader.vue'; // Import SkeletonLoader component
 
 const questions = ref([]);
+const loading = ref(true); // Thêm biến để quản lý trạng thái loading
 const alertTitle = ref('削除の確認');
 const alertContent = ref('');
 const alertActionText = ref('Delete');
@@ -77,8 +98,7 @@ const currentQuestionId = ref(null);
 const createModalVisible = ref(false);
 const successModalNewQuestion = shallowRef(null);
 const successModalAnswersResponse = shallowRef(null);
-const createSuccessModalVisible = ref(false); // Add this line to define createSuccessModalVisible
-
+const createSuccessModalVisible = ref(false);
 const editModalVisible = ref(false);
 const editModalQuestionId = ref(null);
 
@@ -89,7 +109,6 @@ const showEditModal = (questionId) => {
 
 // Xử lý khi lưu chỉnh sửa
 const handleSaveEdit = (editedQuestion) => {
-  // Logic để lưu câu hỏi chỉnh sửa
   editModalVisible.value = false;
   toast.success("問題は正常に編集されました");
   fetchQuestions(); // Gọi lại hàm fetch để cập nhật danh sách câu hỏi
@@ -97,13 +116,16 @@ const handleSaveEdit = (editedQuestion) => {
 
 const fetchQuestions = async () => {
   try {
-    NProgress.start()
-    NProgress.set(0.4)
+    NProgress.start();
+    NProgress.set(0.4);
     const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
     questions.value = response.data;
     NProgress.done();
   } catch (error) {
     NProgress.done();
+    console.error('Error fetching questions:', error);
+  } finally {
+    loading.value = false; // Đặt loading thành false sau khi tải xong
   }
 };
 
@@ -118,29 +140,26 @@ const handleCancel = () => {
 };
 
 const handleCreate = (newQuestion, answersResponse) => {
-  // Logic to handle creating a new question
   successModalNewQuestion.value = newQuestion;
   successModalAnswersResponse.value = answersResponse;
 
   createModalVisible.value = false;
   toast.success("問題が正常に作成されました");
-  // Show success modal
   createSuccessModalVisible.value = true;
   fetchQuestions();
 };
-
 
 const handleConfirm = async () => {
   try {
     NProgress.start();
     await axios.delete(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions/${currentQuestionId.value}`);
     alertVisible.value = false;
+    await axios.delete(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/${currentQuestionId.value}`);
     fetchQuestions(); // Load lại danh sách câu hỏi
     NProgress.done();
-    await axios.delete(`https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-answers-lambda/${currentQuestionId.value}`);
   } catch (error) {
     NProgress.done();
-    toast.success("問題は正常に削除されました");
+    toast.error("問題の削除に失敗しました");
   }
 };
 
@@ -149,25 +168,13 @@ const showCreateModal = () => {
 };
 
 const getFullImageUrl = (url) => {
-  const prefix = "https://mirai-static-website.s3.ap-southeast-1.amazonaws.com/"; // Thay bằng chuỗi bạn muốn nối thêm
+  const prefix = "https://mirai-static-website.s3.ap-southeast-1.amazonaws.com/";
   return prefix + url;
 };
 
-// Watch effect to fetch questions initially and on data change
-watchEffect(async () => {
-  try {
-    NProgress.start();
-    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
-    questions.value = response.data;
-    NProgress.done();
-  } catch (error) {
-    NProgress.done();
-    console.error('Error fetching questions:', error);
-  }
-});
-
 onMounted(fetchQuestions);
 </script>
+
 
 <style scoped>
 .question-list {
@@ -242,11 +249,12 @@ onMounted(fetchQuestions);
 
 .question-row {
   display: flex;
-  align-items: center;
+  align-items: center; /* Căn giữa theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều ngang, nếu cần */
   padding: 16px 0;
   border-bottom: 1px solid #E3E4EC;
-  min-height : 100px;
-  height: fit-content;
+  min-height: 100px; /* Đảm bảo chiều cao tối thiểu */
+  height: fit-content; /* Đảm bảo chiều cao tự động theo nội dung */
 }
 
 .question-row.no-border {
@@ -256,7 +264,7 @@ onMounted(fetchQuestions);
 .index,
 .question-image,
 .question-text {
-  margin-right: 10px;
+  margin-right: 16px;
 }
 
 .index {
@@ -266,7 +274,7 @@ onMounted(fetchQuestions);
     line-height: 28.96px;
     letter-spacing: 0.02em;
     text-align: center;
-    color: #4B4B4D;
+    color: #6A6A6A;
 }
 
 .question-text {
@@ -330,15 +338,11 @@ onMounted(fetchQuestions);
   transform: scale(1); /* Phóng to khi di chuột vào */
 }
 
-@media (max-width: 480px) {
-  .action-image,
-  .divider {
-    display: none; /* Ẩn QR và thanh xám khi màn hình nhỏ hơn 480px */
-  }
+@media (max-width: 768px) {
 
   .question-text {
-    font-size: 16px;
-    font-weight: 300;
+    font-size: 18px;
+    font-weight: 400;
     line-height: 22.96px;
     letter-spacing: 0.02em;
     text-align: center;
@@ -349,12 +353,45 @@ onMounted(fetchQuestions);
     -webkit-line-clamp: 3; /* Số dòng tối đa */
             line-clamp: 3; /* Số dòng tối đa */
     -webkit-box-orient: vertical;
+    margin-right: 0px;
   }
 
-  .question-image img {
-    display: none; /* Ẩn hình ảnh trong question-image */
+  .actions {
+    margin-right: 8px;
   }
-  
+}
+
+
+@media (max-width: 480px) {
+  .action-image,
+  .divider {
+    display: none; /* Ẩn QR và thanh xám khi màn hình nhỏ hơn 480px */
+  }
+
+  .question-text {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22.96px;
+    letter-spacing: 0.02em;
+    text-align: center;
+    color: #4b4b4d;
+    max-height: 150px; /* Giới hạn chiều cao của question-text */
+    overflow: hidden; /* Ẩn nội dung bị tràn */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Số dòng tối đa */
+            line-clamp: 3; /* Số dòng tối đa */
+    -webkit-box-orient: vertical;
+    margin-right: 0px;
+  }
+
+  .actions {
+    margin-right: 4px;
+  }
+  .index,
+.question-image,
+.question-text {
+  margin-right: 12px;
+}
 }
 
 </style>

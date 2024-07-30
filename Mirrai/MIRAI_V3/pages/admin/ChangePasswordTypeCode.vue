@@ -24,7 +24,7 @@
     flex-direction: column;
     justify-content: center; /* Căn giữa theo chiều dọc */
     align-items: center; /* Căn giữa theo chiều ngang */
-    height: 100vh; /* Sửa thành 100vh để đảm bảo trang chiếm toàn bộ viewport height */
+    height: 100dvh; /* Sửa thành 100vh để đảm bảo trang chiếm toàn bộ viewport height */
     margin: 0;
     padding: 0; /* Xóa padding mặc định */
     overflow: hidden; /* Ẩn phần dư thừa */

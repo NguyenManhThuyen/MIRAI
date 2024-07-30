@@ -1,23 +1,3 @@
-<template>
-  <div 
-    class="question-header"
-    ref="questionHeader">
-    <div 
-      v-for="(question, index) in questions" 
-      :key="index" 
-      class="question">
-      <div class="circle"
-           :class="{ 
-             correct: isQuestionCorrect(index + 1),
-             incorrect: isQuestionIncorrect(index + 1)
-           }">
-        <span>Q.{{ question.sort }}</span>
-      </div>
-      <img class="question-arrow" src="@/assets/images/question-arrow-yellow.svg">
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted, watchEffect, nextTick } from 'vue';
 import axios from 'axios';
@@ -25,6 +5,7 @@ import axios from 'axios';
 const props = defineProps({
   color: Boolean,
   admin: Boolean,
+  additionalId: String, // Thêm prop kiểu chuỗi
 });
 
 const questionHeader = ref(null);
@@ -36,6 +17,11 @@ const fetchQuestions = async () => {
   try {
     const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/questions');
     questions.value = response.data;
+
+    // Nếu có additionalId, thêm đối tượng vào cuối mảng questions
+    if (props.additionalId) {
+      questions.value.push({ sort: props.additionalId });
+    }
     numberOfQuestions.value = questions.value.length;
   } catch (error) {
     console.error('Error fetching questions:', error);
@@ -117,37 +103,50 @@ const isQuestionIncorrect = (index) => {
   return results.value.some(result => parseInt(result.id) === questionId && result.status === false && props.admin);
 };
 </script>
+<template>
+  <div 
+    class="question-header"
+    ref="questionHeader">
+    <div 
+      v-for="(question, index) in questions" 
+      :key="index" 
+      class="question">
+      <div class="circle"
+           :class="{ 
+             correct: isQuestionCorrect(index + 1),
+             incorrect: isQuestionIncorrect(index + 1)
+           }">
+        <span>Q.{{ question.sort }}</span>
+      </div>
+      <img class="question-arrow" src="@/assets/images/question-arrow-yellow.svg" alt="Question Arrow" />
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .question-header {
-  display: flex;
   position: sticky;
   flex-wrap: wrap;
   gap: 8px;
   top: 0px;
-  padding: 12px 0 12px 12px;
-  margin: 0;
+  padding: 12px 0 16px 12px;
+  margin: 0 -4px 0 0;
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 999;
-  background-image: var(--question-background-image, url('@/assets/images/question-background.svg'));
+  background-image: url('@/assets/images/question-background.svg');
   background-repeat: repeat;
   background-position: center top;
   scrollbar-width: none;
   -ms-overflow-style: none;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+  justify-content: center;
 }
 
 .question-header.colorful {
   background-image: url('@/assets/images/question-background-yellow.svg');
-}
-
-.question-header::after {
-  content: "";
-  display: block;
-  height: 100%;
-  width: 100%;
-  background-image: inherit;
-  background-size: contain;
 }
 
 .question {
@@ -159,11 +158,12 @@ const isQuestionIncorrect = (index) => {
 
 .circle {
   position: relative;
-  display: flex; /* Sử dụng flexbox để căn giữa theo chiều dọc */
-  align-items: center; /* Căn giữa theo chiều dọc */
-  justify-content: center; /* Căn giữa theo chiều ngang */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 42px;
   height: 42px;
+  min-width: 42px;
   border-radius: 50%;
   background-color: transparent;
   color: #fff;
@@ -177,17 +177,16 @@ const isQuestionIncorrect = (index) => {
 }
 
 .circle span {
-  display: flex; /* Sử dụng flexbox để căn giữa theo chiều dọc */
-  justify-content: center; /* Căn giữa theo chiều ngang */
+  display: flex;
+  justify-content: center;
   height: fit-content;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
-
 
 .circle.incorrect {
   background-color: white;
-  color: black; /* Màu chữ xanh */
-  position: relative; /* Đặt vị trí là tương đối để các thanh chéo được định vị liên quan tới .circle */
+  color: black;
+  position: relative;
 }
 
 .circle.incorrect::before, .circle.incorrect::after {
@@ -197,9 +196,9 @@ const isQuestionIncorrect = (index) => {
   left: 50%;
   width: 28px;
   height: 3px;
-  background-color: #2E7CF6; /* Màu xanh dương */
+  background-color: #2E7CF6;
   transform: translate(-50%, -50%) rotate(45deg);
-  border-radius: 2px; /* Đặt border radius tại đây */
+  border-radius: 2px;
 }
 
 .circle.incorrect::after {
@@ -207,24 +206,22 @@ const isQuestionIncorrect = (index) => {
 }
 
 .circle.correct {
-  color: #6A6A6A; /* Màu chữ */
-  position: relative; /* Đặt vị trí là tương đối để các phần tử con được định vị liên quan tới .circle */
-  width: 42px; /* Đường kính 42px */
-  height: 42px; /* Đường kính 42px */
+  color: #6A6A6A;
+  position: relative;
+  width: 42px;
+  height: 42px;
   border: none;
-  border-radius: 50%; /* Để làm thành hình tròn */
-  background-color: rgba(255, 255, 255, 0.5); /* Màu trắng trong suốt */
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-
   font-family: Noto Sans JP;
   font-size: 14.7px;
   font-weight: 700;
   line-height: 21.29px;
   letter-spacing: 0.02em;
   text-align: center;
-
 }
 
 .circle.correct::before {
@@ -233,11 +230,11 @@ const isQuestionIncorrect = (index) => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 40px; /* Đường kính 38px */
-  height: 40px; /* Đường kính 38px */
-  background-color: #fff; /* Màu trắng */
-  border-radius: 50%; /* Để làm thành hình tròn */
-  z-index: -1; /* Đặt z-index để đẩy lớp này xuống dưới */
+  width: 40px;
+  height: 40px;
+  background-color: #fff;
+  border-radius: 50%;
+  z-index: -1;
   border: none;
 }
 
@@ -247,27 +244,24 @@ const isQuestionIncorrect = (index) => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 35.7px; /* Đường kính 30px */
-  height: 35.7px; /* Đường kính 30px */
-  background-color: transparent; /* Màu nền trong suốt */
-  border: 3px solid red; /* Viền đỏ dày 3px */
-  border-radius: 50%; /* Để làm thành hình tròn */
-  box-sizing: border-box; /* Để border kích thước tính cả padding và border */
-  z-index: 1; /* Đặt z-index để lớp này hiển thị phía trên */
+  width: 35.7px;
+  height: 35.7px;
+  background-color: transparent;
+  border: 3px solid red;
+  border-radius: 50%;
+  box-sizing: border-box;
+  z-index: 1;
 }
 
 .question-arrow {
   margin-left: 8px;
 }
 
-.question.last-in-row .question-arrow {
-  visibility: hidden;
-  width: 8px;
+.question.last-in-row {
+  max-width: 42px;
 }
 
-.question.last-in-row .question-arrow::after {
-  content: '';
-  display: inline-block;
-  width: 8px;
+.question.last-in-row .question-arrow {
+  display: none;
 }
 </style>

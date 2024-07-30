@@ -7,19 +7,20 @@
         <div class="score">{{ correctAnswers }}/{{ totalQuestions }}</div>
         <div class="count-right-answer">トータルスコア：{{ correctAnswers }}</div>        
         <img src="@/assets/images/question-result.svg"/>
-        <div class="message">おつかれさま！キミは何問正解できたかな？？</div>
-        <button class="download-button" @click="share" >デジタル認定画像をダウンロード</button>
+        <div class="message">おつかれさま！キミは何問正解</div>
+          <div class="message"> できたかな？？</div>
+        <button class="download-button" @click="share" >スマホ用オリジナル壁紙をダウンロード</button>
       </div>
       <div class="share-section">
-        <div class="share-text">結果をみんなにシェアしよう！</div>
+        <div class="message">がんばった結果をみんなに</div>
+          <div class="message">シェアしちゃおう</div>
 
         <div class="social-share-container">
-          <div v-for="network in ['facebook', 'twitter', 'line', 'email']" :key="network" class="social-share-item">
+          <div v-for="network in ['facebook', 'twitter', 'line', 'email']" :key="network + uniqueKey" class="social-share-item">
             <SocialShare :network="network" :styled="true" :label="false" :title="'Title of your share'"
                          :url="imageUrl" class="social-share-icon gray-icon" />
           </div>
         </div>
-        
 
         <div class="share-link">
           <a :href="imageUrl" target="_blank" rel="noopener noreferrer">
@@ -58,7 +59,14 @@ const totalQuestions = ref(0);
 const correctAnswers = ref(0);
 const shouldShowFooter = ref(true); // Default to true
 const subtitle = ref('');
-var imageUrl = ref('');
+var imageUrl = ref('https://i.ibb.co/gW3M50z/e1463567236f.png');
+
+const uniqueKey = ref(0);
+
+const refreshSocialShare = () => {
+  uniqueKey.value += 1;
+};
+
 const results = ref([]);    
 const storedResults = localStorage.getItem('results');
 if (storedResults) {
@@ -142,7 +150,9 @@ onMounted(async () => {
     } else {
       subtitle.value = response.data.content;
     }
+    imageUrl.value = 'https://i.ibb.co/gW3M50z/e1463567236f.png'
   await captureComponentAsImage(); // Chờ cho quá trình chụp và tải lên hoàn thành
+  refreshSocialShare();
 });
 
 watchEffect(async () => {
@@ -168,10 +178,9 @@ watchEffect(async () => {
   padding-bottom: 0;
   margin-top: 0;
   margin-bottom: 0;
-  min-height: 100vh; /* Đảm bảo chiếm toàn bộ chiều cao của viewport */
   display: flex;
   flex-direction: column;
-
+  flex: 1;
 }
 .gray-icon {
   display: flex;
@@ -218,8 +227,8 @@ watchEffect(async () => {
 
 .result-section img {
   width: 100%;
-  max-width: 210px;
-  margin: 10px 0;
+  max-width: 361px;
+  padding: 10px 12px;
 }
 
 .message {
@@ -230,14 +239,12 @@ watchEffect(async () => {
   letter-spacing: 0.02em;
   text-align: center;
   color: #4B4B4D;
-  margin: 0 40px;
-  margin-bottom: 12px;
 }
 
 .download-button {
   width: fit-content;
   height: fit-content;
-  padding: 17px 38px;
+  padding: 12px 24px;
   gap: 10px;
   border-radius: 49px;
   background-color:  #31D0AA;
@@ -249,6 +256,7 @@ watchEffect(async () => {
   color: #FFFFFF;
   border: none;
   transition: transform 0.5s ease-in-out; /* Thêm hiệu ứng transition */
+  margin: 12px 12px;
 }
 
 .share-section {
@@ -368,13 +376,14 @@ watchEffect(async () => {
 
 .gray-background-footer {
   display: flex;
-  background-color: #f0f0f0;
+  background-color: #F1F4F9;
   padding: 16px;
-  margin: 8px 16px 48px 16px ;
+  margin: 8px 16px 0 16px ;
   gap: 12px;
   border-radius: 23px;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 32px;
 }
 
 .next-question {

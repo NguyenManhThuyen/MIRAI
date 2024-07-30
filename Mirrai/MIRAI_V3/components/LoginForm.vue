@@ -61,9 +61,11 @@ const handleSubmit = async () => {
       password.value = ''
     } else {
       loginError.value = 'サーバーに接続できません。後でもう一度やり直してください。'
+      password.value = ''
     }
   } catch (error) {
     loginError.value = 'コードが正しくありません'
+    password.value = ''
     console.error('Login error:', error)
   } finally {
     NProgress.done()
@@ -92,16 +94,16 @@ const clearErrorMessage = () => {
 <style scoped>
 .login-container {
   background-color: #ffffff;
-  padding: 32px 20px 32px 20px;
+  padding: 32px 20px;
   border-radius: 16px;
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 100px;
+  width: 90%; /* Đặt kích thước phần tử chính theo phần trăm */
+  max-width: 400px; /* Đặt kích thước tối đa */
+  margin: 0 auto; /* Căn giữa */
   text-align: center;
   gap: 10px;
   border: 1px;
+  margin-bottom: 60px;
 }
-
 h2 {
   color: #2E7CF6;
   font-family: Verdana;
@@ -206,17 +208,23 @@ button:hover {
   text-align: center;
   margin-top: 8px;
 }
-/* Custom NProgress style */
-#nprogress .bar {
-  background: #2E7CF6 !important; /* Blue color */
+
+@media screen and (max-width: 768px) {
+  .login-container {
+    margin-bottom: 70px;
+  }
 }
 
-#nprogress .peg {
-  box-shadow: 0 0 10px #2E7CF6, 0 0 5px #2E7CF6 !important; /* Blue color */
+@media screen and (max-width: 576px) {
+  .login-container {
+    margin-bottom: 85px;
+  }
 }
 
-#nprogress .spinner {
-  display: none !important; /* Hide the spinner */
+@media screen and (max-width: 425px) {
+  .login-container {
+    margin-bottom: 100px;
+  }
 }
 
 </style>

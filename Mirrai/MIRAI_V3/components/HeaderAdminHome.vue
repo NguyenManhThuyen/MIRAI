@@ -1,7 +1,7 @@
 <template>
   <header class="admin-header">
     <div class="admin-icon-container">
-      <img src="@/assets/images/mirai-icon.svg" class="admin-header-icon" />
+      <img src="@/assets/images/mirai-icon.svg" class="admin-header-icon" alt="Mirai Icon" />
       <p class="admin-main-text">Admin</p>
     </div>
     <div class="admin-logout-button">

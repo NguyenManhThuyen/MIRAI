@@ -91,6 +91,11 @@
     errorMessage.value = '' // Đặt lại giá trị lỗi thành rỗng
     successMessage.value = ''
   }
+  // Watch for changes in the `code` input to hide the error message
+  watch(email.value, () => {
+    errorMessage.value = ''
+  })
+
   </script>
   
   <style scoped>
@@ -98,12 +103,13 @@
     background-color: #ffffff;
     padding: 32px 20px 32px 20px;
     border-radius: 16px;
-    width: 100%;
-    max-width: 400px;
-    margin-bottom: 100px;
+    width: 90%; /* Đặt kích thước phần tử chính theo phần trăm */
+    max-width: 400px; /* Đặt kích thước tối đa */
+    margin: 0 auto; /* Căn giữa */
     text-align: center;
     gap: 10px;
     border: 1px;
+    margin-bottom: 60px;
   }
   
   h2 {
@@ -194,6 +200,24 @@
   
   .success-message {
     color: #28a745;
+  }
+
+  @media screen and (max-width: 768px) {
+    .change-password-container {
+      margin-bottom: 70px;
+    }
+  }
+  
+  @media screen and (max-width: 576px) {
+    .change-password-container {
+      margin-bottom: 85px;
+    }
+  }
+  
+  @media screen and (max-width: 425px) {
+    .change-password-container {
+      margin-bottom: 100px;
+    }
   }
   </style>
   

@@ -1,10 +1,19 @@
 <template>
   <div class="quiz-container">
-    <HeaderStampQuestionUser  :admin="true" />
+    <HeaderStampQuestionUser :admin="true" />
     <div class="quiz-body">
-      <img  v-if="question.image_question" :src="getFullImageUrl(question.image_question)" />
+      <img 
+      v-if="question.image_question" 
+      :src="getFullImageUrl(question.image_question)" 
+      loading="lazy" 
+      alt="Hình ảnh câu hỏi"
+    />
+    
+    <!-- Bộ giữ chỗ khi hình ảnh chưa tải -->
+    <SkeletonLoader v-else />
+    
       <div class="question-text">
-        <h2>問題{{question.sort}}:</h2>
+        <h2>問題{{ question.sort }}:</h2>
       </div>
       <p class="question-name">{{ question.title }}</p>
 
@@ -17,13 +26,21 @@
           :class="{ 'selected': selectedAnswer === index }"
         >
           <button
-            :class="'option-' + String.fromCharCode(65 + index)"
+            :class="'option-' + String.fromCharCode(65 + index) + (selectedAnswer === index && animationTrigger ? ' hover-animation' : '')"
             :style="{ transform: selectedAnswer === index ? 'scale(1.2)' : '' }"
           >{{ String.fromCharCode(65 + index) }}</button>
           <p>{{ answer.content }}</p>
         </div>
       </div>
     </div>
+    <AlertComponent
+      v-if="showAlert"
+      :content="alertContent"
+      :actionText="actionText"
+      :visible="showAlert"
+      @cancel="handleAlertCancel"
+      @confirm="handleAlertConfirm"
+    />
   </div>
 </template>
 
@@ -46,7 +63,12 @@ const answers = ref([]);
 const id = ref('');
 const selectedAnswer = ref(null);
 const questionsCount = ref(0);
+const showAlert = ref(false);
+const alertContent = ref('');
+const actionText = ref('');
+const animationTrigger = ref(false); // Thêm ref để quản lý trạng thái animation
 
+let validIds = ref([]);
 let results = JSON.parse(localStorage.getItem('results')) || [];
 let userId = localStorage.getItem('user_id') || uuidv4();
 localStorage.setItem('user_id', userId);
@@ -65,6 +87,7 @@ const fetchQuestion = async (id) => {
     question.value = responseQuestion.data;
     answers.value = responseAnswer.data;
     questionsCount.value = response.data.length;
+    validIds = response.data.map(item => item.id);
   } catch (error) {
     console.error('Error fetching question:', error);
   } finally {
@@ -72,14 +95,29 @@ const fetchQuestion = async (id) => {
   }
 };
 
-function selectAnswer(index) {
+const selectAnswer = (index) => {
   if (selectedAnswer.value !== null) {
     return; // Prevent changing the answer if one is already selected
   }
   
   selectedAnswer.value = index;
   
-  const isCorrect = answers.value[index].is_correct;
+  const answer = String.fromCharCode(65 + index);
+  alertContent.value = `${answer}で回答を確定します`;
+  actionText.value = 'はい';
+  showAlert.value = true;
+};
+
+const handleAlertCancel = () => {
+  selectedAnswer.value = null;
+  showAlert.value = false;
+};
+
+const handleAlertConfirm = async () => {
+  showAlert.value = false;
+  animationTrigger.value = true; // Kích hoạt animation
+
+  const isCorrect = answers.value[selectedAnswer.value].is_correct;
   const result = {
     id: id.value,
     status: isCorrect
@@ -87,50 +125,46 @@ function selectAnswer(index) {
 
   results.push(result);
 
-  setTimeout(async () => {
-    const logAnswer = results.reduce((acc, curr) => {
-      acc[curr.id] = curr.status;
-      return acc;
-    }, {});
+  const logAnswer = results.reduce((acc, curr) => {
+    acc[curr.id] = curr.status;
+    return acc;
+  }, {});
 
-    const analysisData = [{
-      id: userId,
-      log_answer: logAnswer
-    }];
+  const analysisData = [{
+    id: userId,
+    log_answer: logAnswer
+  }];
 
+  try {
+    await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda', analysisData);
+  } catch (error) {
+    console.error('Error posting analysis data:', error);
+  }
+
+  const resultsLength = results.length;
+  let apiUrl = 'https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-statistic-lambda';
+  let requestBody = {};
+
+  if (resultsLength === 1) {
+    requestBody = { status: 0 };
+  } else if (resultsLength === questionsCount.value) {
+    requestBody = { status: 1 };
+  }
+
+  if (Object.keys(requestBody).length > 0) {
     try {
-      await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda', analysisData);
+      await axios.post(apiUrl, requestBody);
     } catch (error) {
-      console.error('Error posting analysis data:', error);
+      console.error('Error posting statistic data:', error);
     }
-
-    // Check the length of results and make additional API calls if needed
-    const resultsLength = results.length;
-
-    let apiUrl = 'https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-statistic-lambda';
-    let requestBody = {};
-
-    if (resultsLength === 1) {
-      requestBody = { status: 0 };
-    } else if (resultsLength === questionsCount.value) {
-      requestBody = { status: 1 };
-    }
-
-    if (Object.keys(requestBody).length > 0) {
-      try {
-        await axios.post(apiUrl, requestBody);
-      } catch (error) {
-        console.error('Error posting statistic data:', error);
-      }
-    }
-
-    // Navigate to the appropriate route based on whether the answer is correct or not
+  }
+  setTimeout(() => {
     if (isCorrect) {
       router.push({
         path: '/users/questionCorrect',
         query: {
-          answer: String.fromCharCode(65 + index),
-          content: answers.value[index].content,
+          answer: String.fromCharCode(65 + selectedAnswer.value),
+          content: answers.value[selectedAnswer.value].content,
           explain: question.value.content,
           explainImg: question.value.image_explain,
           questionsCount: questionsCount.value
@@ -141,8 +175,8 @@ function selectAnswer(index) {
       router.push({
         path: '/users/questionIncorrect',
         query: {
-          answer: String.fromCharCode(65 + index),
-          content: answers.value[index].content,
+          answer: String.fromCharCode(65 + selectedAnswer.value),
+          content: answers.value[selectedAnswer.value].content,
           correctAnswer: String.fromCharCode(65 + correctAnswerIndex),
           correctAnswerContent: answers.value[correctAnswerIndex].content,
           explain: question.value.content,
@@ -152,18 +186,13 @@ function selectAnswer(index) {
       });
     }
 
-    localStorage.setItem('results', JSON.stringify(results));
-  }, 3000);
+    const filteredResults = results.filter(result => validIds.includes(parseInt(result.id, 10)));
+    localStorage.setItem('results', JSON.stringify(filteredResults));
+  }, 3000); 
 
-  // Animate the button
-  const button = document.querySelectorAll('.answer-option button')[index];
-  if (button) {
-    button.classList.add('hover-animation');
-    setTimeout(() => {
-      button.classList.remove('hover-animation');
-    }, 3000);
-  }
-}
+  const filteredResults = results.filter(result => validIds.includes(parseInt(result.id, 10)));
+  localStorage.setItem('results', JSON.stringify(filteredResults));
+};
 
 const getFullImageUrl = (url) => {
   const prefix = "https://mirai-static-website.s3.ap-southeast-1.amazonaws.com/";
@@ -177,15 +206,6 @@ const getCurrentDate = () => {
 
 onMounted(() => {
   id.value = route.query.id;
-  
-  const isAnswered = results.some(result => result.id === id.value);
-  
-  if (isAnswered) {
-    alert('この問題にはすでに回答しました。');
-    router.push('/users/questionResult');
-  } else {
-    fetchQuestion(id);
-  }
 
   const currentDate = getCurrentDate();
   const isFirstLogin = localStorage.getItem('is_first_login');
@@ -194,18 +214,21 @@ onMounted(() => {
     localStorage.setItem('is_first_login', currentDate);
   } else if (isFirstLogin !== currentDate) {
     localStorage.setItem('is_first_login', currentDate);
-    localStorage.removeItem('results');ư
+    localStorage.removeItem('results');
     localStorage.removeItem('user_id');
     results = [];
   }
+
+  const isAnswered = results.some(result => result.id === id.value);
+  
+  if (isAnswered) {
+    alert('この問題にはすでに回答しました。');
+    router.push('/users/questionResult');
+  } else {
+    fetchQuestion(id);
+  }
 });
 </script>
-
-
-
-
-
-
 
 <style scoped>
 .quiz-container {
@@ -214,11 +237,9 @@ onMounted(() => {
   padding-bottom: 0;
   margin-top: 0;
   margin-bottom: 0;
-  min-height: 100vh; /* Đảm bảo chiếm toàn bộ chiều cao của viewport */
   display: flex;
   flex-direction: column;
-
-  
+  flex: 1;
 }
 
 .quiz-navigation button {
@@ -272,6 +293,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 12px;
 }
 
 .answer-option {
@@ -341,5 +363,4 @@ onMounted(() => {
     transform: scale(1);
   }
 }
-
 </style>

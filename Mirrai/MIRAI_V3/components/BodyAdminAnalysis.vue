@@ -8,25 +8,27 @@ import NProgress from 'nprogress';
 
 const series = ref([
   {
-    name: '参加者',
+    name: '参加者数',
     data: []
   },
   {
-    name: '終了した',
+    name: '完了者数',
     data: []
   }
 ]);
 
 const chartOptions = ref({
   chart: {
-    toolbar: false,
+    toolbar: {
+      show: false
+    },
     type: 'bar',
     height: 700,
     fontFamily: 'Noto Sans JP',
     zoom: {
       enabled: true,
-      type: 'x',  
-      autoScaleYaxis: false,  
+      type: 'x',
+      autoScaleYaxis: false,
       zoomedArea: {
         fill: {
           color: '#90CAF9',
@@ -38,13 +40,15 @@ const chartOptions = ref({
           width: 1
         }
       }
-    }
+    },
   },
   plotOptions: {
     bar: {
       horizontal: false,
       columnWidth: '55%',
       endingShape: 'rounded',
+      borderRadius: 2,
+      borderRadiusApplication: 'end',
     }
   },
   dataLabels: {
@@ -69,7 +73,7 @@ const chartOptions = ref({
   tooltip: {
     y: {
       formatter: function (val) {
-        return  val + " 人々";
+        return val + " 人々";
       }
     }
   }
@@ -85,7 +89,8 @@ const exportChart = ref([]);
 const currentPage = ref(1);
 const rowsPerPage = ref(10);
 const totalPages = ref(10);
-
+const startDate = ref('');
+const endDate = ref('');
 
 const goToPage = (page) => {
   currentPage.value = page;
@@ -106,7 +111,7 @@ const nextPage = () => {
 const visiblePages = computed(() => {
   const total = totalPages.value;
   const current = currentPage.value;
-  const range = 2; // Number of pages to show before and after the current page
+  const range = 1; // Number of pages to show before and after the current page
   const pages = [];
 
   for (let i = 1; i <= total; i++) {
@@ -122,30 +127,36 @@ const visiblePages = computed(() => {
 
 const filterWeek = () => {
   activeFilter.value = 'week';
-  const endDate = moment().format('DD/MM/yyyy');
-  const startDate = moment().subtract(7, 'days').format('DD/MM/yyyy');
-  fetchData(startDate, endDate);
+  endDate.value = moment().format('DD/MM/yyyy');
+  startDate.value = moment().subtract(7, 'days').format('DD/MM/yyyy');
+  fetchData();
+  fetchQuestionData();
+  fetchPageData();
 };
 
 const filterMonth = async () => {
   activeFilter.value = 'month';
-  const endDate = moment().format('DD/MM/yyyy');
-  const startDate = moment().startOf('month').format('DD/MM/yyyy');
-  fetchData(startDate, endDate);
+  endDate.value = moment().format('DD/MM/yyyy');
+  startDate.value = moment().startOf('month').format('DD/MM/yyyy');
+  fetchData();
+  fetchQuestionData();
+  fetchPageData();
 };
 
 const exportCSV = (data, fileName) => {
-  let csvContent = "data:text/csv;charset=utf-8," +
-    "Date,";
-  
-  // Add column headers for questions
+  // Thêm BOM cho mã hóa UTF-8
+  const bom = "\uFEFF";
+  let csvContent = bom +
+    "日,";
+
+  // Thêm tiêu đề cột cho các câu hỏi
   const questions = data[0]?.questions || [];
   questions.forEach((question, index) => {
-    csvContent += `Q.${question.sort} - Incorrect,Q.${question.sort} - Correct,Q.${question.sort} - Total,`;
+    csvContent += `Q.${question.sort} - 正しくない,Q.${question.sort} - 正しい,Q.${question.sort} - 合計,`;
   });
   csvContent += "\n";
-  
-  // Add data rows
+
+  // Thêm dữ liệu vào các hàng
   data.forEach((item) => {
     csvContent += `'${item.date},`;
     item.questions.forEach((question) => {
@@ -155,16 +166,22 @@ const exportCSV = (data, fileName) => {
     });
     csvContent += "\n";
   });
-  
-  // Create CSV file and trigger download
-  const encodedUri = encodeURI(csvContent);
+
+  // Tạo đối tượng Blob với loại MIME là "text/csv" và mã hóa là "UTF-8"
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", fileName);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  if (link.download !== undefined) {
+    // Tạo URL đối tượng từ blob
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url); // Dọn dẹp URL đối tượng
+  }
 };
+
 
 const exportQuestionData = () => {
   exportCSV(questionData.value, "question_statistics.csv");
@@ -174,47 +191,59 @@ const exportSeriesData = () => {
   const data = exportChart.value; // Dữ liệu từ chartOptions.value.xaxis.categories
   const fileName = "series_data.csv";
 
-  let csvContent = "data:text/csv;charset=utf-8," +
-    "Category,Total,Correct\n";
+  // Thêm BOM cho mã hóa UTF-8
+  const bom = "\uFEFF";
+  let csvContent = bom +
+    "日,参加者,終了した\n";
 
   data.forEach((item, index) => {
     // Thêm ký tự ' vào trước ngày để Excel hiểu đúng định dạng
     csvContent += `'${item},${series.value[0].data[index]},${series.value[1].data[index]}\n`;
   });
 
-  const encodedUri = encodeURI(csvContent);
+  // Tạo blob với loại MIME là "text/csv" và mã hóa là "UTF-8"
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", fileName);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  if (link.download !== undefined) {
+    // Tạo URL đối tượng từ blob
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url); // Dọn dẹp URL đối tượng
+  }
 };
+
 
 function formatDate(dateStr) {
   const [day, month, year] = dateStr.split('/');
   return `${year}-${month}-${day}`;
 }
 
-const fetchData = async (startDateOriginal, endDateOriginal) => {
+const fetchData = async () => {
   NProgress.start();
   NProgress.set(0.4);
+
   try {
     // Chuyển đổi định dạng ngày tháng cho API URL
-    const startDate = formatDate(startDateOriginal);
-    const endDate = formatDate(endDateOriginal);
+    const startDatee = formatDate(startDate.value);
+    const endDatee = formatDate(endDate.value);
 
-    const apiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-statistic-lambda?start_date=${startDate}&end_date=${endDate}`;
+    // URL cho hai API
+    const statsApiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-statistic-lambda?start_date=${startDatee}&end_date=${endDatee}`;
 
-    const response = await axios.get(apiUrl);
-    const apiData = response.data;
+    // Gửi yêu cầu lấy dữ liệu song song
+    const statsResponse = await axios.get(statsApiUrl);
 
-    // Tạo mảng để lưu số true và tổng số true + false của từng ngày
+    const apiData = statsResponse.data;
+
+    // Xử lý dữ liệu từ API thống kê
     const trueCounts = [];
     const totalCounts = [];
     const dates = [];
 
-    // Duyệt qua các phần tử của apiData và lấy dữ liệu
     for (const item of apiData) {
       const { created_at, join_count, done_count } = item;
       dates.push(created_at);
@@ -222,34 +251,34 @@ const fetchData = async (startDateOriginal, endDateOriginal) => {
       trueCounts.push(done_count);
     }
 
-    // Sắp xếp dates theo định dạng ngày và đảm bảo totalCounts và trueCounts tương ứng
     const sortedDates = [...dates].sort((a, b) => moment(a, 'YYYY-MM-DD').diff(moment(b, 'YYYY-MM-DD')));
     const sortedTotalCounts = sortedDates.map(date => totalCounts[dates.indexOf(date)]);
     const sortedTrueCounts = sortedDates.map(date => trueCounts[dates.indexOf(date)]);
 
-    // Cập nhật dữ liệu cho biểu đồ
     series.value[0].data = sortedTotalCounts;
     series.value[1].data = sortedTrueCounts;
     chartOptions.value.xaxis.categories = sortedDates.map(date => moment(date, 'YYYY-MM-DD').format('DD/MM'));
     exportChart.value = sortedDates.map(date => moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY'));
 
     chartKey.value++; // Buộc render lại biểu đồ
+
   } catch (error) {
     console.error('Error fetching API data:', error);
+  } finally {
+    NProgress.done();
   }
-  NProgress.done();
 };
-
-
-
 const fetchPageData = async () => {
   NProgress.start();
   NProgress.set(0.4);
   try {
+    const startDatee = formatDate(startDate.value);
+    const endDatee = formatDate(endDate.value);
+
     // Gửi yêu cầu lấy tổng số trang
-    const apiUrlPage = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda/totalUserPerQuestion?limit=${rowsPerPage.value}`;
+    const apiUrlPage = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda/totalUserPerQuestion?limit=${rowsPerPage.value}&startDate=${startDatee}&endDate=${endDatee}`;
     const responsePage = await axios.get(apiUrlPage);
-    
+
     // Kiểm tra cấu trúc dữ liệu và tính toán số trang
     if (responsePage.data && responsePage.data.totalPages) {
       totalPages.value = Math.ceil(responsePage.data.totalPages);
@@ -267,8 +296,12 @@ const fetchQuestionData = async () => {
   NProgress.start();
   NProgress.set(0.4);
   try {
+    // Chuyển đổi định dạng ngày tháng cho API URL
+    const startDatee = formatDate(startDate.value);
+    const endDatee = formatDate(endDate.value);
+
     // Gửi yêu cầu lấy dữ liệu phân trang
-    const apiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda/totalUserPerQuestion?page=${currentPage.value}&limit=${rowsPerPage.value}`;
+    const apiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-analysis-lambda/totalUserPerQuestion?page=${currentPage.value}&limit=${rowsPerPage.value}&startDate=${startDatee}&endDate=${endDatee}`;
     const response = await axios.get(apiUrl);
 
     // Kiểm tra cấu trúc dữ liệu trả về
@@ -283,36 +316,33 @@ const fetchQuestionData = async () => {
   NProgress.done();
 };
 
-
-
 // Lấy dữ liệu từ API khi component được mount
 onMounted(() => {
-  filterMonth();
-  fetchPageData();
-  // Fetch question data
-  fetchQuestionData();
+  filterWeek();
   NProgress.done();
 });
 
-watchEffect(() => {
-  if (selectedDate.value && selectedDate.value.length === 2) {
-    const startDate = moment(selectedDate.value[0]).format('DD/MM/yyyy');
-    const endDate = moment(selectedDate.value[1]).format('DD/MM/yyyy');
-    console.log('Start Date:', startDate);
-    console.log('End Date:', endDate);
+// Theo dõi sự thay đổi của selectedDate
+watch(selectedDate, (newVal, oldVal) => {
+  if (newVal && newVal.length === 2) {
+    startDate.value = moment(newVal[0]).format('DD/MM/yyyy');
+    endDate.value = moment(newVal[1]).format('DD/MM/yyyy');
     activeFilter.value = "year";
-    // Gọi API với startDate và endDate
-    fetchData(startDate, endDate);
+    fetchData();
+    fetchQuestionData();
+    fetchPageData();
   }
 });
 
 watch(rowsPerPage, () => {
-  currentPage.value = 1; // Reset to the first page when rowsPerPage changes
+  currentPage.value = 1;
   fetchQuestionData();
+  fetchPageData();
 });
 
 watch(currentPage, () => {
   fetchQuestionData();
+  fetchPageData();
 });
 </script>
 
@@ -324,50 +354,38 @@ watch(currentPage, () => {
       </div>
       <div class="right-section">
         <div class="date-picker-container">
-          <vue-date-picker
-            v-model="selectedDate"
-            type="daterange"
-            format="dd/MM/yyyy"
-            range
-            class="date-picker"
-          >
+          <vue-date-picker v-model="selectedDate" type="daterange" format="dd/MM/yyyy" range class="date-picker">
             <template #calendar-header="{ index, day }">
               <div :class="index === 5 || index === 6 ? 'red-color' : ''">
                 {{ day }}
               </div>
             </template>
             <template #input-icon>
-              <div 
-              style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; pointer-events: none;"
-            >
-              <img src="@/assets/images/calendar-icon.svg" class="centered-icon" />
-            </div>
+              <div
+                style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; pointer-events: none;">
+                <img src="@/assets/images/calendar-icon.svg" class="centered-icon" />
+              </div>
             </template>
           </vue-date-picker>
         </div>
-        
+
         <div class="button-analysis">
-        <button
-          :class="{ 'filter-week': true, 'active': activeFilter === 'week' }"
-          @click="filterWeek"
-        >
-          今週
-        </button>
-        <button
-          :class="{ 'filter-month': true, 'active': activeFilter === 'month' }"
-          @click="filterMonth"
-        >
-          今月
-        </button>
-        <div class="vertical-separator"></div>
-        <button class="export-csv" @click="exportSeriesData">
-          <img src="@/assets/images/export-icon.svg" alt="CSV Icon" class="csv-icon">
-          <span>CSV出力</span>
-        </button>
-      </div>
+          <button :class="{ 'filter-week': true, 'active': activeFilter === 'week' }" @click="filterWeek">
+            今週
+          </button>
+          <button :class="{ 'filter-month': true, 'active': activeFilter === 'month' }" @click="filterMonth">
+            今月
+          </button>
+          <div class="vertical-separator"></div>
+          <button class="export-csv" @click="exportSeriesData">
+            <img src="@/assets/images/export-icon.svg" alt="CSV Icon" class="csv-icon">
+            <span>CSV出力</span>
+          </button>
+        </div>
       </div>
     </div>
-    <apexchart ref="chartRef" v-if="chartData" type="bar" height="600" :options="chartOptions" :series="chartData" :key="chartKey">
+    <apexchart ref="chartRef" v-if="chartData" type="bar" height="600" :options="chartOptions" :series="chartData"
+      :key="chartKey">
     </apexchart>
 
     <div class="footer-container">
@@ -375,7 +393,7 @@ watch(currentPage, () => {
         <span>前進</span>
         <img src="@/assets/images/arrow-right-icon.svg" class="arrow-icon">
       </div>
-    
+
       <button class="export-csv" @click="exportQuestionData">
         <img src="@/assets/images/export-icon.svg" alt="CSV Icon" class="csv-icon">
         <span>CSV出力</span>
@@ -392,8 +410,8 @@ watch(currentPage, () => {
               <table class="inner-table">
                 <thead>
                   <tr>
-                    <th>間違い</th>
-                    <th>正しい</th>
+                    <th>正解</th>
+                    <th>不正解</th>
                     <th>合計</th>
                   </tr>
                 </thead>
@@ -408,16 +426,16 @@ watch(currentPage, () => {
               <table>
                 <tbody>
                   <tr>
-                    <td>{{ question.statsPerDay.answered - question.statsPerDay.correct }}</td>
                     <td>{{ question.statsPerDay.correct }}</td>
+                    <td>{{ question.statsPerDay.answered - question.statsPerDay.correct }}</td>
                     <td>{{ question.statsPerDay.answered }}</td>
                   </tr>
                 </tbody>
               </table>
             </td>
           </tr>
-        </tbody>        
-      </table>  
+        </tbody>
+      </table>
     </div>
     <div class="pagination">
       <div class="rows-per-page">
@@ -429,23 +447,20 @@ watch(currentPage, () => {
           <option value="100">100</option>
         </select>
       </div>
-      <div>
-        <button @click="prevPage" :disabled="currentPage === 1">前へ</button>
+      <div class="page">
+        <button class="hidden" @click="prevPage" :disabled="currentPage === 1">前へ</button>
         <span v-for="page in visiblePages" :key="page" :class="{ 'current-page': page === currentPage }">
           <button @click="goToPage(page)" v-if="page !== '...'">{{ page }}</button>
           <span v-else>{{ page }}</span>
         </span>
-        <button @click="nextPage" :disabled="currentPage === totalPages">次へ</button>
+        <button class="hidden" @click="nextPage" :disabled="currentPage === totalPages">次へ</button>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-#chart {
-  max-width: 100%;
-  margin: auto;
-}
+
 .header-container {
   display: flex;
   justify-content: space-between;
@@ -481,12 +496,14 @@ watch(currentPage, () => {
 .date-picker :deep(input) {
   display: flex;
   justify-content: center;
-  width: 250px;
+  width: 280px;
   height: 48px;
   border-radius: 12px;
-  background-color: #f1f4f9; /* Màu nền xám */
-  border: none; /* Không có đường viền */
-  padding-left: 50px;
+  background-color: #f1f4f9;
+  /* Màu nền xám */
+  border: none;
+  /* Không có đường viền */
+  padding-left: 45px;
   padding-right: 16px;
   font-family: Noto Sans JP;
   font-size: 16px;
@@ -496,14 +513,50 @@ watch(currentPage, () => {
   color: #292D32;
 }
 
-/* Ẩn icon bên phải của input trong vue-date-picker */
-.date-picker :deep(.dp--clear-btn) {
-  display: none;
+.date-picker .dp__input-icon img {
+  width: 20px;
+  /* Kích thước icon */
+  height: 20px;
 }
 
+/* Thay đổi giao diện của Vue Datepicker */
+.date-picker {
+  --dp-menu-min-width: 260px;
+  /*Adjust the min width of the menu*/
+  --dp-font-family: 'Noto Sans JP';
+  --dp-border-radius: 12px;
+  /*Configurable border-radius*/
+  --dp-cell-border-radius: 4px;
+  --dp-month-year-row-button-size: 35px;
+  /*Specific height for the next/previous buttons*/
+  --dp-button-icon-height: 24px;
+  /*Icon sizing in buttons*/
+  --dp-cell-size: 40px;
+  /*Width and height of calendar cell*/
+  --dp-cell-padding: 3px;
+  /*Padding in the cell*/
+
+  --dp-action-buttons-padding: 4px 12px;
+  /*Adjust padding for the action buttons in action row*/
+  --dp-row-margin: 5px 5px;
+  /*Adjust the spacing between rows in the calendar*/
+}
+
+/* Thay đổi màu cho các ngày cuối tuần */
+.date-picker .dp__calendar .dp__day.red-color {
+  color: #ff0000;
+  /* Màu chữ cho các ngày cuối tuần */
+}
+
+/* Ẩn icon bên phải của input trong vue-date-picker */
+.date-picker :deep(.dp--clear-btn),
+.date-picker :deep(.dp__icon.dp__clear_icon.dp__input_icons),
+.date-picker :deep(.dp__btn.dp__button.dp__overlay_action),
 .date-picker :deep(.dp--tp-wrap) {
   display: none;
 }
+
+
 
 .filter-week,
 .filter-month,
@@ -524,20 +577,23 @@ watch(currentPage, () => {
   font-weight: 500;
   line-height: 23.17px;
   text-align: center;
-  transition: transform 0.3s ease-in-out; /* Thêm hiệu ứng transition */
+  transition: transform 0.3s ease-in-out;
+  /* Thêm hiệu ứng transition */
   margin-left: 16px;
 }
 
 .filter-week:hover,
 .filter-month:hover,
 .export-csv:hover {
-  transform: scale(1.17); /* Phóng to khi di chuột vào */
+  transform: scale(1.17);
+  /* Phóng to khi di chuột vào */
 }
 
 .filter-week:active,
 .filter-month:active,
 .export-csv:active {
-  transform: scale(1); /* Phóng to khi di chuột vào */
+  transform: scale(1);
+  /* Phóng to khi di chuột vào */
 }
 
 
@@ -592,30 +648,39 @@ watch(currentPage, () => {
   margin-left: 8px;
   height: 24px;
 }
+
 .red-color {
   color: red;
 }
 
 .table-container {
-  overflow-x: scroll; /* Ẩn thanh cuộn ngang */
-  overflow-y: auto; /* Cho phép thanh cuộn dọc nếu cần */
+  overflow-x: scroll;
+  /* Ẩn thanh cuộn ngang */
+  overflow-y: auto;
+  /* Cho phép thanh cuộn dọc nếu cần */
   position: relative;
-  white-space: nowrap; /* Ngăn không cho dòng xuống */
+  white-space: nowrap;
+  /* Ngăn không cho dòng xuống */
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
-  border: none; /* Ẩn viền ngoài cùng */
-  cursor: pointer; /* Hiển thị con trỏ tay khi di chuột vào bảng */
+  border: none;
+  /* Ẩn viền ngoài cùng */
+  cursor: pointer;
+  /* Hiển thị con trỏ tay khi di chuột vào bảng */
 }
 
-th, td {
+th,
+td {
   padding: 8px;
   text-align: center;
-  border-right: 1px solid #E6E8EC; /* Thêm viền phải cho tất cả các ô */
-  border-bottom: 1px solid #E6E8EC; /* Thêm viền dưới cho tất cả các ô */
+  border-right: 1px solid #E6E8EC;
+  /* Thêm viền phải cho tất cả các ô */
+  border-bottom: 1px solid #E6E8EC;
+  /* Thêm viền dưới cho tất cả các ô */
   min-width: 60px;
 }
 
@@ -624,7 +689,8 @@ td:first-child {
 }
 
 /* Ẩn border-right của phần tử cuối cùng trong mỗi hàng */
-th:last-child, td:last-child {
+th:last-child,
+td:last-child {
   border-right: none;
 }
 
@@ -636,8 +702,9 @@ tr:last-child td {
 thead {
   background-color: transparent;
 }
+
 /* Căn lề trái cho cột chứa ngày */
-.date-cell{
+.date-cell {
   text-align: left;
 }
 
@@ -662,17 +729,22 @@ td {
 }
 
 /* Thêm đường viền dọc giữa các thẻ th */
-.inner-table th:nth-child(2), .inner-table th:nth-child(3) {
+.inner-table th:nth-child(2),
+.inner-table th:nth-child(3) {
   border-left: 1px solid #E6E8EC;
 }
 
-th > table, td > table {
+th>table,
+td>table {
   width: 100%;
   border-collapse: collapse;
   margin: 0;
 }
 
-th > table th, td > table th, th > table td, td > table td {
+th>table th,
+td>table th,
+th>table td,
+td>table td {
   border: none;
   padding: 4px;
   background-color: transparent;
@@ -680,6 +752,7 @@ th > table th, td > table th, th > table td, td > table td {
 
 .pagination {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   margin-top: 20px;
@@ -735,53 +808,119 @@ th > table th, td > table th, th > table td, td > table td {
   }
 
   .left-section {
-    display: none; /* Ẩn left-section khi màn hình nhỏ hơn */
+    display: none;
+    /* Ẩn left-section khi màn hình nhỏ hơn */
   }
 }
 
 /* Responsive từ 576px trở lên */
 @media screen and (max-width: 576px) {
   .right-section {
-    flex-direction: column; /* Sắp xếp theo cột cho right-section */
+    flex-direction: column;
+    /* Sắp xếp theo cột cho right-section */
   }
+
   .date-picker-container {
-    flex-direction: column; /* Sắp xếp theo cột cho date-picker-container */
+    flex-direction: column;
+    /* Sắp xếp theo cột cho date-picker-container */
   }
 
   .date-picker {
-    width: 100%; /* Đảm bảo date-picker chiếm toàn bộ chiều rộng */
-    margin-right: 0; /* Xóa khoảng cách phải của date-picker */
-    margin-bottom: 10px; /* Khoảng cách từ date-picker xuống các button */
+    width: 100%;
+    /* Đảm bảo date-picker chiếm toàn bộ chiều rộng */
+    margin-right: 0;
+    /* Xóa khoảng cách phải của date-picker */
+    margin-bottom: 10px;
+    /* Khoảng cách từ date-picker xuống các button */
   }
 
   .filter-week,
   .filter-month,
   .export-csv {
-    margin-bottom: 10px; /* Khoảng cách giữa các button */
+    margin-bottom: 10px;
+    /* Khoảng cách giữa các button */
   }
 
-  .footer-container {
-    flex-direction: column; /* Chuyển sang sắp xếp theo cột cho footer-container */
-    align-items: flex-start; /* Căn trái các phần tử trong footer-container */
+
+  .pagination {
+    flex-direction: column;
+  }
+
+  .rows-per-page {
+    margin-bottom: 12px;
+  }
+
+  .filter-week {
+    margin-left: 0px;
+  }
+
+  /* Chỉnh CSS cho input bên trong vue-date-picker */
+  .date-picker :deep(input) {
+    width: 450px;
+    margin-bottom: 4px 0 16px 0;
   }
 }
 
 /* Responsive từ 480px trở lên */
 @media screen and (max-width: 480px) {
   .right-section {
-    flex-direction: column; /* Sắp xếp theo cột cho right-section */
+    flex-direction: column;
+    /* Sắp xếp theo cột cho right-section */
+  }
+
+  .page {
+    justify-content: space-between;
+  }
+
+  .filter-week,
+  .filter-month,
+  .export-csv,
+  .vertical-separator {
+    margin-left: 14px;
+  }
+
+  /* Chỉnh CSS cho input bên trong vue-date-picker */
+  .date-picker :deep(input) {
+    width: 350px;
+    margin-bottom: 4px 0 16px 0;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .hidden {
+    display: none;
+  }
+
+  .filter-week,
+  .filter-month,
+  .export-csv,
+  .vertical-separator {
+    margin-left: 12px;
+  }
+
+  /* Chỉnh CSS cho input bên trong vue-date-picker */
+  .date-picker :deep(input) {
+    width: 320px;
+    margin-bottom: 4px 0 16px 0;
   }
 }
 
 /* Responsive từ 320px trở lên */
 @media screen and (max-width: 320px) {
   .header-container {
-    padding: 10px; /* Thêm padding để tránh các phần tử quá gần nhau */
+    padding: 10px;
+    /* Thêm padding để tránh các phần tử quá gần nhau */
   }
 
   .rows-per-page select {
-    font-size: 14px; /* Giảm kích thước font chọn số lượng bản ghi trên một trang */
+    font-size: 14px;
+    /* Giảm kích thước font chọn số lượng bản ghi trên một trang */
+  }
+
+  /* Chỉnh CSS cho input bên trong vue-date-picker */
+  .date-picker :deep(input) {
+    width: 260px;
+    margin-bottom: 4px 0 16px 0;
   }
 }
-
 </style>

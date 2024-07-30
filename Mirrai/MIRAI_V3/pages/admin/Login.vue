@@ -27,17 +27,19 @@ useHead({
   flex-direction: column;
   justify-content: center; /* Căn giữa theo chiều dọc */
   align-items: center; /* Căn giữa theo chiều ngang */
-  height: 100vh; /* Sửa thành 100vh để đảm bảo trang chiếm toàn bộ viewport height */
+  height: 100dvh; /* Sửa thành 100vh để đảm bảo trang chiếm toàn bộ viewport height */
   margin: 0;
   padding: 0; /* Xóa padding mặc định */
   overflow: hidden; /* Ẩn phần dư thừa */
 }
+
 
 .branding {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 32px; /* Khoảng cách dưới */
+  width: 90%; /* Đặt kích thước phần tử chính theo phần trăm */
 }
 
 .brand-icon {

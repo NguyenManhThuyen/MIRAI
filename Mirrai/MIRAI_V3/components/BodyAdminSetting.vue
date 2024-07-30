@@ -33,88 +33,117 @@
 
 <script>
 import axios from 'axios';
+import { onMounted, ref } from 'vue';
 import { toast } from 'vue3-toastify';
+import NProgress from 'nprogress';
+
 export default {
-  data() {
-    return {
-      showModal: false,
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-      showNewPassword: false,
-      showConfirmPassword: false,
-      errorMessage: '',
+  setup() {
+    const showModal = ref(false);
+    const currentPassword = ref('');
+    const newPassword = ref('');
+    const confirmPassword = ref('');
+    const showNewPassword = ref(false);
+    const showConfirmPassword = ref(false);
+    const errorMessage = ref('');
+
+    const openModal = () => {
+      showModal.value = true;
+      errorMessage.value = '';
     };
-  },
-  methods: {
-    openModal() {
-      this.showModal = true;
-      this.errorMessage = '';
-    },
-    closeModal() {
-      this.showModal = false;
-      this.currentPassword = '';
-      this.newPassword = '';
-      this.confirmPassword = '';
-      this.errorMessage = '';
-    },
-    toggleNewPasswordVisibility() {
-      this.showNewPassword = !this.showNewPassword;
-    },
-    toggleConfirmPasswordVisibility() {
-      this.showConfirmPassword = !this.showConfirmPassword;
-    },
-    validateInputs() {
-      if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
-        this.errorMessage = 'すべてのフィールドに入力してください';
+
+    const closeModal = () => {
+      showModal.value = false;
+      currentPassword.value = '';
+      newPassword.value = '';
+      confirmPassword.value = '';
+      errorMessage.value = '';
+    };
+
+    const toggleNewPasswordVisibility = () => {
+      showNewPassword.value = !showNewPassword.value;
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+      showConfirmPassword.value = !showConfirmPassword.value;
+    };
+
+    const validateInputs = () => {
+      if (!currentPassword.value || !newPassword.value || !confirmPassword.value) {
+        errorMessage.value = 'すべてのフィールドに入力してください';
         return false;
       }
-      if (this.newPassword !== this.confirmPassword) {
-        this.errorMessage = '新しいパスワードと確認パスワードが一致しません';
+      if (newPassword.value !== confirmPassword.value) {
+        errorMessage.value = '新しいパスワードと確認パスワードが一致しません';
         return false;
       }
-      this.errorMessage = '';
+      errorMessage.value = '';
       return true;
-    },
-    async changePassword() {
-      if (!this.validateInputs()) {
+    };
+
+    const changePassword = async () => {
+      if (!validateInputs()) {
         return;
       }
 
       try {
         const response = await axios.post('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/users/changePassword', {
           email: sessionStorage.getItem('email'),
-          password: this.currentPassword,
-          newpassword: this.newPassword,
-          confirmpassword: this.confirmPassword,
+          password: currentPassword.value,
+          newpassword: newPassword.value,
+          confirmpassword: confirmPassword.value,
         });
 
         if (response.status === 200) {
-          this.currentPassword = '';
-          this.newPassword = '';
-          this.confirmPassword = '';
-          this.errorMessage = '';
+          currentPassword.value = '';
+          newPassword.value = '';
+          confirmPassword.value = '';
+          errorMessage.value = '';
           toast.success("パスワードが正常に変更されました");
-          this.showModal = false;
+          showModal.value = false;
         }
       } catch (error) {
         if (error.response) {
           // Các lỗi từ server
           if (error.response.status >= 400 && error.response.status < 500) {
-            this.errorMessage = 'クライアントエラーが発生しました。';
+            errorMessage.value = 'クライアントエラーが発生しました。';
           } else if (error.response.status >= 500) {
-            this.errorMessage = 'システムエラーが発生しました。';
+            errorMessage.value = 'システムエラーが発生しました。';
           }
         } else {
           // Các lỗi khác
-          this.errorMessage = 'エラーが発生しました。';
+          errorMessage.value = 'エラーが発生しました。';
         }
       }
-    }
-  }
-};
+    };
 
+    onMounted(() => {
+      NProgress.start();
+      NProgress.set(0.4);
+      setTimeout(() => {
+        NProgress.done();
+      }, 100);
+    });
+
+    return {
+      showModal,
+      currentPassword,
+      newPassword,
+      confirmPassword,
+      showNewPassword,
+      showConfirmPassword,
+      errorMessage,
+      openModal,
+      closeModal,
+      toggleNewPasswordVisibility,
+      toggleConfirmPasswordVisibility,
+      validateInputs,
+      changePassword,
+    };
+  },
+};
 </script>
+
 
 <style scoped>
 .total {
@@ -179,7 +208,7 @@ export default {
 
 .modal-container {
   background-color: #ffffff;
-  width: 80%;
+  width: 90%;
   max-width: 430px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
@@ -190,19 +219,19 @@ export default {
 }
 
 .modal-title {
-  margin-bottom: 24px;
-  font-family: Verdana;
+  margin: 0px 24px 24px 24px;
+  font-family: Noto Sans JP;
   font-size: 24px;
   font-weight: 700;
-  line-height: 24px;
+  line-height: 32px;
   text-align: center;
   color: #2E7CF6;
 }
 
 .modal-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 5px;
+  right: 5px;
   font-size: 24px;
   cursor: pointer;
   color: #666;
@@ -221,7 +250,7 @@ export default {
 }
 
 .input-group input {
-  width: calc(100% - 40px);
+  width: calc(100% - 10px);
   height: 28px;
   padding: 10px;
   border: none;
@@ -238,7 +267,7 @@ export default {
 .input-group img {
   width: 24px;
   height: 24px;
-  margin-right: 0px;
+  margin-top: 2px;
 }
 
 .modal-button {
@@ -249,12 +278,15 @@ export default {
   cursor: pointer;
   font-size: 16px;
   margin-top: 16px;
-  padding: 14px 14px 14px 14px;
-  gap: 10px;
+  padding: 14px; /* Có thể gộp tất cả padding lại thành 14px */
   border-radius: 12px;
-  min-height: 48px;
-  height: fit-content;
+  height: 48px;
+  text-align: center;
+  display: flex;
+  align-items: center; /* Căn giữa nội dung theo chiều dọc */
+  justify-content: center; /* Căn giữa nội dung theo chiều ngang */
 }
+
 
 .error-message {
   color: red;
@@ -262,6 +294,22 @@ export default {
   text-align: center;
 }
 
+@media screen and (max-width: 768px) {
+  .modal-container {
+    padding: 32px 24px 24px 24px;
+  }
+}
 
+@media screen and (max-width: 576px) {
+  .modal-container {
+    padding: 32px 16px 24px 16px;
+  }
+}
+
+@media screen and (max-width: 425px) {
+  .modal-container {
+    padding: 32px 12px 24px 12px;
+  }
+}
 
 </style>

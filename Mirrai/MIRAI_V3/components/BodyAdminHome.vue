@@ -1,173 +1,173 @@
 <template>
-    <div v-if="showComponent" class="custom-component">
-      <!-- Phần tiêu đề -->
-      <div class="title-section">
-        <p class="title-text">{{ title.title }}</p>
+  <div v-if="showComponent" class="custom-component">
+    <!-- Phần tiêu đề -->
+    <div class="title-section">
+      <p class="title-text">
+        <template v-if="title">{{ title.title }}</template>
+        <SkeletonLoader v-else />
+      </p>
+    </div>
+
+    <div class="content-section">
+      <p class="content-title">
+        <template v-if="title">{{ title.content }}</template>
+        <SkeletonLoader v-else />
+      </p>
+      <div class="icon-container" @click="openEdit1Modal">
+        <img src="@/assets/images/admin-home-edit-icon.svg" class="edit-icon" loading="lazy" />
       </div>
-  
-      <div class="content-section">
-        <p class="content-title">{{ title.content }}</p>
-        <div class="icon-container" @click="openEdit1Modal">
-          <img src="@/assets/images/admin-home-edit-icon.svg"  class="edit-icon" />
+    </div>
+
+    <!-- Thanh ngang xám -->
+    <div class="gray-line"></div>
+
+    <div class="title-section">
+      <p class="title-text">
+        <template v-if="notificationTitle">{{ notificationTitle.title }}</template>
+        <SkeletonLoader v-else />
+      </p>
+      <div class="switch-container">
+        <label class="switch">
+          <input type="checkbox" v-model="switchValue" @change="handleSliderChange" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <p class="title-text-temp">
+        <template v-if="notificationTitle">{{ notificationTitle.content }}</template>
+        <SkeletonLoader v-else />
+      </p>
+      <div class="icon-container" @click="openEdit2Modal">
+        <img src="@/assets/images/admin-home-edit-icon.svg" class="edit-icon" loading="lazy" />
+      </div>
+    </div>
+
+    <!-- Thanh ngang xám -->
+    <div class="gray-line"></div>
+
+    <BodyAdminHomeListQuestion />
+
+    <!-- Modal -->
+    <div v-if="showModal" class="modal-container" @click="handleOverlayClick($event)">
+      <div class="modal-content">
+        <div class="modal-header">
+          <p class="modal-title">{{ modalTitle }}</p>
+          <img src="@/assets/images/admin-home-change-topic-icon-plus.svg" class="close-icon" @click="closeModal" />
         </div>
-      </div>
-  
-      <!-- Thanh ngang xám -->
-      <div class="gray-line"></div>
-  
-      <div class="title-section">
-        <p class="title-text">{{ notificationTitle.title }}</p>
-        <div class="switch-container">
-          <label class="switch">
-            <input type="checkbox" v-model="switchValue" @change="handleSliderChange" />
-            <span class="slider"></span>
-          </label>
+        <div class="modal-body">
+          <!-- Nội dung của modal -->
+          <textarea v-model="modalContent" class="modal-textarea" style="resize: none;"></textarea>
         </div>
-      </div>
-  
-      <div class="content-section">
-        <p class="title-text-temp">{{ notificationTitle.content }}</p>
-        <div class="icon-container" @click="openEdit2Modal">
-          <img src="@/assets/images/admin-home-edit-icon.svg"  class="edit-icon" />
-        </div>
-      </div>
-  
-      <!-- Thanh ngang xám -->
-      <div class="gray-line"></div>
-  
-      <BodyAdminHomeListQuestion />
-  
-      <!-- Modal -->
-      <div v-if="showModal" class="modal-container" @click="handleOverlayClick($event)">
-        <div class="modal-content">
-          <div class="modal-header">
-            <p class="modal-title">{{ modalTitle }}</p>
-            <img src="@/assets/images/admin-home-change-topic-icon-plus.svg"  class="close-icon" @click="closeModal" />
-          </div>
-          <div class="modal-body">
-            <!-- Nội dung của modal -->
-            <textarea v-model="modalContent" class="modal-textarea" style="resize: none;"></textarea>
-          </div>
-          <div class="modal-footer">
-            <button class="cancel-button" @click="closeModal">キャンセル</button>
-            <button class="save-button" @click="saveModalChanges">保存</button>
-          </div>
+        <div class="modal-footer">
+          <button class="cancel-button" @click="closeModal">キャンセル</button>
+          <button class="save-button" @click="saveModalChanges">保存</button>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, onMounted } from 'vue';
-  import axios from 'axios';
-  import NProgress from 'nprogress';
-  import { toast } from 'vue3-toastify';
+  </div>
+</template>
 
-  const showComponent = ref(false); // Biến để điều khiển hiển thị component
-  const title = ref(null); // Khai báo biến title là một ref
-  const notificationTitle = ref(null); // Khai báo biến notificationTitle là một ref
-  const switchValue = ref(false);
-  const showModal = ref(false);
+<script setup>
+import { ref, onMounted, nextTick } from 'vue';
+import axios from 'axios';
+import NProgress from 'nprogress';
+import { toast } from 'vue3-toastify';
+import SkeletonLoader from '@/components/SkeletonLoader.vue'; // Đảm bảo đường dẫn đúng
 
-  let modalTitle = ref(''); // Khai báo biến modalTitle là một ref
-  let modalContent = ref(''); // Khai báo biến modalContent là một ref
-  let modalType = ref('');
-  
-  const fetchData = async () => {
-    NProgress.start()
-    NProgress.set(0.4)
-    try {
-        const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda');
-        response.data.forEach(item => {
-        if (item.type === 'title') {
-            title.value = item; // Gán giá trị cho title
-        } else if (item.type === 'noti') {
-            notificationTitle.value = item; // Gán giá trị cho notificationTitle
-        }
-        });
-        switchValue.value = notificationTitle.value.noti; // Gán giá trị cho switchValue từ dữ liệu notification
-        showComponent.value = true; // Hiển thị component sau khi fetch data thành công
-        NProgress.done();
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    } finally {
+const showComponent = ref(false);
+const title = ref(null);
+const notificationTitle = ref(null);
+const switchValue = ref(false);
+const showModal = ref(false);
+
+let modalTitle = ref('');
+let modalContent = ref('');
+let modalType = ref('');
+
+const fetchData = async () => {
+  NProgress.start();
+  NProgress.set(0.4);
+  try {
+    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda');
+    response.data.forEach(item => {
+      if (item.type === 'title') {
+        title.value = item;
+      } else if (item.type === 'noti') {
+        notificationTitle.value = item;
+      }
+    });
+    switchValue.value = notificationTitle.value.noti;
+    nextTick(() => {
+      showComponent.value = true;
       NProgress.done();
-    }
-    };
-    
+    });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    NProgress.done();
+  }
+};
+
 const openEdit1Modal = () => {
-    showModal.value = true;
-    modalType.value = 'title'; // Đánh dấu là đang chỉnh sửa title
-    modalTitle.value = title.value.title; // Set appropriate title
-    modalContent.value = title.value.content; // Set appropriate content
+  showModal.value = true;
+  modalType.value = 'title';
+  modalTitle.value = title.value.title;
+  modalContent.value = title.value.content;
 };
 
 const openEdit2Modal = () => {
-    showModal.value = true;
-    modalType.value = 'noti'; // Đánh dấu là đang chỉnh sửa notificationTitle
-    modalTitle.value = notificationTitle.value.title; // Set appropriate title
-    modalContent.value = notificationTitle.value.content; // Set appropriate content
+  showModal.value = true;
+  modalType.value = 'noti';
+  modalTitle.value = notificationTitle.value.title;
+  modalContent.value = notificationTitle.value.content;
 };
-  
-  const closeModal = () => {
-    showModal.value = false;
-    modalTitle.value = '';
-    modalContent.value = '';
-  };
-  
-  const saveModalChanges = () => {
-    NProgress.start()
-    NProgress.set(0.4)
-    // Update the appropriate data object (title or notificationTitle) with modalContent
-    if (modalType.value === 'title') {
-        title.value.content = modalContent.value;
-    } else if (modalType.value === 'noti') {
-        notificationTitle.value.content = modalContent.value;
-    }
 
-    // Determine which data object to update based on modalType
-    let dataToUpdate = modalType.value === 'title' ? title.value : notificationTitle.value;
-    
-    // Call your API to save modalContent
-    axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda', { 
-        ...dataToUpdate
-    })
-        .then(response => {
-        NProgress.done();
-        closeModal(); // Close modal after successful save
-        toast.success("質更新に成功");
-        })
-        .catch(error => {
-        toast.error("アップデートに失敗しました");
-        // Handle error here
-        });
-    };
+const closeModal = () => {
+  showModal.value = false;
+  modalTitle.value = '';
+  modalContent.value = '';
+};
 
-  
-  // Function to handle slider change
-  const handleSliderChange = () => {
-    NProgress.start()
-    NProgress.set(0.4)
-    const apiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/${switchValue.value}`;
-    axios.put(apiUrl)
-      .then(response => {
-        toast.success("質更新に成功");
-      })
-      .catch(error => {
-        toast.error("アップデートに失敗しました");
-      });
+const saveModalChanges = () => {
+  NProgress.start();
+  NProgress.set(0.4);
+  let dataToUpdate = modalType.value === 'title' ? title.value : notificationTitle.value;
+  axios.put('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda', {
+    ...dataToUpdate
+  })
+    .then(response => {
       NProgress.done();
-  };
-
-  const handleOverlayClick = (event) => {
-    // Check if the click occurred outside the modal
-    if (event.target === event.currentTarget) {
-        closeModal(); // Call cancel method when clicked outside the modal
-    }
+      closeModal();
+      toast.success("質更新に成功");
+    })
+    .catch(error => {
+      toast.error("アップデートに失敗しました");
+    });
 };
-  
-  onMounted(fetchData);
-  </script>
+
+const handleSliderChange = () => {
+  NProgress.start();
+  NProgress.set(0.4);
+  const apiUrl = `https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/${switchValue.value}`;
+  axios.put(apiUrl)
+    .then(response => {
+      toast.success("質更新に成功");
+    })
+    .catch(error => {
+      toast.error("アップデートに失敗しました");
+    });
+  NProgress.done();
+};
+
+const handleOverlayClick = (event) => {
+  if (event.target === event.currentTarget) {
+    closeModal();
+  }
+};
+
+onMounted(fetchData);
+</script>
   
 
 <style scoped>
@@ -235,19 +235,25 @@ const openEdit2Modal = () => {
     letter-spacing: 0.02em;
     text-align: center;
     color:#4B4B4D;
+    overflow: hidden;
 }
 
 .title-text-temp {
-    font-family: Noto Sans JP;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 23.17px;
-    letter-spacing: 0.02em;
-    text-align: center;
-    color: #4B4B4D;
-    background-color:  #F1F4F9;
-    padding-top: 3.5px;
-    padding-bottom: 3.5px;
+  font-family: Noto Sans JP;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 23.17px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: #4B4B4D;
+  background-color:  #F1F4F9;
+  margin: 0;
+  padding: 3.5px 0; /* Đảm bảo không có khoảng cách dư thừa */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
 }
 
 .switch-container {
@@ -408,5 +414,22 @@ input:checked+.slider:before {
 .save-button {
     background-color:  #2E7CF6;
     color: white;
+}
+
+@media (max-width: 480px) {
+  .content-title {
+    font-family: Noto Sans JP;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 28.96px;
+    letter-spacing: 0.02em;
+    text-align: center;
+    color:#4B4B4D;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+  }
 }
 </style>

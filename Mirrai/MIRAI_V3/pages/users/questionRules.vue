@@ -1,5 +1,6 @@
 <template>
   <div class="quiz-container">
+    <HeaderQuestionUser />
     <div class="quiz-body">
       <div class="terms-title">利用規約と条件</div>
       <p class="terms-text">
@@ -21,19 +22,17 @@
         <br/>
         あなたは、App Store の利用規約への違反から生じるすべての損害および損失から Apple および第三者を補償することに同意します。
       </p>
-      <button class="back-button" @click="goBack">
-        <span class="button-icon"></span> 前のページに戻る
-      </button>
+        <button class="back-button" @click="goBack">
+          <img src="@/assets/images/arrow-right-blue-icon.svg">
+          前のページに戻る
+        </button>
     </div>
+    <FooterQuestionUser :hideTerms="true"/>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router';
-
-definePageMeta({
-  layout: "users",
-});
 
 const router = useRouter();
 
@@ -49,17 +48,17 @@ function goBack() {
   padding-bottom: 0;
   margin-top: 0;
   margin-bottom: 0;
-  min-height: 100vh;
   display: flex;
+  min-height: 100vh;
   flex-direction: column;
 }
 
 .quiz-body {
-  margin: 16px 41px 16px 41px;
-  flex-grow: 1; 
+  margin: 16px 41px 10px 41px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex: 1;
 }
 
 .terms-title {
@@ -80,37 +79,33 @@ function goBack() {
   line-height: 19.6px;
   text-align: left;
   color: #6A6A6A;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
-
+.download-button text {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  justify-items: center;
+  margin-bottom: 2px;
+}
 .back-button {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 17px 38px;
-  border-radius: 49px;
-  background-color: #31d0aa;
-  font-family: 'Noto Sans JP', sans-serif;
+  gap: 10px;
+  border-radius: 49px 0 0 0;
+  opacity: 1;
+  font-family: Noto Sans JP;
   font-size: 16px;
   font-weight: 700;
-  line-height: 24px;
+  line-height: 23.17px;
   letter-spacing: 0.02em;
-  color: #ffffff;
+  text-align: center;
+  color: #0082CA;
   border: none;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.back-button .button-icon {
-  width: 24px; /* Kích thước của biểu tượng */
-  height: 24px;
-  background-image: url('@/assets/images/Arrow - Right 2.svg'); /* Đường dẫn đến biểu tượng Arrow - Right 2 */
-  background-size: cover;
-  margin-right: 10px; /* Khoảng cách giữa biểu tượng và văn bản */
-}
-
-.back-button:hover {
-  background-color: #1eae8a; /* Màu nền khi hover */
+  background-color: transparent;
+  margin-top: 10px;
 }
 </style>

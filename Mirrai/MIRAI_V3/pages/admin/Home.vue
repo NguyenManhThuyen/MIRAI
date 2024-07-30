@@ -114,7 +114,7 @@ useHead({
 
 @media screen and (max-width: 480px) {
   .content {
-    padding: 16px 4px 4px; /* Adjusted padding for smaller screens */
+    padding: 16px 8px 8px; /* Adjusted padding for smaller screens */
   }
 
   .tab {

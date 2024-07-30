@@ -119,7 +119,7 @@
           </div>
           </div>
         </div>
-        <FooterQuestionUser />
+        <FooterQuestionUser :disableLink="true"/>
       </div>
     </div>
   </div>
@@ -566,7 +566,7 @@ watchEffect(() => {
   padding: 32px;
   gap: 20px;
   border-radius: 16px;
-
+  margin: 0 12px;
   max-height: 85vh; /* Đặt chiều cao tối đa của modal là 80% chiều cao của viewport */
   overflow-y: auto; /* Cho phép nội dung cuộn khi vượt quá chiều cao */
 
@@ -580,6 +580,17 @@ watchEffect(() => {
     width: 0px;
     background: transparent; /* Optional: just in case it's visible in some browser */
   }
+}
+
+.modal-content h2 {
+  margin-bottom: 12px;
+  font-weight: bold; /* Độ đậm của font */
+  font-family: Noto Sans JP;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28.96px;
+  letter-spacing: 0.02em;
+  color: #000;
 }
 
 .close {
@@ -928,7 +939,7 @@ watchEffect(() => {
   background-color: #fefefe;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-width: 80%;
+  max-width: 90%;
   width: 813px;
 
   max-height: 85vh; /* Đặt chiều cao tối đa của modal là 80% chiều cao của viewport */
@@ -1071,5 +1082,53 @@ p.option-correct {
 .error-message {
   color: red;
   font-size: 12px;
+}
+
+/* Responsive từ 768px trở lên */
+@media screen and (max-width: 768px) {
+  .modal-content {
+    padding: 24px;
+  }
+  .question-details {
+    margin-top: 12px;
+  }
+  .question-content {
+    padding-bottom: 8px;
+  }
+  .form-group input {
+    max-width: 100px;
+  }
+  .uploaded-image {
+    min-height: 0;
+  }
+  .form-group textarea#questionDescription {
+    min-height: 150px;
+  }
+}
+/* Responsive từ 576px trở lên */
+@media screen and (max-width: 576px) {
+
+}
+
+/* Responsive từ 480px trở lên */
+@media screen and (max-width: 480px) {
+
+}
+
+@media screen and (max-width: 420px) {
+  .modal-content {
+    padding: 24px 16px;
+  }
+  .actions button {
+    width: 95px;
+    font-size: 14px;
+  }
+}
+
+/* Responsive từ 320px trở lên */
+@media screen and (max-width: 320px) {
+  .modal-content {
+    padding: 24px 12px;
+  }
 }
 </style>

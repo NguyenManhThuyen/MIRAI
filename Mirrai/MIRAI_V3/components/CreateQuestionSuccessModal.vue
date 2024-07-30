@@ -2,7 +2,7 @@
   <div v-if="visible" class="modal" @click="handleOverlayClick($event)">
     <div class="modal-content">
       <span class="modal-close" @click="close">×</span>
-      <h2 class="modal-title">正常に作成できました！</h2>
+      <h2 class="modal-title">正常に作成されました！</h2>
       <img :src="newQuestion?.qrcode"  class="modal-qrcode"/>
       <button class="modal-download" @click="downloadQRCode">ダウンロード</button>
       <div class="modal-input-container">
@@ -125,6 +125,7 @@ const downloadQRCode = () => {
     background: transparent;
   }
   text-align: center;
+  margin: 0 12px;
 }
 
 .modal-title {
@@ -167,6 +168,11 @@ const downloadQRCode = () => {
 }
 
 .modal-input {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   flex: 1;
   height: auto;
   min-height: 48px;
@@ -174,8 +180,9 @@ const downloadQRCode = () => {
   outline: none;
   background-color:  #F1F4F9;
   border-radius: 8px;
-  padding :10px 12px 10px  12px;
+  padding :10px 45px 10px  12px;
   gap : 10px;
+
 
   font-family: Noto Sans JP;
   font-size: 16px;
@@ -193,7 +200,7 @@ const downloadQRCode = () => {
 
 .modal-question-image {
   display: block;
-  margin: 20px auto;
+  margin: 20px auto auto auto;
   border-radius: 20px;
   width: 100%;
 }
@@ -206,6 +213,7 @@ const downloadQRCode = () => {
   letter-spacing: 0.02em;
   text-align: center;
   color: #626263;
+  margin-top: 20px;
   margin-bottom: 12px;
 }
 
@@ -301,6 +309,17 @@ p.option-correct {
 
 .modal-ok-button:hover {
   background-color: #005AA7;
+}
+@media screen and (max-width: 768px) {
+  .modal-content {
+    padding: 32px 24px;
+  }
+}
+
+@media screen and (max-width: 425px) {
+  .modal-content  {
+    padding: 24px 16px;
+  }
 }
 
 </style>

@@ -94,7 +94,7 @@
     <div class="modal-content-preview">
       <div class="quiz-container">
         <HeaderQuestionUser />
-        <HeaderStampQuestionUser />
+        <HeaderStampQuestionUser :additionalId="questionNo"/>
         <div class="quiz-body">
           <img v-if="imageQuestion" :src="getFullImageUrl(imageQuestion)" alt="Question Image" />
           <div class="question-text">
@@ -116,7 +116,7 @@
           </div>
           </div>
         </div>
-        <FooterQuestionUser />
+        <FooterQuestionUser :disableLink="true"/>
       </div>
     </div>
   </div>
@@ -324,7 +324,7 @@ const cancel = () => {
   questionText.value = '';
   questionDescription.value = '';
   answers.value.forEach(answer => answer.text = '');
-  correctAnswer.value = null;
+  correctAnswer.value = 0;
   activeTab = ref('answers');
   // Reset image upload state
   uploadedQuestionImage.value = null;
@@ -511,7 +511,6 @@ const generateQRCode = async () => {
     // Chuyển đổi canvas thành base64
     const base64 = canvas.toDataURL();
     qrCodeBase64.value = (await tobase64(base64));
-    console.log(qrCodeBase64.value);
   } catch (error) {
     console.error('Error generating QR code:', error);
     // Retry generating QR code
@@ -572,7 +571,7 @@ onMounted(() => {
   -webkit-overflow-scrolling: touch;
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-
+  margin: 0 12px;
   /* Hide scrollbar for WebKit-based browsers */
   &::-webkit-scrollbar {
     width: 0px;
@@ -581,6 +580,7 @@ onMounted(() => {
 }
 
 .modal-content h2 {
+  margin-bottom: 12px;
   font-weight: bold; /* Độ đậm của font */
   font-family: Noto Sans JP;
   font-size: 20px;
@@ -900,7 +900,7 @@ onMounted(() => {
   background-color: #fefefe;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-width: 80%;
+  max-width: 90%;
   width: 813px;
 
   max-height: 90vh; /* Đặt chiều cao tối đa của modal là 80% chiều cao của viewport */
@@ -1043,6 +1043,54 @@ p.option-correct {
 .error-message {
   color: red;
   font-size: 12px;
+}
+
+/* Responsive từ 768px trở lên */
+@media screen and (max-width: 768px) {
+  .modal-content {
+    padding: 24px;
+  }
+  .question-details {
+    margin-top: 12px;
+  }
+  .question-content {
+    padding-bottom: 8px;
+  }
+  .form-group input {
+    max-width: 100px;
+  }
+  .uploaded-image {
+    min-height: 0;
+  }
+  .form-group textarea#questionDescription {
+    min-height: 150px;
+  }
+}
+/* Responsive từ 576px trở lên */
+@media screen and (max-width: 576px) {
+
+}
+
+/* Responsive từ 480px trở lên */
+@media screen and (max-width: 480px) {
+
+}
+
+@media screen and (max-width: 420px) {
+  .modal-content {
+    padding: 24px 16px;
+  }
+  .actions button {
+    width: 95px;
+    font-size: 14px;
+  }
+}
+
+/* Responsive từ 320px trở lên */
+@media screen and (max-width: 320px) {
+  .modal-content {
+    padding: 24px 12px;
+  }
 }
 
 </style>

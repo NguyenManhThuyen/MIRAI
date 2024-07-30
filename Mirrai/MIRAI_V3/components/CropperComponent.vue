@@ -130,7 +130,7 @@ const cancelCrop = () => {
 <style scoped>
 .cropper-wrapper {
   position: relative;
-  height: 500px; /* Set the container height */
+  height: auto; /* Set the container height */
   overflow: hidden; /* Hide overflow for the blurred background effect */
 }
 
@@ -148,10 +148,12 @@ const cancelCrop = () => {
 
 .cropper-controls {
   display: flex;
+  flex-wrap: wrap; /* Cho phép các nút xuống dòng khi không còn đủ không gian */
   justify-content: center;
   align-items: center;
-  margin-top: 24px;
   gap: 10px;
+  margin-top: 24px;
+  margin-bottom: 24px; /* Thêm margin-bottom để có khoảng cách với phần dưới của cropper */
 }
 
 .control-button {
@@ -167,6 +169,7 @@ const cancelCrop = () => {
   line-height: 23.17px;
   letter-spacing: 0.02em;
   text-align: center;
+  margin: 4px; /* Đảm bảo các nút có khoảng cách nhỏ giữa các nút */
 }
 
 .control-button.save-button {
@@ -174,7 +177,7 @@ const cancelCrop = () => {
 }
 
 .control-button.cancel-button {
-  background-color: #FF6347; /* Red color for cancel button */
+  background-color: #FF6347; /* Màu đỏ cho nút hủy */
 }
 
 .control-button:hover {
@@ -183,6 +186,10 @@ const cancelCrop = () => {
 
 .control-button:focus {
   outline: none;
+}
+
+.vue-advanced-cropper {
+  margin-bottom: 24px;
 }
 
 input[type="range"] {

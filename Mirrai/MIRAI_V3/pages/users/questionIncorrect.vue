@@ -24,6 +24,8 @@
         <div v-if="shouldShowExplanation" class="gray-background">
           <div class="section-title">解説</div>
           <img v-if="explainImg" :src="getFullImageUrl(explainImg)" />
+              <!-- Bộ giữ chỗ khi hình ảnh chưa tải -->
+            <SkeletonLoader v-else />
           <div class="explanation-text">
             <p v-html="explain"></p>
           </div>
@@ -81,8 +83,7 @@ onMounted(async () => {
   const storedResults = localStorage.getItem('results');
   if (storedResults) {
     const results = JSON.parse(storedResults);
-    console(results.length)
-    if (results.length === questionsCount) {
+    if (results.length == questionsCount.value) {
       shouldShowFooter.value = false;
     }
   }
@@ -95,9 +96,9 @@ onMounted(async () => {
   padding-bottom: 0;
   margin-top: 0;
   margin-bottom: 0;
-  min-height: 100vh; /* Đảm bảo chiếm toàn bộ chiều cao của viewport */
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .quiz-body {
@@ -229,7 +230,7 @@ onMounted(async () => {
 
 
 .gray-background {
-  background-color: #f0f0f0;
+  background-color: #F1F4F9;
   padding: 16px;
   gap: 12px;
   border-radius: 23px;
@@ -266,7 +267,7 @@ onMounted(async () => {
 
 .gray-background-footer {
   display: flex;
-  background-color: #f0f0f0;
+  background-color: #F1F4F9;
   padding: 16px;
   margin: 8px 16px 48px 16px ;
   gap: 12px;

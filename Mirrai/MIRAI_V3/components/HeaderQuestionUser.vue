@@ -1,7 +1,7 @@
 <template>
   <header class="header">
     <div class="icon-container">
-      <img src="@/assets/images/mirai-icon.svg" class="header-icon" />
+      <img src="@/assets/images/mirai-icon.svg" class="admin-header-icon" alt="Mirai Icon" />
     </div>
     <div :class="['header-text', { 'no-subtitle': !subtitle }]">
       <p class="main-text">スカイウォーキング・デジタルクイズチャレンジ</p>
