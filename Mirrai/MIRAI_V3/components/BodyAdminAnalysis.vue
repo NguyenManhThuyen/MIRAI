@@ -378,7 +378,7 @@ watch(currentPage, () => {
           </button>
           <div class="vertical-separator"></div>
           <button class="export-csv" @click="exportSeriesData">
-            <img src="@/assets/images/export-icon.svg" alt="CSV Icon" class="csv-icon">
+            <img src="@/assets/images/export-icon.svg" class="csv-icon">
             <span>CSV出力</span>
           </button>
         </div>
@@ -395,7 +395,7 @@ watch(currentPage, () => {
       </div>
 
       <button class="export-csv" @click="exportQuestionData">
-        <img src="@/assets/images/export-icon.svg" alt="CSV Icon" class="csv-icon">
+        <img src="@/assets/images/export-icon.svg" class="csv-icon">
         <span>CSV出力</span>
       </button>
     </div>

@@ -31,7 +31,6 @@
               v-if="question.qrcode"
               :src="question.qrcode"
               loading="lazy"
-              alt="QR Code" 
             />
           </div>
           <div class="divider"></div> <!-- Thêm phần này để làm thanh ngăn cách -->
@@ -39,14 +38,12 @@
             <img
               src="@/assets/images/admin-home-edit-question-icon.svg"
               @click="showEditModal(question.id)"
-              alt="Edit Question"
             />
           </div>
           <div class="delete">
             <img
               src="@/assets/images/admin-home-delete-question-icon.svg"
               @click="confirmDelete(question.id, index+1)"
-              alt="Delete Question" 
             />
           </div>
         </div>

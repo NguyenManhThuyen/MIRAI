@@ -118,7 +118,7 @@ const isQuestionIncorrect = (index) => {
            }">
         <span>Q.{{ question.sort }}</span>
       </div>
-      <img class="question-arrow" src="@/assets/images/question-arrow-yellow.svg" alt="Question Arrow" />
+      <img class="question-arrow" src="@/assets/images/question-arrow-yellow.svg"/>
     </div>
   </div>
 </template>
