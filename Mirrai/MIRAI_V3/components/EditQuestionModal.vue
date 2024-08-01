@@ -124,19 +124,19 @@
     </div>
   </div>
 
-  <div v-if="showCropModalQuestion" class="modal-overlay">
+  <div v-if="showCropModalQuestion" class="modal-overlay" @click.self="closeCropModal('question')">
     <div class="modal-content">
       <h2>クロップ画像</h2>
       <span class="close" @click="closeCropModal('question')">×</span>
-      <CropperComponent :imageUrl="uploadedQuestionImage" @cropped="handleCroppedImage('question',$event)" />
+      <CropperComponent :imageUrl="uploadedQuestionImagee" @cropped="handleCroppedImage('question',$event)" />
     </div>
   </div>
   
-  <div v-if="showCropModalExplain" class="modal-overlay">
+  <div v-if="showCropModalExplain" class="modal-overlay" @click.self="closeCropModal('explain')">
     <div class="modal-content">
       <h2>クロップ画像</h2>
       <span class="close" @click="closeCropModal('explain')">×</span>
-      <CropperComponent :imageUrl="uploadedExplainImage" @cropped="handleCroppedImage('explain',$event)" />
+      <CropperComponent :imageUrl="uploadedExplainImagee" @cropped="handleCroppedImage('explain',$event)" />
     </div>
   </div>
   
@@ -168,6 +168,8 @@ const question = ref({});
 const answers = ref([]);
 const uploadedQuestionImage = ref('');
 const uploadedExplainImage = ref('');
+const uploadedQuestionImagee = ref('');
+const uploadedExplainImagee = ref('');
 const sort = ref();
 const qrcode = ref('');
 let activeTab = ref('answers');
@@ -206,6 +208,11 @@ const closeCropModal = (type) => {
   } else if (type === 'explain') {
     showCropModalExplain.value = false;
   }
+  // Reset the input file elements themselves
+  const fileInputs = document.querySelectorAll('.image-upload input[type="file"]');
+  fileInputs.forEach(fileInput => {
+    fileInput.value = ''; // Clear the selected file in the input
+  });
 };
 
 const fetchQuestionData = async () => {
@@ -265,6 +272,8 @@ watch(() => props.visible, async (newValue, oldValue) => {
     answers.value = [];
     uploadedQuestionImage.value = '';
     uploadedExplainImage.value = '';
+    uploadedQuestionImagee.value = '';
+    uploadedExplainImagee.value = '';
     sort.value = null;
     qrcode.value = '';
     activeTab.value = 'answers'; // Reset activeTab to 'answers'
@@ -279,6 +288,8 @@ const closeModal = () => {
   emit('cancel');
   uploadedQuestionImage.value = null;
   uploadedExplainImage.value = null;
+  uploadedQuestionImagee.value = null;
+  uploadedExplainImagee.value = null;
 };
 
 const hidden = () => {
@@ -322,14 +333,14 @@ const handleFileQuestionChange = async (event) => {
         canvas.toBlob(async (blob) => {
           const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
           question.value.image_question = base64String;
-          uploadedQuestionImage.value = URL.createObjectURL(blob);
           showCropModalQuestion.value = true;
+          uploadedQuestionImagee.value = URL.createObjectURL(file);
         }, 'image/jpeg', 0.8); // Giảm chất lượng ảnh để giảm kích thước
       };
     } else {
-      uploadedQuestionImage.value = URL.createObjectURL(file);
       question.value.image_question = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
       showCropModalQuestion.value = true;
+      uploadedQuestionImagee.value = URL.createObjectURL(file);
     }
   }
 };
@@ -361,14 +372,14 @@ const handleFileExplainChange = async (event) => {
         canvas.toBlob(async (blob) => {
           const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
           question.value.image_explain = base64String;
-          uploadedExplainImage.value = URL.createObjectURL(blob);
           showCropModalExplain.value = true;
         }, 'image/jpeg', 0.8); // Giảm chất lượng ảnh để giảm kích thước
+        uploadedExplainImagee.value = URL.createObjectURL(file);
       };
     } else {
-      uploadedExplainImage.value = URL.createObjectURL(file);
       question.value.image_explain = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
       showCropModalExplain.value = true;
+      uploadedExplainImagee.value = URL.createObjectURL(file);
     }
   }
 };

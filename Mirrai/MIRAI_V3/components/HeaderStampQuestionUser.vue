@@ -32,7 +32,7 @@ const updateRows = () => {
   nextTick(() => {
     if (questionHeader.value) {
       const questionElements = Array.from(questionHeader.value.children);
-      questionElements.forEach(el => el.classList.remove('last-in-row', 'last-row'));
+      questionElements.forEach(el => el.classList.remove('last-in-row', 'last-row', 'hide-arrow'));
 
       let currentTop = null;
       let lastInRow = [];
@@ -57,11 +57,25 @@ const updateRows = () => {
       questionElements.forEach(question => {
         if (question.offsetTop === lastRowTop) {
           question.classList.add('last-row');
+          question.classList.add('hide-arrow');
         }
       });
+
+      // Kiểm tra số lượng phần tử có lớp 'last-in-row'
+      const lastInRowCount = questionElements.filter(el => el.classList.contains('last-in-row')).length;
+
+      if (lastInRowCount >= 2) {
+        questionHeader.value.classList.add('multi-row');
+        questionHeader.value.classList.remove('single-row');
+      } else {
+        questionHeader.value.classList.add('single-row');
+        questionHeader.value.classList.remove('multi-row');
+      }
     }
   });
 };
+
+
 
 onMounted(async () => {
   await fetchQuestions();
@@ -89,7 +103,7 @@ onMounted(async () => {
     }
   }
   });
-
+  updateRows();
 });
 
 
@@ -126,11 +140,9 @@ const isQuestionIncorrect = (index) => {
 <style scoped>
 .question-header {
   position: sticky;
-  flex-wrap: wrap;
   gap: 8px;
   top: 0px;
-  padding: 12px 0 16px 12px;
-  margin: 0 -4px 0 0;
+  padding: 12px 4px 16px 12px;
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 999;
@@ -139,15 +151,24 @@ const isQuestionIncorrect = (index) => {
   background-position: center top;
   scrollbar-width: none;
   -ms-overflow-style: none;
-
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
-  justify-content: center;
 }
 
 .question-header.colorful {
   background-image: url('@/assets/images/question-background-yellow.svg');
 }
+
+.question-header.single-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.question-header.multi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  justify-content: center;
+}
+
 
 .question {
   display: flex;
@@ -174,6 +195,7 @@ const isQuestionIncorrect = (index) => {
   line-height: 21.29px;
   letter-spacing: 0.02em;
   text-align: center;
+  margin: 0;
 }
 
 .circle span {
@@ -255,6 +277,7 @@ const isQuestionIncorrect = (index) => {
 
 .question-arrow {
   margin-left: 8px;
+  visibility: visible; /* Đảm bảo rằng visibility là visible */
 }
 
 .question.last-in-row {
@@ -262,6 +285,11 @@ const isQuestionIncorrect = (index) => {
 }
 
 .question.last-in-row .question-arrow {
-  display: none;
+  visibility: hidden;
 }
+
+.question.last-in-row.hide-arrow .question-arrow {
+  display: none; /* Hoặc sử dụng visibility: hidden nếu bạn muốn ẩn thay vì loại bỏ */
+}
+
 </style>

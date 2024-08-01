@@ -24,8 +24,6 @@
         <div v-if="shouldShowExplanation" class="gray-background">
           <div class="section-title">解説</div>
           <img v-if="explainImg" :src="getFullImageUrl(explainImg)" />
-              <!-- Bộ giữ chỗ khi hình ảnh chưa tải -->
-            <SkeletonLoader v-else />
           <div class="explanation-text">
             <p v-html="explain"></p>
           </div>

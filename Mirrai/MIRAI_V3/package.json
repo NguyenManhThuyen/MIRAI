@@ -10,11 +10,13 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^4.4.3",
     "@fontsource/noto-sans-jp": "^5.0.19",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@nuxt/image": "^1.7.0",
+    "@rajesh896/broprint.js": "^2.1.1",
     "@stefanobartoletti/nuxt-social-share": "^0.7.0",
     "@vuepic/vue-datepicker": "8.8.1",
     "apexcharts": "^3.50.0",

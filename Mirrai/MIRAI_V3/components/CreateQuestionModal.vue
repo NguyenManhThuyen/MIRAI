@@ -8,7 +8,12 @@
       <div class="image-upload">
         <template v-if="uploadedQuestionImage">
           <img :src="uploadedQuestionImage"  class="uploaded-image" @click="handleQuestionImageClick" />
+          <div class="button-container">
+            <button @click="triggerFileQuestionInput" class="change-image-button">画像変更</button>
+            <input type="file" ref="fileQuestionInput" @change="onQuestionFileChange" style="display: none;" />
+          </div>
         </template>
+        
         <template v-else>
           <img src="@/assets/images/admin-create-question-icon.svg"  class="upload-icon" />
           <p>ドラッグ&ドロップでファイルをアップロードする又はブラウザ</p>
@@ -67,6 +72,10 @@
         <div class="image-upload">
           <template v-if="uploadedExplainImage">
             <img :src="uploadedExplainImage"  class="uploaded-image" @click="handleExplainImageClick" />
+            <div class="button-container">
+              <button @click="triggerFileExplainInput" class="change-image-button">画像変更</button>
+              <input type="file" ref="fileQuestionInput" @change="onExplainFileChange" style="display: none;" />
+            </div>
           </template>
           <template v-else>
             <img src="@/assets/images/admin-create-question-icon.svg"  class="upload-icon" />
@@ -121,19 +130,19 @@
     </div>
   </div>
 
-  <div v-if="showCropModalQuestion" class="modal-overlay">
-    <div class="modal-content">
+  <div v-if="showCropModalQuestion" class="modal-overlay" @click.self="closeCropModal('question')">
+    <div class="modal-content" @click.stop>
       <h2>クロップ画像</h2>
       <span class="modal-close" @click="closeCropModal('question')">×</span>
-      <CropperComponent :imageUrl="uploadedQuestionImage" @cropped="handleCroppedImage('question',$event)" />
+      <CropperComponent :imageUrl="uploadedQuestionImagee" @cropped="handleCroppedImage('question', $event)" />
     </div>
   </div>
   
-  <div v-if="showCropModalExplain" class="modal-overlay">
+  <div v-if="showCropModalExplain" class="modal-overlay" @click.self="closeCropModal('explain')">
     <div class="modal-content">
       <h2>クロップ画像</h2>
       <span class="modal-close" @click="closeCropModal('explain')">×</span>
-      <CropperComponent :imageUrl="uploadedExplainImage" @cropped="handleCroppedImage('explain',$event)" />
+      <CropperComponent :imageUrl="uploadedExplainImagee" @cropped="handleCroppedImage('explain',$event)" />
     </div>
   </div>
   
@@ -174,6 +183,8 @@ const answers = ref([
 const correctAnswer = ref(0);
 const uploadedQuestionImage = ref(null);
 const uploadedExplainImage = ref(null);
+const uploadedQuestionImagee = ref(null);
+const uploadedExplainImagee = ref(null);
 const imageQuestion = ref('');
 const imageExplain = ref('');
 let qrCodeBase64 = ref('');
@@ -206,15 +217,18 @@ const handleCroppedImage = async (type, croppedImage) => {
   }
 };
 
-
 const closeCropModal = (type) => {
   if (type === 'question') {
     showCropModalQuestion.value = false;
   } else if (type === 'explain') {
     showCropModalExplain.value = false;
   }
+  // Reset the input file elements themselves
+  const fileInputs = document.querySelectorAll('.image-upload input[type="file"]');
+  fileInputs.forEach(fileInput => {
+    fileInput.value = ''; // Clear the selected file in the input
+  });
 };
-
 
 const toBase64 = file => new Promise((resolve, reject) => {
   const reader = new FileReader();
@@ -249,18 +263,17 @@ const onQuestionFileChange = async (event) => {
         canvas.toBlob(async (blob) => {
           const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
           imageQuestion.value = base64String;
-          uploadedQuestionImage.value = URL.createObjectURL(blob);
+          uploadedQuestionImagee.value = URL.createObjectURL(blob);
           showCropModalQuestion.value = true;
         }, 'image/jpeg', 0.8); // Giảm chất lượng ảnh để giảm kích thước
       };
     } else {
-      uploadedQuestionImage.value = URL.createObjectURL(file);
+      uploadedQuestionImagee.value = URL.createObjectURL(file);
       imageQuestion.value = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
       showCropModalQuestion.value = true;
     }
   }
 };
-
 
 const onExplainFileChange = async (event) => {
   const file = event.target.files?.[0];
@@ -289,17 +302,26 @@ const onExplainFileChange = async (event) => {
         canvas.toBlob(async (blob) => {
           const base64String = (await toBase64(blob)).replace(/^data:image\/[a-z]+;base64,/, '');
           imageExplain.value = base64String;
-          uploadedExplainImage.value = URL.createObjectURL(blob);
+          uploadedExplainImagee.value = URL.createObjectURL(blob);
           showCropModalExplain.value = true;
         }, 'image/jpeg', 0.8); // Giảm chất lượng ảnh để giảm kích thước
       };
     } else {
-      uploadedExplainImage.value = URL.createObjectURL(file);
+      uploadedExplainImagee.value = URL.createObjectURL(file);
       imageExplain.value = (await toBase64(file)).replace(/^data:image\/[a-z]+;base64,/, '');
       showCropModalExplain.value = true;
     }
   }
 };
+
+const triggerFileQuestionInput = () => {
+  document.querySelector('input[type="file"]').click();
+};
+
+const triggerFileExplainInput = () => {
+  document.querySelector('input[type="file"]').click();
+};
+
 
 const handleQuestionImageClick = () => {
   const fileInput = document.createElement('input');
@@ -315,6 +337,7 @@ const handleExplainImageClick = () => {
   fileInput.click();
 };
 
+
 const cancel = () => {
   // Emit event to cancel modal
   emit('cancel');
@@ -329,6 +352,8 @@ const cancel = () => {
   // Reset image upload state
   uploadedQuestionImage.value = null;
   uploadedExplainImage.value = null;
+  uploadedQuestionImagee.value = null;
+  uploadedExplainImagee.value = null;
   imageQuestion.value = '';
   imageExplain.value = '';
 
@@ -603,6 +628,21 @@ onMounted(() => {
   color: #000;
 }
 
+.button-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.change-image-button {
+  background-color: transparent;
+  color: #2E7CF6;
+  border: none;
+  border-radius: 4px;
+  height: 20px;
+  cursor: pointer;
+}
+
 .tab-buttons {
   display: flex;
   gap: 10px;
@@ -631,6 +671,9 @@ onMounted(() => {
 }
 
 .image-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-top: 20px;
   border: 2px dashed #ccc;
   text-align: center;
@@ -705,6 +748,7 @@ onMounted(() => {
   align-items: center; /* căn giữa theo chiều dọc */
   margin-left: auto;
   margin-right: auto;
+  border-radius: 16px;
 }
 
 .upload-icon {

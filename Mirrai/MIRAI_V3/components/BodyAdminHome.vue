@@ -11,7 +11,6 @@
     <div class="content-section">
       <p class="content-title">
         <template v-if="title">{{ title.content }}</template>
-        <SkeletonLoader v-else />
       </p>
       <div class="icon-container" @click="openEdit1Modal">
         <img src="@/assets/images/admin-home-edit-icon.svg" class="edit-icon" loading="lazy" />
@@ -37,7 +36,6 @@
     <div class="content-section">
       <p class="title-text-temp">
         <template v-if="notificationTitle">{{ notificationTitle.content }}</template>
-        <SkeletonLoader v-else />
       </p>
       <div class="icon-container" @click="openEdit2Modal">
         <img src="@/assets/images/admin-home-edit-icon.svg" class="edit-icon" loading="lazy" />

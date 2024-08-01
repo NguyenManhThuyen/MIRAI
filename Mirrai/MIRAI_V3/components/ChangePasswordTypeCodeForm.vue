@@ -63,7 +63,7 @@ const handleSubmit = async () => {
   text-align: center;
   gap: 10px;
   border: 1px;
-  margin-bottom: 60px;
+  margin-bottom: 110px;
 }
 
 h2 {

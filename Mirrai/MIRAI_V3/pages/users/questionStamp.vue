@@ -12,6 +12,7 @@
         @mouseup="cancelDownloadTimer" 
         @mouseleave="cancelDownloadTimer" 
       />
+      <SkeletonLoader v-else />
       <div class="download-button-container">
         <button class="download-button" @click="startDownload">
           <img src="@/assets/images/cloud-download-icon.svg">
@@ -34,8 +35,8 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import questionStampImage from '@/assets/images/question-stamp.png';
 import { saveAs } from 'file-saver'; // Đảm bảo bạn đã cài đặt thư viện file-saver
+import axios from 'axios';
 
 definePageMeta({
   layout: "users",
@@ -43,6 +44,7 @@ definePageMeta({
 
 const router = useRouter();
 const downloadTimer = ref(null);
+const questionStampImage = ref('');
 
 const goToResults = () => {
   router.push('/users/questionResult');
@@ -62,6 +64,20 @@ const cancelDownloadTimer = () => {
 const startDownload = () => {
   saveAs(questionStampImage, 'question-stamp.png');
 };
+
+const getFullImageUrl = (url) => {
+  const prefix = "https://mirai-static-website.s3.ap-southeast-1.amazonaws.com/";
+  return prefix + url;
+};
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('https://naadstkfr7.execute-api.ap-southeast-1.amazonaws.com/mirai-infos-lambda/3');
+    questionStampImage.value = getFullImageUrl(response.data.content);
+  } catch (error) {
+    console.error('Error fetching subtitle:', error);
+  }
+});
 </script>
 
 <style scoped>
@@ -97,7 +113,7 @@ const startDownload = () => {
   display: block; /* Đảm bảo ảnh không có khoảng trắng bên dưới */
   width: 100%; /* Chiều rộng ảnh luôn là 100% của phần tử chứa nó */
   height: auto; /* Chiều cao tự động để giữ tỷ lệ khung hình */
-  max-width: 100%; /* Đảm bảo ảnh không vượt quá chiều rộng của phần tử chứa nó */
+  max-width: 576px; /* Đảm bảo ảnh không vượt quá chiều rộng của phần tử chứa nó */
   margin-bottom: 12px; /* Khoảng cách dưới cùng của ảnh */
 }
 
@@ -161,7 +177,7 @@ const startDownload = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 17px 38px;
+  padding: 17px 38px 17px 28px;
   gap: 10px;
   border-radius: 49px 0 0 0;
   opacity: 1;

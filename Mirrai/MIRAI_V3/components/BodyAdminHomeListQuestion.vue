@@ -275,6 +275,7 @@ onMounted(fetchQuestions);
 }
 
 .question-text {
+  text-align: left;
   font-family: Noto Sans JP;
   font-size: 20px;
   font-weight: 400;
